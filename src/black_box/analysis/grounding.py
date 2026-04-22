@@ -25,15 +25,20 @@ class GroundingThresholds:
 NO_ANOMALY_PATCH = "No anomaly detected with sufficient evidence to support a scoped fix."
 
 
-def _accept_hypothesis(h: Hypothesis, thresholds: GroundingThresholds) -> bool:
+def _accept_hypothesis(
+    h: Hypothesis,
+    thresholds: GroundingThresholds,
+    available_sources: int = 2,
+) -> bool:
     if h.confidence < thresholds.min_confidence:
         return False
     if len(h.evidence) < thresholds.min_evidence_per_hypothesis:
         return False
     if h.bug_class == "other" and len(h.evidence) < thresholds.min_evidence_for_other:
         return False
+    required = min(thresholds.min_cross_source_evidence, available_sources)
     distinct_sources = {e.source for e in h.evidence}
-    if len(distinct_sources) < thresholds.min_cross_source_evidence:
+    if len(distinct_sources) < required:
         return False
     return True
 
@@ -51,7 +56,11 @@ def ground_post_mortem(
     thresholds: GroundingThresholds | None = None,
 ) -> PostMortemReport:
     t = thresholds or GroundingThresholds()
-    accepted = [h for h in report.hypotheses if _accept_hypothesis(h, t)]
+    all_sources = {e.source for h in report.hypotheses for e in h.evidence}
+    available = max(1, len(all_sources))
+    accepted = [
+        h for h in report.hypotheses if _accept_hypothesis(h, t, available_sources=available)
+    ]
 
     if not accepted:
         return report.model_copy(

@@ -94,11 +94,27 @@ def test_other_bug_class_requires_three_evidence():
     assert len(out_ok.hypotheses) == 1
 
 
-def test_same_source_evidence_rejected():
+def test_same_source_rejected_when_multi_source_available_in_report():
+    """If the report surfaces >1 distinct evidence source, a hypothesis that cites only one is rejected."""
+    single_src = _hyp(
+        confidence=0.85,
+        evidence=[_ev("telemetry", snippet="a"), _ev("telemetry", snippet="b")],
+    )
+    multi_src = _hyp(
+        confidence=0.9,
+        evidence=[_ev("camera"), _ev("code")],
+    )
+    out = ground_post_mortem(_report([single_src, multi_src]))
+    assert len(out.hypotheses) == 1
+    assert out.hypotheses[0].confidence == 0.9
+
+
+def test_same_source_accepted_when_only_one_source_available():
+    """Telemetry-only input: every hypothesis is single-source. Cross-source gate must relax."""
     h = _hyp(evidence=[_ev("telemetry", snippet="a"), _ev("telemetry", snippet="b")])
     out = ground_post_mortem(_report([h]))
-    assert out.hypotheses == []
-    assert out.patch_proposal == NO_ANOMALY_PATCH
+    assert len(out.hypotheses) == 1
+    assert out.patch_proposal.startswith("---")
 
 
 def test_all_rejected_yields_no_anomaly_shell():

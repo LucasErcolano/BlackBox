@@ -8,47 +8,45 @@
 
 | Time | Beat | Shot | VO |
 |------|------|------|-----|
-| 0:00 – 0:15 | **Hook** | Webcam Lucas in front of the autonomous car | *"This is my autonomous car. Last week it did something weird. Nobody noticed."* |
-| 0:15 – 0:30 | **Problem** | Bag file icon, terminal showing 206 GB | *"AV labs process hundreds of bags per week. Nobody reads them end-to-end. What do they miss?"* |
-| 0:30 – 0:45 | **The setup** | Upload UI, 5-camera preview grid | *"I give Black Box a bag it has never seen. No labels. Five cameras. No telemetry."* |
-| 0:45 – 1:15 | **Analysis live** | Streaming reasoning view (HTMX), Claude working through the window | *"Opus 4.7 sees all five views at once. It's looking for moments a human would want to review — not crashes it was told about."* |
-| 1:15 – 1:40 | **First moment** | Report opens to moment #1, front-cam overexposure frame | *"Here. Both front cameras blown out for 4.5 seconds at scene entry. Auto-exposure convergence failure."* |
-| 1:40 – 2:00 | **Second moment** | Bag 0 indoor-scene finding with annotation | *"Here. The vehicle is parked at the lab entrance. Rear and left cameras see into open doorways. The bag's tail is not driving footage. Training on it would poison a road-scene model."* |
-| 2:00 – 2:20 | **The money shot** | Split screen: original controller code vs unified diff patching AE init | *"This is the bug. This is the fix. It's a diff, not a redesign."* |
-| 2:20 – 2:35 | **The second platform** | Cut to NAO6 fall, same UI, same output | *"Same tool. Different robot. Humanoid fall, same three artifacts, same ranked hypothesis."* |
-| 2:35 – 2:50 | **Punchline + credibility** | Testimonial quote card from roboticist contact + benchmark repo URL | *"This ran while I slept. Benchmark open on GitHub. Two builders, six days."* |
-| 2:50 – 3:00 | **Outro** | Logo, hackathon tag, team credit | silent |
+| 0:00 – 0:15 | **Hook** | Webcam Lucas in front of the autonomous car | *"Last week the operator told me the GPS failed when the car went under a tunnel. I gave the bag to Black Box. It said he was wrong."* |
+| 0:15 – 0:30 | **Problem** | Bag file icon, terminal showing 375 GB | *"AV labs process hundreds of bags per week. Nobody reads them end-to-end. Everybody has a theory. Most theories are wrong."* |
+| 0:30 – 0:45 | **The setup** | Upload UI, topic list for `sanfer_sanisidro` session | *"One hour of real driving. ROS1 bag. No labels. The operator gave me one sentence of prior: 'check the tunnel.'"* |
+| 0:45 – 1:15 | **Analysis live** | Streaming reasoning view, Claude working through carrier-phase timeline | *"Opus 4.7 reads the telemetry. Carrier-phase, fix quality, relative-position validity. It's checking whether the operator's theory survives the data."* |
+| 1:15 – 1:45 | **The counterfactual** | Side-by-side: operator's quote on the left, Claude's refutation card on the right | *"Here. The rover receiver keeps a 3D fix with 29 satellites the entire session. No dropouts anywhere. If a tunnel killed the GPS, numSV would collapse. It never does. The operator is wrong."* |
+| 1:45 – 2:05 | **The real finding** | Two plots: moving-base carrier-phase (healthy) vs rover carrier-phase (flat zero). REL_POS_VALID flat zero. | *"Moving-base antenna: clean RTK, float and fixed 94% of the bag. Rover antenna: never locks. Once. The whole hour. REL_POS_VALID never sets. The dual-antenna heading pipeline is broken — and it was broken before the car left the lot."* |
+| 2:05 – 2:25 | **The money shot** | Report page opens to patch proposal: enable RTCM3 msgs 1077/1087/1097/1127/4072.0/4072.1, verify UART link | *"This is the fix. Specific message IDs. Specific checkpoint. It's a config diff, not a redesign."* |
+| 2:25 – 2:45 | **Grounding** | Clean synthetic window runs through the same pipeline; Claude returns empty moments | *"Same tool, clean bag. It says nothing anomalous. It will not fabricate a bug. That's the rule."* |
+| 2:45 – 2:55 | **Punchline + credibility** | Benchmark repo URL + cost ledger ($0.22 per run) | *"One hour of real driving, twenty-two cents. Benchmark open on GitHub."* |
+| 2:55 – 3:00 | **Outro** | Logo, hackathon tag | silent |
 
 ## Non-negotiables
 
-1. **Diff as climax.** Not the PDF. The PDF is the artifact; the diff is the *payoff*. Everything else stops at explanation — we don't.
-2. **Grounding gate visible.** At least once show Claude saying *"nothing anomalous detected"* on a clean window. Proves we don't hallucinate. Inoculates credibility early.
-3. **Real data, on camera.** Lucas in front of the actual car for the hook. Not a stock shot. Winner pattern is *"built from what I know"* — show you know it.
-4. **NAO6 cameo.** Second platform in last 15 seconds. Proves tool is not one-hardware bespoke.
-5. **Testimonial quote.** From a roboticist in the network (ex-NASA or ex-NVIDIA preferred). Capture by Day 5 — not Day 6.
-6. **URL visible.** `github.com/.../black-box-bench` on screen at punchline. Judges will look.
+1. **Disagreement as climax.** The tool rejecting the operator's own hypothesis is the money shot. Diff is the follow-up payoff. Everything else stops at explanation — we don't.
+2. **Grounding gate visible.** Show the clean-bag pass where Claude returns empty moments. Proves we don't hallucinate. Inoculates credibility before the counterfactual.
+3. **Real data, on camera.** Lucas in front of the actual car for the hook. Not a stock shot. Real session. Real operator quote.
+4. **Cost visible.** $0.22 per bag on screen at punchline. Judges care about token discipline.
+5. **URL visible.** `github.com/.../black-box-bench` on screen at punchline. Judges will look.
 
 ## What we do NOT show
 
-- Synthesis pipeline (Wan 2.2 / Nano Banana). It's backend QA, not product pitch.
-- Token cost dashboard. Insider detail, off-pitch for 3-min video.
+- Synthesis pipeline (Wan 2.2 / Nano Banana). Backend QA, not product pitch.
+- NAO6 beat. Real humanoid recordings not captured in time. Single-platform cut.
 - Any hypothesis we couldn't verify. Honesty beats drama.
 - The word *"multimodal."* Say *"heterogeneous artifact fusion"* or *"video + logs + code."*
 
 ## Required assets by Day 5
 
-- [ ] 1 clean recording of UI analysis on bag 1 (overexposure moment) — 800×600 frames OK
-- [ ] 1 recording of analysis on bag 0 end window (indoor-scene finding)
-- [ ] 1 recording of NAO6 fall analysis (3 artifacts fused)
-- [ ] 1 unified-diff screenshot (real code, real fix) — readable at 1080p
-- [ ] 1 testimonial quote, text + name + affiliation
-- [ ] 1 webcam clip of Lucas at the car (15 s)
-- [ ] Benchmark repo public with README + at least 2 cases
+- [ ] 1 recording of the RTK counterfactual pass on `sanfer_sanisidro` — streaming reasoning visible, operator-quote overlay on first card
+- [ ] 2 matplotlib plots rendered from `rtk_heading_break_01/telemetry.npz`: moving-base vs rover carrier-phase over time; REL_POS_VALID flag over time
+- [ ] 1 patch-proposal screenshot (RTCM3 message IDs + UART check) — readable at 1080p
+- [ ] 1 clean-window pass showing empty moments (grounding gate visible)
+- [ ] 1 webcam clip of Lucas at the car with operator-quote voice-over (15 s)
+- [ ] Benchmark repo public with README + 4 scoreable cases incl. `rtk_heading_break_01`
 
 ## Backup cut
 
-If NAO6 recordings slip, replace beat 2:20 – 2:35 with *"batch run overnight over 20 bags"* — Managed Agents angle. Still captures the depth story, keeps duo narrative intact.
+If any beat slips, collapse 1:45 – 2:05 and 2:05 – 2:25 into a single 30 s beat showing the plot + patch in one panel. Total comes in at 2:45 with room for the outro. Keep the counterfactual. Cut the grounding-gate beat first — its content is in the PITCH one-liner and the benchmark README.
 
 ## Day-5 rehearsal
 
-One full voice-over dry run before recording. Time it. If over 3:05, cut the second moment (keep overexposure as sole moment). Under no circumstances ship a 4-minute video.
+One full voice-over dry run before recording. Time it. If over 3:05, cut the grounding-gate beat (keep the counterfactual + patch). Under no circumstances ship a 4-minute video.

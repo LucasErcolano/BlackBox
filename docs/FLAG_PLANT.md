@@ -5,11 +5,10 @@
 **When to post:** Day 3 or Day 4 morning (ART). Not later — thread needs 24–48 h to pick up replies before submission.
 
 **Assets required before posting:**
-- [x] Bag-1 overexposure GIF (4-frame loop, saturated → mid → recovered → mid). File: `docs/assets/bag1_ae_failure.gif`. Used in tweet 1.
-- [x] Screenshot of unified diff from `pid_saturation_01` (GitHub-style dark theme). File: `docs/assets/pid_saturation_diff.png`. Used in tweet 3.
+- [ ] Plot: rover carrier-phase vs moving-base carrier-phase over 1 h. File: `docs/assets/rtk_carrier_contrast.png`. Used in tweet 1.
+- [ ] Plot: REL_POS_VALID flag (flat zero for 1 h). File: `docs/assets/rel_pos_valid.png`. Used in tweet 3.
+- [ ] Screenshot: patch proposal from `runs/sample/rtk_heading_break_01.json` (RTCM3 msg IDs + UART check). File: `docs/assets/rtk_patch.png`. Used in tweet 4.
 - [ ] Public URLs: repo, benchmark repo, gist.
-
-**Dropped**: PDF report page. Synthetic case's telemetry plots would mislead viewers into thinking the real hero bag (bag-1 AE failure, image-only) was analyzed with the same telemetry surface. Report asset re-added only if a vision-only PDF template exists for bag-1.
 
 **Pinning:** Pin thread after posting. Keep pinned through submission.
 
@@ -17,55 +16,68 @@
 
 ## Thread (7 tweets, ~1400 chars total)
 
-### 1/ — Hook + clip
-> When a robot crashes, the flight data recorder tells you *what* happened.
+### 1/ — Hook
+> The operator told me the GPS failed when the car went under a tunnel.
 >
-> I built **Black Box** — a forensic copilot that tells you *why*, and hands you the diff.
+> I gave the bag to the tool I built. It said he was wrong.
 >
-> Powered by Claude Opus 4.7.
+> **Black Box** — forensic copilot for robots. Claude Opus 4.7.
 >
-> [video: bag-1 overexposure clip]
+> [plot: rover vs moving-base carrier-phase over 1 h]
 
-### 2/ — What it does
-> Feed it a ROS bag. Out comes:
-> • ranked root-cause hypotheses (closed-set taxonomy, no hand-waving)
-> • cross-camera evidence (5 cameras reasoned in one prompt)
-> • a scoped code patch — clamp, timeout, null check, gain — never an architectural rewrite
+### 2/ — The counterfactual
+> Real ROS1 bag. One hour. No labels.
+>
+> Operator's theory: tunnel knocked out GPS.
+>
+> What the rover receiver actually did: 3D fix, 29 satellites median, no dropouts, hAcc sub-metre the entire session. A tunnel would have collapsed numSV. It never does.
 
-### 3/ — The hero finding
-> Real AV bag, 55 GB, 5 cameras.
+### 3/ — The real finding
+> Moving-base antenna: carrier-phase FLOAT 64%, FIXED 31%. Healthy.
 >
-> Black Box found a 4.5 s auto-exposure convergence failure on both front cameras that a human review missed on first pass.
+> Rover antenna: carrier-phase NONE 100%. Never locks. Once. In 3,626 seconds.
 >
-> Patch: widen AE range + add a glare-detect fallback.
+> REL_POS_VALID flag: flat zero for the whole bag.
 >
-> [screenshot: unified diff]
+> The dual-antenna heading pipeline was broken before the car left the lot.
+>
+> [plot: REL_POS_VALID over 1 h]
 
-### 4/ — The grounding gate
-> An LLM that fabricates a bug on a clean bag is worse than useless.
+### 4/ — The fix
+> Black Box doesn't stop at diagnosis. It prescribes.
 >
-> Black Box runs a gate: on known-clean windows, it MUST return "no anomalies detected." Regression-tested in CI.
+> Patch: enable RTCM3 msgs 1077, 1087, 1097, 1127, 4072.0, 4072.1 on the moving-base → rover link; verify UART baud match; success criterion is DIFF_SOLN at 100% (currently 15%) and REL_POS_VALID above 95%.
 >
-> Conservative by default. If it flags something, it's because something is there.
+> Scoped. No architectural rewrites.
+>
+> [screenshot: patch proposal]
 
-### 5/ — Benchmark
-> Shipping a public benchmark alongside: **black-box-bench**.
+### 5/ — The grounding gate
+> A forensic tool that agrees with the human is a yes-man.
 >
-> 3 synthetic cases with injected bugs, ground-truth windows, source diffs, scoring harness. MIT. Use it to evaluate your own robot-forensic agent.
+> A forensic tool that invents bugs on clean data is worse.
+>
+> Black Box does neither. Clean window → empty moments. Operator wrong → it says so.
+>
+> Cost for this whole analysis: $0.22.
+
+### 6/ — Benchmark
+> **black-box-bench** — 4 scoreable cases.
+>
+> 3 synthetic (PID wind-up, sensor timeout, bad gain) with ground-truth windows + source diffs.
+>
+> 1 real 1 h bag with the operator's wrong hypothesis encoded as the anti-hypothesis the pipeline must reject.
+>
+> MIT. Benchmark your own robot-forensic agent.
 >
 > https://github.com/LucasErcolano/BlackBox/tree/master/black-box-bench
-
-### 6/ — Built for hackathon, but…
-> Built during the Cerebral Valley × Anthropic "Built with Opus 4.7" hackathon. 6 days, two builders, two platforms (5-camera AV + NAO6 humanoid).
->
-> But the actual use case — post-incident review at AV / humanoid labs — is a petabyte problem, not a week-long one.
 
 ### 7/ — Links + CTA
 > Repo: https://github.com/LucasErcolano/BlackBox
 > Benchmark: https://github.com/LucasErcolano/BlackBox/tree/master/black-box-bench
-> Build journal (decisions, failures, findings): https://gist.github.com/LucasErcolano/851c5e976c6aa364f69c9e6875544061
+> Build journal: https://gist.github.com/LucasErcolano/851c5e976c6aa364f69c9e6875544061
 >
-> If you run a robot fleet and this would've saved you a week of oncall: DM open. If you think it wouldn't: reply and tell me why.
+> If you run a robot fleet and have a bag where the "obvious" cause turned out to be wrong: I want to hear about it. DM open.
 
 ---
 

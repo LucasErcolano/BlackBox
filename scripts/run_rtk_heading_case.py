@@ -105,7 +105,7 @@ def main() -> int:
         },
         resolution="thumb",
         max_tokens=4000,
-        apply_grounding=False,
+        apply_grounding=True,
     )
 
     out_dir = REPO / "black-box-bench" / "runs" / "sample"
