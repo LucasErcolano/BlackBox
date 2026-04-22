@@ -143,7 +143,7 @@ Bag 0 total pipeline: 449 s extraction + 87 s analysis + $1.48 API. 4 moments in
 
 - **Cost accounting bug**: `uncached_input_tokens: -656` in synthetic smoke entry. Cache-read double-subtract in `claude_client.py`. Cosmetic.
 - **Token caching not triggering** on v2 deep calls (cached blocks are <1024 tokens → below Anthropic cache threshold). Pad `cached_blocks` in `prompts_v2.py` to >1024 tokens if rerunning bags.
-- **Verify bag 1 overexposure finding manually**: check raw frames in `/home/hz/blackbox_cache/frames/bag_1_v2/start__front_left_*.png`. Hero deep-dive already confirmed — concrete sensor-level defect, write dedicated PDF report.
+- ~~Verify bag 1 overexposure finding manually~~ DONE: `start__front_left_00` JPEG is 5 KB (compressed-flat → near-pure white saturated pixels), `start__front_left_02` is 209 KB (normal scene recovered). Overexposure is real, 4.5 s duration matches hero report.
 - ~~Investigate bag 0 data-integrity anomaly~~ DONE: manually verified 2026-04-22. Finding is real but reinterpreted — vehicle parked at robotics lab; cameras see indoor spaces through doors. Not a mux artifact. Recommend trimming bag 0 tail (~last 120 s) when using as road-scene training data.
 - **Verify bag 3 close-pass SUV**: inspect `start__front_left_*.png` and `end__left_*.png`.
 - **Curate 3 best frames for demo video**: strongest moment is the overexposure anomaly (bag 1); runner-up is the bag 0 indoor-scene data-integrity flag (very visual, very demo-worthy).

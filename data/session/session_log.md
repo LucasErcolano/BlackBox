@@ -93,6 +93,11 @@ Conclusion: **not a mux artifact**. At bag 0 end, vehicle parked at entrance of 
 
 Verification cost: $0.00 (no API — direct frame viewing).
 
+Also verified bag 1 overexposure by direct image inspection:
+- `start__front_left_00_t1709228361059324518_small.png` (5 KB, compressed-flat): nearly pure white with faint bluish ghost pixels at left edge — textbook sensor pixel clipping / AE blow-out.
+- `start__front_left_02_t1709228365523823377_small.png` (209 KB): normal outdoor parking lot, trees, parked cars, white ego hood with Scotland saltire decal.
+- Recovery window ~4.5 s matches hero report exactly. Hero deep-dive was accurate.
+
 
 ## Phase 6 (summary + commit) — DONE
 
