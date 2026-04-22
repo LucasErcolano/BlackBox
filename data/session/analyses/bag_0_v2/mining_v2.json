@@ -1,0 +1,349 @@
+{
+  "bag_id": "bag_0_v2",
+  "total_cost_usd": 1.475565,
+  "wall_s": 87.3355827331543,
+  "windows": {
+    "start": {
+      "summary": {
+        "per_camera": {
+          "front_left": "Tree-lined residential street with a parked SUV on the right shoulder under heavy foliage; frames appear nearly static, suggesting the ego vehicle is stationary or creeping very slowly.",
+          "front_right": "View dominated by overhanging tree canopy and the same parked SUV on the right; minimal change between frames indicates little to no ego motion.",
+          "right": "Shows a brick driveway with a closed metal gate and stone pillars directly alongside; scene is unchanging across all four frames, consistent with the vehicle being stopped next to the gate.",
+          "rear": "Rear view of the residential street with parked cars on the left and dappled shade; scene is essentially static with no following traffic or hazards.",
+          "left": "Opens onto what looks like a park/campground area with cabins, picnic shelters, and a person visible in the distance; frames are nearly identical, reinforcing a stationary ego vehicle.",
+          "overall": "Ego vehicle appears parked or barely moving on a shaded residential street next to a gated property, with a park visible to the left."
+        },
+        "overall": "Ego vehicle appears parked or barely moving on a shaded residential street next to a gated property, with a park visible to the left.",
+        "interesting": false,
+        "reason": "No inferred ego motion change, no close road users, no hazards or occlusions beyond normal shade; scene is routine and uneventful across all cameras."
+      },
+      "summary_cost": 0.10327499999999999,
+      "deep": null,
+      "deep_cost": 0.0
+    },
+    "middle": {
+      "summary": {
+        "per_camera": {
+          "front_left": "Vehicle approaches and crosses a zebra crossing/intersection near a tall residential building, then proceeds down a cobblestone street lined with parked cars and trees; no close hazards, clear sunny conditions.",
+          "front_right": "Narrow cobblestone street with cars parked on both sides under tree cover; traffic appears light with a few distant vehicles ahead, no immediate hazards.",
+          "right": "Side view shows storefronts, a bus stop sign, parked cars (silver sedan, red hatchback, black SUV) along the curb; static urban scene with no pedestrians close to the vehicle.",
+          "rear": "Rear view shows an intersection being cleared, then cobblestone streets with parked cars behind; a cyclist is visible in several frames trailing the vehicle at a safe distance.",
+          "left": "Left side shows parked cars, a driveway/building entrance, and later a white Fiat and silver Peugeot parked along cobblestone; uneventful residential/commercial frontage."
+        },
+        "overall": "Routine low-speed drive through a sunny urban cobblestone street with parked cars and a trailing cyclist.",
+        "interesting": false,
+        "reason": "No close-margin interactions, no erratic ego motion inferred from frame-to-frame scene compression, and no unusual road users or hazards; the trailing cyclist remains at a safe distance."
+      },
+      "summary_cost": 0.102825,
+      "deep": null,
+      "deep_cost": 0.0
+    },
+    "end": {
+      "summary": {
+        "per_camera": {
+          "front_left": "View of a tree-lined parking lot/driveway area with parked cars on the left and a parked dark vehicle ahead; a small group of pedestrians appears on the right walking near the vehicle's path across the frames.",
+          "front_right": "Shows the right side of the driveway with shrubs, a building, and pedestrians walking across; the scene remains largely static suggesting the ego vehicle is stationary or moving very slowly.",
+          "right": "Looks out toward a landscaped garden, building entrance with AC units, and an orange traffic cone; pedestrians (a small group with backpacks) pass close by on the right side.",
+          "rear": "Interior view of what appears to be a workshop/lab room with whiteboards, projector, shelves, and equipment \u2014 suggesting the camera is indoors or the rear camera is occluded/mounted oddly.",
+          "left": "View of a shaded parking lot with multiple parked cars under trees; final frame shows a doorway/wall edge suggesting the vehicle moved past a structure or the camera framing changed."
+        },
+        "overall": "Ego vehicle appears nearly stationary or creeping in a parking/driveway area with pedestrians passing close on the right.",
+        "interesting": true,
+        "reason": "Pedestrians pass in close proximity to the right side of the vehicle, and the rear camera shows an indoor scene which is anomalous and worth verifying (possible miscalibration, occlusion, or unusual mounting)."
+      },
+      "summary_cost": 0.10455,
+      "deep": {
+        "moments": [
+          {
+            "t_ns": 1708366585241825069,
+            "label": "Pedestrian group passes close to right side of ego vehicle",
+            "cameras": {
+              "shows": [
+                "front_right",
+                "right"
+              ],
+              "misses": [
+                "front_left",
+                "rear"
+              ]
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "front_right",
+                "t_ns": 1708366585240869309,
+                "snippet": "Three pedestrians with backpacks walking on right side of drivable area, close to ego vehicle's front-right quarter."
+              },
+              {
+                "source": "camera",
+                "camera": "right",
+                "t_ns": 1708366586340623199,
+                "snippet": "Same pedestrian group visible passing alongside the vehicle on the right, walking on a paved path adjacent to landscaping."
+              },
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1708366585241825069,
+                "snippet": "Pedestrians not visible in this view; only the dark SUV ahead and parked cars on the left."
+              }
+            ],
+            "why_review": "Pedestrians traversing across the front-right and then down the right side of the ego vehicle represent a close-pass/tracking handoff between front_right and right cameras; verify continuous detection across camera boundaries and clearance margins.",
+            "confidence": 0.78,
+            "inferred_ego_motion": "slow forward creep, near-stationary"
+          },
+          {
+            "t_ns": 1708366593652249837,
+            "label": "Extended near-stationary / stall behavior",
+            "cameras": {
+              "shows": [
+                "front_left",
+                "front_right",
+                "rear",
+                "left",
+                "right"
+              ],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1708366593652249837,
+                "snippet": "Scene composition (black SUV position, cone, booth, parked cars) nearly identical across multiple consecutive frames, indicating very little forward displacement."
+              },
+              {
+                "source": "camera",
+                "camera": "front_right",
+                "t_ns": 1708366593655007602,
+                "snippet": "Same framing persists; pedestrians slowly advance while ego background stays constant."
+              },
+              {
+                "source": "camera",
+                "camera": "rear",
+                "t_ns": 1708366593651767701,
+                "snippet": "Rear parking lot view largely unchanged across sequence."
+              }
+            ],
+            "why_review": "Ego vehicle appears to remain near-stationary for many seconds in a drivable area with active pedestrian crossing and a lead vehicle ahead; verify whether this was a deliberate yield/stop and that planner did not hang.",
+            "confidence": 0.6,
+            "inferred_ego_motion": "stopped or crawling <1 m/s"
+          },
+          {
+            "t_ns": 1708366585251648853,
+            "label": "Rear camera frame content changes to indoor workshop scene (camera role/frame mapping anomaly)",
+            "cameras": {
+              "shows": [
+                "rear"
+              ],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "rear",
+                "t_ns": 1708366585251648853,
+                "snippet": "Rear-labeled frames in latter half of window show an indoor laboratory/workshop with whiteboards, projector, shelving and tools \u2014 inconsistent with outdoor parking lot shown by all other cameras at the same timestamps."
+              },
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1708366585241825069,
+                "snippet": "Outdoor parking lot scene with trees, pedestrians, SUV ahead."
+              },
+              {
+                "source": "camera",
+                "camera": "right",
+                "t_ns": 1708366585271393623,
+                "snippet": "Outdoor right-side view of landscaping and building exterior, consistent with outdoor context."
+              }
+            ],
+            "why_review": "A rear-view frame depicting an indoor workshop while all other cameras show an outdoor driving scene at synchronized timestamps is a serious cross-camera inconsistency \u2014 possible topic mis-mapping, stale buffer, or wrong camera assigned to the 'rear' role. Must be audited before using this bag for perception training or evaluation.",
+            "confidence": 0.9,
+            "inferred_ego_motion": "n/a (sensor/data integrity issue)"
+          },
+          {
+            "t_ns": 1708366594722605178,
+            "label": "Left camera shows indoor kitchen/doorway scene while ego is outdoors",
+            "cameras": {
+              "shows": [
+                "left"
+              ],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "left",
+                "t_ns": 1708366594722605178,
+                "snippet": "Left-labeled frame shows interior wall, red chair, broom, electrical outlet and a doorway looking out to parked cars \u2014 an indoor vantage."
+              },
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1708366594653104920,
+                "snippet": "Outdoor parking lot, trees, cone, parked cars visible."
+              },
+              {
+                "source": "camera",
+                "camera": "front_right",
+                "t_ns": 1708366594652747816,
+                "snippet": "Outdoor driveway with parked SUV and landscaping."
+              }
+            ],
+            "why_review": "Left camera frames during the latter portion of the window appear to originate from inside a building, which is geometrically impossible if ego is driving outdoors. Indicates likely camera/topic remapping, stale data, or that this window straddles a vehicle-at-rest-inside-garage transition. Critical integrity check.",
+            "confidence": 0.9,
+            "inferred_ego_motion": "n/a (sensor/data integrity issue)"
+          }
+        ],
+        "rationale": "Window shows ego moving very slowly through a tree-shaded parking/driveway area with parked cars, a dark SUV ahead, a cone, and a group of 3 backpacked pedestrians crossing from front-right along the right side. Main flags: (1) a pedestrian close-pass handoff between front_right and right cameras, (2) prolonged near-stationary ego motion, and most importantly (3) strong cross-camera inconsistency where rear and left camera streams appear to contain indoor scenes (workshop / kitchen-doorway) at timestamps synchronized with clearly outdoor views in the other cameras \u2014 suggesting a data/topic integrity problem worth engineer review."
+      },
+      "deep_cost": 1.1649150000000001
+    }
+  },
+  "all_moments": [
+    {
+      "t_ns": 1708366585241825069,
+      "label": "Pedestrian group passes close to right side of ego vehicle",
+      "cameras": {
+        "shows": [
+          "front_right",
+          "right"
+        ],
+        "misses": [
+          "front_left",
+          "rear"
+        ]
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "front_right",
+          "t_ns": 1708366585240869309,
+          "snippet": "Three pedestrians with backpacks walking on right side of drivable area, close to ego vehicle's front-right quarter."
+        },
+        {
+          "source": "camera",
+          "camera": "right",
+          "t_ns": 1708366586340623199,
+          "snippet": "Same pedestrian group visible passing alongside the vehicle on the right, walking on a paved path adjacent to landscaping."
+        },
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1708366585241825069,
+          "snippet": "Pedestrians not visible in this view; only the dark SUV ahead and parked cars on the left."
+        }
+      ],
+      "why_review": "Pedestrians traversing across the front-right and then down the right side of the ego vehicle represent a close-pass/tracking handoff between front_right and right cameras; verify continuous detection across camera boundaries and clearance margins.",
+      "confidence": 0.78,
+      "inferred_ego_motion": "slow forward creep, near-stationary",
+      "window": "end"
+    },
+    {
+      "t_ns": 1708366593652249837,
+      "label": "Extended near-stationary / stall behavior",
+      "cameras": {
+        "shows": [
+          "front_left",
+          "front_right",
+          "rear",
+          "left",
+          "right"
+        ],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1708366593652249837,
+          "snippet": "Scene composition (black SUV position, cone, booth, parked cars) nearly identical across multiple consecutive frames, indicating very little forward displacement."
+        },
+        {
+          "source": "camera",
+          "camera": "front_right",
+          "t_ns": 1708366593655007602,
+          "snippet": "Same framing persists; pedestrians slowly advance while ego background stays constant."
+        },
+        {
+          "source": "camera",
+          "camera": "rear",
+          "t_ns": 1708366593651767701,
+          "snippet": "Rear parking lot view largely unchanged across sequence."
+        }
+      ],
+      "why_review": "Ego vehicle appears to remain near-stationary for many seconds in a drivable area with active pedestrian crossing and a lead vehicle ahead; verify whether this was a deliberate yield/stop and that planner did not hang.",
+      "confidence": 0.6,
+      "inferred_ego_motion": "stopped or crawling <1 m/s",
+      "window": "end"
+    },
+    {
+      "t_ns": 1708366585251648853,
+      "label": "Rear camera frame content changes to indoor workshop scene (camera role/frame mapping anomaly)",
+      "cameras": {
+        "shows": [
+          "rear"
+        ],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "rear",
+          "t_ns": 1708366585251648853,
+          "snippet": "Rear-labeled frames in latter half of window show an indoor laboratory/workshop with whiteboards, projector, shelving and tools \u2014 inconsistent with outdoor parking lot shown by all other cameras at the same timestamps."
+        },
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1708366585241825069,
+          "snippet": "Outdoor parking lot scene with trees, pedestrians, SUV ahead."
+        },
+        {
+          "source": "camera",
+          "camera": "right",
+          "t_ns": 1708366585271393623,
+          "snippet": "Outdoor right-side view of landscaping and building exterior, consistent with outdoor context."
+        }
+      ],
+      "why_review": "A rear-view frame depicting an indoor workshop while all other cameras show an outdoor driving scene at synchronized timestamps is a serious cross-camera inconsistency \u2014 possible topic mis-mapping, stale buffer, or wrong camera assigned to the 'rear' role. Must be audited before using this bag for perception training or evaluation.",
+      "confidence": 0.9,
+      "inferred_ego_motion": "n/a (sensor/data integrity issue)",
+      "window": "end"
+    },
+    {
+      "t_ns": 1708366594722605178,
+      "label": "Left camera shows indoor kitchen/doorway scene while ego is outdoors",
+      "cameras": {
+        "shows": [
+          "left"
+        ],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "left",
+          "t_ns": 1708366594722605178,
+          "snippet": "Left-labeled frame shows interior wall, red chair, broom, electrical outlet and a doorway looking out to parked cars \u2014 an indoor vantage."
+        },
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1708366594653104920,
+          "snippet": "Outdoor parking lot, trees, cone, parked cars visible."
+        },
+        {
+          "source": "camera",
+          "camera": "front_right",
+          "t_ns": 1708366594652747816,
+          "snippet": "Outdoor driveway with parked SUV and landscaping."
+        }
+      ],
+      "why_review": "Left camera frames during the latter portion of the window appear to originate from inside a building, which is geometrically impossible if ego is driving outdoors. Indicates likely camera/topic remapping, stale data, or that this window straddles a vehicle-at-rest-inside-garage transition. Critical integrity check.",
+      "confidence": 0.9,
+      "inferred_ego_motion": "n/a (sensor/data integrity issue)",
+      "window": "end"
+    }
+  ]
+}

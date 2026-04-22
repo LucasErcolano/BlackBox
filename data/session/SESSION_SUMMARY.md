@@ -25,7 +25,7 @@
 |-----|------|----------|--------|
 | 1_cam-lidar.bag | 55 GB | 970 s | ✓ extracted + analyzed |
 | 3_cam-lidar.bag | 74 GB | 1193 s | ✓ extracted + analyzed |
-| 0_cam-lidar.bag | 206 GB | unknown | **SKIPPED**: AnyReader open phase stalls — bag appears to lack EOF index, forcing linear scan at ~20 MB/s ≈ 2.8 hrs just to open. Two extraction attempts killed after 3 min each (no frames produced). Workaround: `rosbag reindex` (ROS1 CLI) or slice with `rosbag filter` before using rosbags lib. |
+| 0_cam-lidar.bag | 206 GB | 3545 s | ✓ extracted + analyzed (3rd attempt succeeded — see notes) |
 
 ## Topics (confirmed)
 
@@ -59,6 +59,14 @@
 
 ### Bag 3 — middle window — nothing flagged by summary pass (savings).
 
+### Bag 0 — end window (~3510-3530 s)
+- **0.90** Rear camera frame content changes to indoor workshop scene while ego is outdoors — **data integrity issue** (possible camera feed swap, bag mux artifact, or literal reflection in window glass; warrants root-cause investigation).
+- **0.90** Left camera shows indoor kitchen/doorway scene while ego is outdoors — same class of issue.
+- **0.78** Pedestrian group passes close to right side of ego vehicle.
+- **0.60** Extended near-stationary / stall behavior (<1 m/s).
+
+### Bag 0 — start + middle windows — uneventful, filtered out by summary pass.
+
 ## Cost summary
 
 (See `data/costs.jsonl` for full log.)
@@ -77,9 +85,13 @@
 | bag3 v2 summary end | window_summary_v2 | 4430/0 | 495 | $0.104 | 15 |
 | bag3 v2 deep end | visual_mining_v2 | 67101/0 | 1607 | $1.127 | 45 |
 
-| hero bag1 deep-dive | hero_deep_dive | 26k+/0 | 1.6k | $0.477 | 29 |
+| hero bag1 deep-dive | hero_deep_dive | 27206/0 | 921 | $0.477 | 29 |
+| bag0 v2 summary start | window_summary_v2 | 4430/0 | 491 | $0.103 | 11 |
+| bag0 v2 summary middle | window_summary_v2 | 4430/0 | 485 | $0.103 | 11 |
+| bag0 v2 summary end | window_summary_v2 | 4430/0 | 508 | $0.105 | 12 |
+| bag0 v2 deep end | visual_mining_v2 | 67101/0 | 2112 | $1.165 | 51 |
 
-**Running total: $5.01** (of $30 session cap). Room remaining: ~$25.
+**Running total: $6.48** (of $30 session cap). Room remaining: ~$23.50.
 
 ## Hero moment deep-dive (demo material)
 
@@ -99,16 +111,19 @@ JSON: `data/session/analyses/hero_bag1_overexposure/hero_report.json`.
 
 - `/home/hz/blackbox_cache/analyses/bag_1_v2/mining_report_v2.pdf` — 16.2 MB
 - `/home/hz/blackbox_cache/analyses/bag_3_v2/mining_report_v2.pdf` — 20.2 MB
-- bag 0 — skipped (see above)
+- `/home/hz/blackbox_cache/analyses/bag_0_v2/mining_report_v2.pdf` — 19.1 MB
 
 Also v1 single-window reports (less interesting, kept for comparison):
 - `/home/hz/blackbox_cache/analyses/bag_1/mining_report_v1.pdf` — 6.3 MB
 
-## Top 3 priority moments for manual review
+## Top priority moments for manual review (ranked)
 
-1. **Bag 1, t≈16-34 s (start window)**: Front_left and front_right cameras severely overexposed. Confidence 0.95. This could be a systematic exposure fault; worth inspecting raw images and auto-exposure logs.
-2. **Bag 3, t≈1172 s (end window)**: Pedestrian near traffic cones at gated checkpoint / level crossing, captured on left cam. Confidence 0.70. High forensic value (safety-relevant interaction).
-3. **Bag 3, t≈18 s (start window)**: Oncoming white SUV passing at close range. Confidence 0.70. Manual check for actual lateral margin and reaction behavior.
+1. **Bag 1, t≈16-34 s (start window)**: Front_left and front_right cameras severely overexposed. Confidence 0.95 (plus hero deep-dive confirmed at 0.93). Systematic exposure fault; hero report diagnoses AE convergence failure with 4.5 s recovery window.
+2. **Bag 0, t≈3510-3530 s (end window)**: Rear camera frame content changes to indoor workshop scene while ego is outdoors. Confidence 0.90. **Data integrity issue** — inspect raw msg timestamps on `/cam4/image_raw/compressed` for this window; likely a bag recording artifact (mux error, or late arrival of queued frames from previous recording session).
+3. **Bag 0, t≈3510-3530 s (end window)**: Left camera shows indoor kitchen/doorway scene. Confidence 0.90. Same class as (2). If both cams show indoor scenes at the same timestamps, this is strong evidence of a systemic recording pipeline anomaly.
+4. **Bag 0, t≈3505 s (end window)**: Pedestrian group passes close to right side of ego vehicle. Confidence 0.78.
+5. **Bag 3, t≈1172 s (end window)**: Pedestrian near traffic cones at gated checkpoint / level crossing, captured on left cam. Confidence 0.70.
+6. **Bag 3, t≈18 s (start window)**: Oncoming white SUV passing at close range. Confidence 0.70.
 
 ## Decisions logged
 
@@ -116,14 +131,21 @@ Also v1 single-window reports (less interesting, kept for comparison):
 - **No telemetry topics present**: Pipeline adapted to vision-only cues. Plots phase skipped. Frame count raised (3 windows × 20 frames/cam vs 1 window × 8 frames/cam) to compensate.
 - **v2 two-stage analysis**: Summary pass at 400×300 screens out uneventful windows before deep pass. Saved an estimated 33-50 % of API spend (middle-window deep calls skipped on both bags 1 and 3).
 
+## Bag 0 extraction resolution
+
+Two initial attempts stalled in AnyReader open phase (both killed after 3-4 min with 0 frames). Third attempt succeeded — index scan took 11 min (~15 GB read at 22 MB/s) on first open, then frame extraction ran in ~2 min. Conclusion: rosbags ROS1 Reader needs a long index-building scan on bag 0 (possibly missing footer index, or chunk index located far from EOF), but once the open completes, seek-and-read works normally. Subsequent re-opens of the same bag in the same session can reuse the built index (in-memory) — if a workflow needs multiple passes on bag 0, keep the Reader open across passes rather than reopening per pass.
+
+Bag 0 total pipeline: 449 s extraction + 87 s analysis + $1.48 API. 4 moments including 2 high-confidence data-integrity anomalies.
+
 ## Known issues / TODOs for manual follow-up
 
 - **Cost accounting bug**: `uncached_input_tokens: -656` in synthetic smoke entry. Cache-read double-subtract in `claude_client.py`. Cosmetic.
 - **Token caching not triggering** on v2 deep calls (cached blocks are <1024 tokens → below Anthropic cache threshold). Pad `cached_blocks` in `prompts_v2.py` to >1024 tokens if rerunning bags.
-- **Bag 0 extraction hung-ish** on HDD: first attempt stuck after 3:20 with no file output, killed & retried. May need to retry again.
-- **Verify bag 1 overexposure finding manually**: check raw frames in `/home/hz/blackbox_cache/frames/bag_1_v2/start__front_left_*.png`. If genuine, this is a concrete sensor-level defect worth writing a dedicated PDF report for.
+- **Verify bag 1 overexposure finding manually**: check raw frames in `/home/hz/blackbox_cache/frames/bag_1_v2/start__front_left_*.png`. Hero deep-dive already confirmed — concrete sensor-level defect, write dedicated PDF report.
+- **Investigate bag 0 data-integrity anomaly**: `/home/hz/blackbox_cache/frames/bag_0_v2/end__rear_*.png` and `end__left_*.png` reportedly show indoor scenes. Open these manually and if real, dig into `/cam4` and `/cam3` raw `msg.header.stamp` vs bag record `t_ns` to check for clock skew / wrong-frame-on-topic.
 - **Verify bag 3 close-pass SUV**: inspect `start__front_left_*.png` and `end__left_*.png`.
-- **Curate 3 best frames for demo video**: strongest moment is the overexposure anomaly (bag 1) — clear visual story.
+- **Curate 3 best frames for demo video**: strongest moment is the overexposure anomaly (bag 1); runner-up is the bag 0 indoor-scene data-integrity flag (very visual, very demo-worthy).
+- **Bag 0 rosbag reindex**: if future workflows need to re-open bag 0 cold repeatedly, run ROS1 `rosbag reindex` once (needs ROS install on another machine) to add/fix the EOF index and make subsequent opens instantaneous.
 
 ## Artifacts layout
 
@@ -137,10 +159,11 @@ Also v1 single-window reports (less interesting, kept for comparison):
 │   ├── bag_1_v2/                    # v2: 3 windows × 20 frames × 5 cams (big+small)
 │   ├── bag_3/                       # v1 single-window
 │   ├── bag_3_v2/                    # v2 3-window
-│   └── bag_0_v2/                    # (if extraction completes)
+│   └── bag_0_v2/                    # 3-window vision extraction (450 s wall)
 └── analyses/
     ├── bag_1/                       # v1 scenario mining
     ├── bag_1_v2/                    # v2 two-stage mining
     ├── bag_3_v2/                    # v2 two-stage mining
-    └── bag_0_v2/                    # (if analysis completes)
+    ├── bag_0_v2/                    # 3-window mining (2 data-integrity anomalies)
+    └── hero_bag1_overexposure/      # AE convergence failure deep-dive
 ```

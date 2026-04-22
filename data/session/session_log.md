@@ -70,12 +70,15 @@ Applied changes (2026-04-22):
 - Total bag 3 v2: $2.52. Wall 126s.
 - Top findings: pedestrian at gated checkpoint (0.70); oncoming vehicle close passes (0.70 / 0.55); sun glare (0.60).
 
-## Phase 2/3/4 (v2 bag 0) — SKIPPED
+## Phase 2/3/4 (v2 bag 0) — DONE on 3rd attempt
 - Bag 0 is 206 GB on HDD. Two extraction attempts — both stuck in `AnyReader.__enter__` phase reading multiple GB without producing the first frame.
 - Probe (just opening reader): 227 MB read in 17s at ~20 MB/s. Extrapolated full-open time: ~2.8 hours (and extraction would require more reads after that).
 - Diagnosis: bag 0 likely has no bag index at EOF (or rosbags lib is scanning chunk-by-chunk for this file), forcing a linear scan. Without `rosbag reindex` (ROS1 CLI) to repair/add a proper index, rosbags lib can't seek efficiently for this bag.
 - Budget check: continuing would burn ≥3 hrs of wallclock on extraction alone for questionable return. SKIPPING per rule "Si te empantanás en debugging de un error: 15 min MAX, después workaround o skip."
 - Workaround for future session: run `rosbag reindex` (requires ROS1 install on a machine with capacity), or copy bag 0 to SSD once SSD has 210+ GB free, or slice bag 0 into smaller bags with `rosbag filter --duration` first.
+
+UPDATE — retry succeeded. A third attempt (after a probe that patiently waited through the 675 s open phase) completed in 449 s extraction + 87 s analysis. Total bag 0 API spend: $1.48. 4 moments found; 2 are 0.90-confidence **data integrity anomalies** (rear and left cameras show indoor scenes while ego is outdoors — likely camera feed swap or recording mux artifact). This is now the strongest demo finding after the bag 1 overexposure hero.
+Final session spend: **$6.48** of $30 cap.
 
 ## Phase 6 (summary + commit) — DONE
 
