@@ -6,6 +6,10 @@
     "/cmd_vel angular spikes to +/- 2.5 rad/s with no visible obstacle"
   ],
   "patch_hint": "In ObstacleAvoider.step, compare (time.time() - self.last_scan_t) against a SCAN_TIMEOUT_S constant and fall back to a conservative crawl (low linear, zero angular) when the scan is stale.",
+  "patch_target": {
+    "file": "source/buggy/obstacle_avoider.py",
+    "function": "ObstacleAvoider.step"
+  },
   "window_s": [
     10.0,
     14.0

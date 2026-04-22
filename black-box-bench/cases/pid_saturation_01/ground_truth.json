@@ -6,6 +6,10 @@
     "/cmd_vel linear command keeps rising while pose stops tracking"
   ],
   "patch_hint": "Add anti-windup to PIDController.step: only accumulate the integral when the unclamped output is inside [PWM_MIN, PWM_MAX] or when the error would reduce saturation.",
+  "patch_target": {
+    "file": "source/buggy/pid_controller.py",
+    "function": "PIDController.step"
+  },
   "window_s": [
     12.0,
     18.0

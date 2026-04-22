@@ -14,6 +14,8 @@ Built with **Claude Opus 4.7** (vision) + **Managed Agents** (long-horizon bag r
 - [Risks](docs/RISKS.md) — risk register + stop-loss triggers.
 - [Submission](docs/SUBMISSION.md) — deliverables checklist.
 - [Testimonial](docs/TESTIMONIAL.md) — quote capture plan.
+- [Flag-plant](docs/FLAG_PLANT.md) — X/LinkedIn thread copy.
+- [Rehearsal](docs/REHEARSAL.md) — pitch timing, breath points, Q&A prep.
 
 ## Modes
 - **Forensic post-mortem** — crash bag in, root cause + patch out.
