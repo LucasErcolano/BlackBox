@@ -1,0 +1,9 @@
+{
+  "bug_class": "sensor_timeout",
+  "window_s": [10.5, 13.2],
+  "patch": {
+    "file": "source/buggy/obstacle_avoider.py",
+    "function": "ObstacleAvoider.step"
+  },
+  "notes": "Sample prediction. Bug class + file/function correct. Window IoU good."
+}

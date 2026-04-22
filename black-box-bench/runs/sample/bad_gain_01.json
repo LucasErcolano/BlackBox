@@ -1,0 +1,9 @@
+{
+  "bug_class": "bad_gain_tuning",
+  "window_s": [4.5, 21.0],
+  "patch": {
+    "file": "source/buggy/heading_controller.py",
+    "function": "HeadingController.step"
+  },
+  "notes": "Sample prediction. Full marks."
+}

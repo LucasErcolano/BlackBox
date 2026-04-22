@@ -1,0 +1,9 @@
+{
+  "bug_class": "pid_saturation",
+  "window_s": [12.2, 17.9],
+  "patch": {
+    "file": "source/buggy/pid_controller.py",
+    "function": "PIDController.step"
+  },
+  "notes": "Sample prediction reproduced from end_to_end_smoke.py run on 2026-04-22. Perfect match."
+}

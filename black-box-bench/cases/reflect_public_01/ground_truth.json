@@ -1,0 +1,20 @@
+{
+  "bug_class": "unknown",
+  "platform": "reflect_public_dataset",
+  "status": "skeleton_awaiting_bag",
+  "source_dataset": "REFLECT (Robot Execution Failures Large-scale benchmark)",
+  "source_url": "https://github.com/real-stanford/reflect",
+  "mode": "forensic_post_mortem",
+  "window_s": [null, null],
+  "evidence_hints": [
+    "Manipulation-domain failure (grasp slip, plan infeasible, execution diverges)",
+    "RGB-D frames + robot state trajectory available from public release",
+    "Ground-truth failure label provided by REFLECT annotators"
+  ],
+  "patch_hint": null,
+  "patch_target": {
+    "file": null,
+    "function": null
+  },
+  "notes": "Public-dataset case satisfying SUBMISSION §Depth requirement (>=1 public-dataset case). Loader will convert REFLECT's per-episode bundle into the canonical {frames, time-series, source} shape consumed by src/black_box/eval/public_data.py. Bag file not bundled — fetched by src/black_box/eval/public_data.py download routine."
+}
