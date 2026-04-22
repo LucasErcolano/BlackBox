@@ -35,7 +35,7 @@
 ### 3/ — The hero finding
 > Real AV bag, 55 GB, 5 cameras.
 >
-> Black Box found a 4.5 s auto-exposure convergence failure on the front-left camera that a human review missed on first pass.
+> Black Box found a 4.5 s auto-exposure convergence failure on both front cameras that a human review missed on first pass.
 >
 > Patch: widen AE range + add a glare-detect fallback.
 >
@@ -53,7 +53,7 @@
 >
 > 3 synthetic cases with injected bugs, ground-truth windows, source diffs, scoring harness. MIT. Use it to evaluate your own robot-forensic agent.
 >
-> [link: github.com/.../black-box-bench]
+> https://github.com/LucasErcolano/BlackBox/tree/master/black-box-bench
 
 ### 6/ — Built for hackathon, but…
 > Built during the Cerebral Valley × Anthropic "Built with Opus 4.7" hackathon. 6 days, two builders, two platforms (5-camera AV + NAO6 humanoid).
@@ -61,9 +61,9 @@
 > But the actual use case — post-incident review at AV / humanoid labs — is a petabyte problem, not a week-long one.
 
 ### 7/ — Links + CTA
-> Repo: [link]
-> Benchmark: [link]
-> Build journal (decisions, failures, findings): [gist link]
+> Repo: https://github.com/LucasErcolano/BlackBox
+> Benchmark: https://github.com/LucasErcolano/BlackBox/tree/master/black-box-bench
+> Build journal (decisions, failures, findings): https://gist.github.com/LucasErcolano/851c5e976c6aa364f69c9e6875544061
 >
 > If you run a robot fleet and this would've saved you a week of oncall: DM open. If you think it wouldn't: reply and tell me why.
 
