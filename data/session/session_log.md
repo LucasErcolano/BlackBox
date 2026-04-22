@@ -107,3 +107,23 @@ Also verified bag 1 overexposure by direct image inspection:
 - Final session spend: **$5.01** of $30 cap.
 
 
+## 2026-04-22 — Solo-builder re-plan, Day 1 + Day 2 closure
+
+Context: partner (Aayush) scope dropped. Replan narrowed to Lucas-owned items.
+
+**Day 1 — hero + cost ledger**
+- Bag disk state: 3-bag HDD temporarily offline, only `data/bags/1_cam-lidar.bag` (55 GB) local. Reader opens OK, 970 s, 11 topics (5 cams + velodyne).
+- Hero artifact re-validated (`/home/hz/blackbox_cache/analyses/hero_bag1_overexposure/hero_report.json`): anomaly=`sensor_overexposure`, conf 0.93, 4.5 s window, scoped AE patch. No rerun needed.
+- Cost-ledger bug: `src/black_box/analysis/claude_client.py:237` double-subtracted cached tokens. Fix: `uncached_input = usage.input_tokens`. Retroactive patch to `data/costs.jsonl` line 1 (uncached −656 → 1402, usd → 0.086067). Commit `daeb9f2`.
+- Test mock semantics in `tests/test_analysis.py:184` realigned (input_tokens is uncached-only per Anthropic API).
+- Smoke validation: `scripts/end_to_end_smoke.py` on `pid_saturation_01`, cost $0.1201, wall 11.5 s, predicted=`pid_saturation` match=True. Ledger line 26 clean.
+- Total session: $7.66 of $500 cap.
+
+**Day 2 — benchmark + grounding**
+- New case `black-box-bench/cases/reflect_public_01/` (skeleton, wired to REFLECT via `src/black_box/eval/public_data.py`). Satisfies SUBMISSION Depth "≥1 public-dataset case".
+- `black-box-bench/runs/sample/` + `black-box-bench/results/sample_eval_2026-04-22.md` committed. Harness validated 6.00/6.00 on 3 scoreable synthetic cases, 3 skeletons excluded. Commit `0502cc8`.
+- Bench README polished: scoring table, reproducer commands, case inventory.
+- Grounding gate infra already present; full suite 36/36 green post cost-bug fix.
+- Testimonial outreach owned by user directly; not tracked here.
+
+**Pushed to `origin/master`**: `daeb9f2`, `0502cc8`. Day 3 (flag-plant) and Day 4 (final cleanup) deferred.

@@ -29,7 +29,7 @@ Mitigate on sight. Update as risks fire or new ones emerge.
 
 | # | Risk | Mitigation |
 |---|------|-----------|
-| 14 | Cost-log bug: `uncached_input_tokens: -656` in synthetic smoke entry | Cosmetic. Fix if time. |
+| 14 | ~~Cost-log bug: `uncached_input_tokens: -656` in synthetic smoke entry~~ | **RESOLVED 2026-04-22** (commit `daeb9f2`). Root cause: Anthropic `usage.input_tokens` already excludes cache reads; client was subtracting `cache_read_input_tokens` twice. Retroactive fix applied to line 1 of `data/costs.jsonl` (uncached 1402, usd 0.086067). Test mock updated, 36/36 tests green. |
 | 15 | HDD → SSD bag copy time | Copy in background while analyzing. Not critical path. |
 | 16 | FastAPI UI polish incomplete | Ship minimal. Demo is the recording, not the UI tour. |
 | 17 | Prior hackathon prior-art scan missed LessWrong alignment coverage (corrigibility, approval-directed agents) | Cite Christiano approval-directed + Orseau/Armstrong interruptibility if safety frame gets questioned in judging Q&A. |
