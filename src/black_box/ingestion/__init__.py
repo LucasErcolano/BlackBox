@@ -14,11 +14,18 @@ from .render import (
     to_b64,
     thumb,
 )
+from .lidar import (
+    LidarScan,
+    decode_laserscan,
+    decode_pointcloud2,
+    top_down_render,
+)
 
 __all__ = [
     "BagData",
     "Frame",
     "TimeSeries",
+    "LidarScan",
     "load_bag",
     "sync_frames",
     "frames_at",
@@ -26,4 +33,7 @@ __all__ = [
     "plot_telemetry",
     "to_b64",
     "thumb",
+    "decode_laserscan",
+    "decode_pointcloud2",
+    "top_down_render",
 ]

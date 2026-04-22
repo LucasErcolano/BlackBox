@@ -20,6 +20,8 @@ except Exception:  # pragma: no cover
 
 from rosbags.highlevel import AnyReader
 
+from .lidar import LidarScan, decode_laserscan, decode_pointcloud2
+
 
 # -------- types --------------------------------------------------------------
 
@@ -43,6 +45,7 @@ class BagData:
     cameras: dict[str, list[Frame]]
     telemetry: dict[str, "TimeSeries"]
     metadata: dict
+    lidar: dict[str, list[LidarScan]] = field(default_factory=dict)
 
     def sync_frames(
         self, target_hz: float = 2.0, tolerance_ms: int = 50
@@ -58,6 +61,18 @@ _COMPRESSED_MSGTYPES = {
     "sensor_msgs/msg/CompressedImage",
     "sensor_msgs/CompressedImage",
 }
+_POINTCLOUD_MSGTYPES = {
+    "sensor_msgs/msg/PointCloud2",
+    "sensor_msgs/PointCloud2",
+}
+_LASERSCAN_MSGTYPES = {
+    "sensor_msgs/msg/LaserScan",
+    "sensor_msgs/LaserScan",
+}
+
+
+def _is_lidar_msgtype(msgtype: str) -> bool:
+    return msgtype in _POINTCLOUD_MSGTYPES or msgtype in _LASERSCAN_MSGTYPES
 
 _TELEMETRY_REGEX = re.compile(
     r"(odom|imu|cmd_vel|pose|twist|gps|fix|joint_states|pwm|battery)",
@@ -172,9 +187,11 @@ def _auto_topics(
     reader: AnyReader,
     camera_topics: list[str] | None,
     telemetry_topics: list[str] | None,
-) -> tuple[set[str], set[str]]:
+    lidar_topics: list[str] | None = None,
+) -> tuple[set[str], set[str], set[str]]:
     cams: set[str] = set()
     tele: set[str] = set()
+    lid: set[str] = set()
     for conn in reader.connections:
         topic = conn.topic
         msgtype = conn.msgtype
@@ -184,20 +201,32 @@ def _auto_topics(
         else:
             if _is_camera_msgtype(msgtype):
                 cams.add(topic)
+        if lidar_topics is not None:
+            if topic in lidar_topics:
+                lid.add(topic)
+        else:
+            if _is_lidar_msgtype(msgtype):
+                lid.add(topic)
         if telemetry_topics is not None:
             if topic in telemetry_topics:
                 tele.add(topic)
         else:
-            if _TELEMETRY_REGEX.search(topic) and not _is_camera_msgtype(msgtype):
+            if (
+                _TELEMETRY_REGEX.search(topic)
+                and not _is_camera_msgtype(msgtype)
+                and not _is_lidar_msgtype(msgtype)
+            ):
                 tele.add(topic)
-    return cams, tele
+    return cams, tele, lid
 
 
 def load_bag(
     path: str | Path,
     camera_topics: list[str] | None = None,
     telemetry_topics: list[str] | None = None,
+    lidar_topics: list[str] | None = None,
     max_frames_per_cam: int = 300,
+    max_scans_per_lidar: int = 600,
 ) -> BagData:
     path = Path(path)
     # AnyReader wants a sequence of paths
@@ -208,15 +237,23 @@ def load_bag(
         paths = [path]
 
     cameras: dict[str, list[Frame]] = {}
+    lidar: dict[str, list[LidarScan]] = {}
     # Telemetry accumulators: topic -> (list[t_ns], list[row], fields)
     tele_acc: dict[str, tuple[list[int], list[list[float]], list[str]]] = {}
 
     with AnyReader(paths) as reader:
-        cam_set, tele_set = _auto_topics(reader, camera_topics, telemetry_topics)
+        cam_set, tele_set, lid_set = _auto_topics(
+            reader, camera_topics, telemetry_topics, lidar_topics
+        )
         cam_counts: dict[str, int] = {t: 0 for t in cam_set}
+        lid_counts: dict[str, int] = {t: 0 for t in lid_set}
 
         # Filter connections we care about
-        wanted = [c for c in reader.connections if c.topic in cam_set or c.topic in tele_set]
+        wanted = [
+            c
+            for c in reader.connections
+            if c.topic in cam_set or c.topic in tele_set or c.topic in lid_set
+        ]
 
         for conn, t_ns, raw in reader.messages(connections=wanted):
             topic = conn.topic
@@ -235,6 +272,24 @@ def load_bag(
                     continue
                 cameras.setdefault(topic, []).append(Frame(t_ns=int(t_ns), image=img, topic=topic))
                 cam_counts[topic] += 1
+            elif topic in lid_set:
+                if lid_counts[topic] >= max_scans_per_lidar:
+                    continue
+                try:
+                    msg = reader.deserialize(raw, conn.msgtype)
+                except Exception:
+                    continue
+                if conn.msgtype in _POINTCLOUD_MSGTYPES:
+                    scan = decode_pointcloud2(msg)
+                else:
+                    scan = decode_laserscan(msg)
+                if scan is None:
+                    continue
+                scan.topic = topic
+                if scan.t_ns == 0:
+                    scan.t_ns = int(t_ns)
+                lidar.setdefault(topic, []).append(scan)
+                lid_counts[topic] += 1
             elif topic in tele_set:
                 try:
                     msg = reader.deserialize(raw, conn.msgtype)
@@ -266,6 +321,8 @@ def load_bag(
     # Sort frames
     for topic in cameras:
         cameras[topic].sort(key=lambda f: f.t_ns)
+    for topic in lidar:
+        lidar[topic].sort(key=lambda s: s.t_ns)
 
     telemetry: dict[str, TimeSeries] = {}
     for topic, (ts, vs, fs) in tele_acc.items():
@@ -284,7 +341,9 @@ def load_bag(
         "end_ns": end_ns,
         "topics": topics_list,
     }
-    return BagData(cameras=cameras, telemetry=telemetry, metadata=metadata)
+    return BagData(
+        cameras=cameras, telemetry=telemetry, metadata=metadata, lidar=lidar
+    )
 
 
 # -------- synchronization ----------------------------------------------------

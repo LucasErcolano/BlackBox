@@ -52,13 +52,20 @@ def score_case(gt_path: Path, pred_path: Path) -> CaseScore:
     gt = json.loads(gt_path.read_text())
     pred = json.loads(pred_path.read_text()) if pred_path.exists() else {}
 
+    skeleton = gt.get("status", "").startswith("skeleton")
+
     bug_gt = gt["bug_class"]
     bug_pred = pred.get("bug_class", "")
-    bug_match = 1.0 if bug_gt == bug_pred else 0.0
+    bug_match = 1.0 if (bug_gt == bug_pred and not skeleton) else 0.0
 
     window_gt = gt["window_s"]
     window_pred = pred.get("window_s")
-    if window_pred and len(window_pred) == 2:
+    window_gt_valid = (
+        isinstance(window_gt, list)
+        and len(window_gt) == 2
+        and all(isinstance(v, (int, float)) for v in window_gt)
+    )
+    if window_pred and len(window_pred) == 2 and window_gt_valid:
         iou = iou_1d(window_gt, window_pred)
         window_score = 0.5 if iou >= 0.5 else 0.0
     else:
@@ -85,8 +92,9 @@ def score_case(gt_path: Path, pred_path: Path) -> CaseScore:
         total=bug_match + window_score + patch_score,
         bug_class_gt=bug_gt,
         bug_class_pred=bug_pred,
-        window_gt=window_gt,
+        window_gt=window_gt if window_gt_valid else [],
         window_pred=window_pred,
+        notes="skeleton (awaiting bag)" if skeleton else "",
     )
 
 
@@ -94,17 +102,22 @@ def print_table(scores: list[CaseScore]) -> None:
     header = f"{'case':30s} {'bug':5s} {'iou':>5s} {'win':>5s} {'patch':>5s} {'total':>5s}"
     print(header)
     print("-" * len(header))
+    scoreable = [s for s in scores if not s.notes.startswith("skeleton")]
     for s in scores:
+        suffix = f"  [{s.notes}]" if s.notes else ""
         print(
             f"{s.case:30s} {s.bug_match:5.1f} {s.window_iou:5.2f} "
-            f"{s.window_score:5.1f} {s.patch_score:5.1f} {s.total:5.2f}"
+            f"{s.window_score:5.1f} {s.patch_score:5.1f} {s.total:5.2f}{suffix}"
         )
-    if scores:
-        total = sum(s.total for s in scores)
-        max_total = 2.0 * len(scores)
+    if scoreable:
+        total = sum(s.total for s in scoreable)
+        max_total = 2.0 * len(scoreable)
         print("-" * len(header))
-        print(f"{'TOTAL':30s} {'':5s} {'':>5s} {'':>5s} {'':>5s} "
+        print(f"{'TOTAL (scoreable only)':30s} {'':5s} {'':>5s} {'':>5s} {'':>5s} "
               f"{total:5.2f} / {max_total:.1f}")
+        if len(scoreable) < len(scores):
+            skipped = len(scores) - len(scoreable)
+            print(f"({skipped} skeleton case(s) excluded from total)")
 
 
 def main() -> None:

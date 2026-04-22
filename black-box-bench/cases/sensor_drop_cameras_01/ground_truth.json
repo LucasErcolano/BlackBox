@@ -1,0 +1,18 @@
+{
+  "bug_class": "sensor_timeout",
+  "platform": "autonomous_car_ros1",
+  "status": "skeleton_awaiting_bag",
+  "window_s": [null, null],
+  "dropped_topics": [],
+  "surviving_topics": [],
+  "evidence_hints": [
+    "Multiple camera topics stop publishing simultaneously",
+    "Non-camera topics (IMU/GPS/odom) continue publishing through window",
+    "Drop pattern is a cliff, not gradual rate decay"
+  ],
+  "patch_hint": "Add camera-freshness watchdog in perception consumer; trigger safety stop after CAMERA_WATCHDOG_S.",
+  "patch_target": {
+    "file": null,
+    "function": null
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "bug_class": "unknown",
+  "platform": "usv_ros2",
+  "status": "skeleton_awaiting_bag",
+  "mode": "tbd_forensic_or_scenario_mining",
+  "window_s": [null, null],
+  "lidar_topics": [],
+  "evidence_hints": [],
+  "patch_hint": null,
+  "patch_target": {
+    "file": null,
+    "function": null
+  }
+}
