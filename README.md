@@ -9,6 +9,11 @@ Built with **Claude Opus 4.7** (vision) + **Managed Agents** (long-horizon bag r
 ## Docs
 - [Build journal & strategy](https://gist.github.com/LucasErcolano/851c5e976c6aa364f69c9e6875544061) — narrative, novelty positioning, findings.
 - [Team onboarding](docs/ONBOARDING.md) — scope, cadence, conventions.
+- [Pitch](docs/PITCH.md) — one-liner, elevator, positioning one-liners.
+- [Demo script](docs/DEMO_SCRIPT.md) — 3-min video beat sheet.
+- [Risks](docs/RISKS.md) — risk register + stop-loss triggers.
+- [Submission](docs/SUBMISSION.md) — deliverables checklist.
+- [Testimonial](docs/TESTIMONIAL.md) — quote capture plan.
 
 ## Modes
 - **Forensic post-mortem** — crash bag in, root cause + patch out.
