@@ -17,6 +17,7 @@ data/synthetic/*
 data/reports/*
 !data/reports/.gitkeep
 data/costs.jsonl
+data/jobs/
 *.bag
 *.db3
 *.mcap
@@ -24,3 +25,6 @@ data/costs.jsonl
 .DS_Store
 .idea/
 .vscode/
+data/uploads_raw/
+data/uploads_review/
+data/uploads_safe/

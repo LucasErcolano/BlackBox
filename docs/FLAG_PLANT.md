@@ -5,10 +5,11 @@
 **When to post:** Day 3 or Day 4 morning (ART). Not later — thread needs 24–48 h to pick up replies before submission.
 
 **Assets required before posting:**
-- [ ] Bag-1 overexposure short clip (6–10 s, muted, bright-to-recovery transition). Drop as video in tweet 1.
-- [ ] Screenshot of unified diff from one synthetic case (readable at mobile size).
-- [ ] Screenshot of one PDF report page (NTSB-style header visible).
+- [x] Bag-1 overexposure GIF (4-frame loop, saturated → mid → recovered → mid). File: `docs/assets/bag1_ae_failure.gif`. Used in tweet 1.
+- [x] Screenshot of unified diff from `pid_saturation_01` (GitHub-style dark theme). File: `docs/assets/pid_saturation_diff.png`. Used in tweet 3.
 - [ ] Public URLs: repo, benchmark repo, gist.
+
+**Dropped**: PDF report page. Synthetic case's telemetry plots would mislead viewers into thinking the real hero bag (bag-1 AE failure, image-only) was analyzed with the same telemetry surface. Report asset re-added only if a vision-only PDF template exists for bag-1.
 
 **Pinning:** Pin thread after posting. Keep pinned through submission.
 

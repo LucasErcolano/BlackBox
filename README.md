@@ -6,6 +6,10 @@ Forensic copilot for robots. Feed it a ROS bag, get back a root-cause hypothesis
 
 Built with **Claude Opus 4.7** (vision) + **Managed Agents** (long-horizon bag replay).
 
+![bag-1 AE convergence failure](docs/assets/bag1_ae_failure.gif)
+
+_Hero finding: 4.5 s auto-exposure failure on the front-left camera, caught by Black Box in the opening window of a real 55 GB, 5-camera AV bag._
+
 ## Docs
 - [Build journal & strategy](https://gist.github.com/LucasErcolano/851c5e976c6aa364f69c9e6875544061) — narrative, novelty positioning, findings.
 - [Team onboarding](docs/ONBOARDING.md) — scope, cadence, conventions.
