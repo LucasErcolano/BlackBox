@@ -8,6 +8,8 @@ from PIL import Image, ImageDraw
 
 from black_box.reporting import (
     build_report,
+    demo_side_by_side_html,
+    parse_patch_proposal,
     scoped_check,
     side_by_side_html,
     unified_diff_str,
@@ -108,6 +110,49 @@ def test_side_by_side_html() -> None:
     assert "delta" in html_out
     assert "#e6ffed" in html_out  # added bg color
     assert "<html" in html_out.lower()
+
+
+def test_demo_side_by_side_html_has_ntsb_chrome() -> None:
+    old = "x = 1\ny = 2\n"
+    new = "x = 1\ny = clamp(2, 0, 5)\n"
+    out = demo_side_by_side_html(
+        old, new,
+        file_path="src/controller.cpp",
+        case_key="c1_faceplant",
+        title="Proposed Fix",
+    )
+    # Banner + case key visible
+    assert "BLACK BOX — FORENSIC DIFF" in out
+    assert "c1_faceplant" in out
+    assert "src/controller.cpp" in out
+    # Legend keys
+    assert "− removed" in out
+    assert "+ added" in out
+    # Demo-size font: 14px, not 12px
+    assert "font-size:14px" in out
+    # Both columns still rendered
+    assert "clamp(2, 0, 5)" in out
+
+
+def test_parse_patch_proposal_extracts_file_and_sides() -> None:
+    text = (
+        "In pid_controller.cpp, line 45:\n"
+        "- integral += error;\n"
+        "+ integral += error;\n"
+        "+ integral = clamp(integral, -1.0, 1.0);\n"
+    )
+    path, old, new = parse_patch_proposal(text)
+    assert path == "pid_controller.cpp"
+    assert "integral += error;" in old
+    assert "clamp(integral" in new
+    assert "clamp(integral" not in old
+
+
+def test_parse_patch_proposal_empty_text() -> None:
+    path, old, new = parse_patch_proposal("")
+    assert path == "patch"
+    assert old == ""
+    assert new == ""
 
 
 if __name__ == "__main__":

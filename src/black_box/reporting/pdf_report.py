@@ -50,6 +50,25 @@ def _styles():
             alignment=1,
             spaceAfter=6,
         ),
+        "cover_classification": ParagraphStyle(
+            "cover_classification",
+            parent=base["Normal"],
+            fontName="Helvetica-Bold",
+            fontSize=9,
+            leading=11,
+            alignment=1,
+            textColor=colors.HexColor("#b22222"),
+            spaceAfter=4,
+        ),
+        "cover_case_key": ParagraphStyle(
+            "cover_case_key",
+            parent=base["Normal"],
+            fontName="Courier-Bold",
+            fontSize=14,
+            leading=18,
+            alignment=1,
+            spaceAfter=4,
+        ),
         "h1": ParagraphStyle(
             "h1",
             parent=base["Heading1"],
@@ -201,17 +220,64 @@ def build_report(
 
     styles = _styles()
     page_w, page_h = LETTER
+    case_key = case_meta.get("case_key", "unknown")
+    mode_label = case_meta.get("mode", "post_mortem")
     doc = SimpleDocTemplate(
         str(out_pdf),
         pagesize=LETTER,
-        leftMargin=0.75 * inch,
-        rightMargin=0.75 * inch,
-        topMargin=0.75 * inch,
-        bottomMargin=0.75 * inch,
-        title=f"Black Box Report — {case_meta.get('case_key', 'unknown')}",
+        leftMargin=0.85 * inch,
+        rightMargin=0.85 * inch,
+        topMargin=0.95 * inch,
+        bottomMargin=0.85 * inch,
+        title=f"Black Box Report — {case_key}",
         author="Black Box",
     )
     content_w = page_w - doc.leftMargin - doc.rightMargin
+
+    def _draw_page_chrome(canvas, doc_):
+        canvas.saveState()
+        # Top rule
+        canvas.setStrokeColor(colors.black)
+        canvas.setLineWidth(0.75)
+        canvas.line(
+            doc_.leftMargin,
+            page_h - 0.55 * inch,
+            page_w - doc_.rightMargin,
+            page_h - 0.55 * inch,
+        )
+        # Header text
+        canvas.setFont("Times-Bold", 9)
+        canvas.setFillColor(colors.black)
+        canvas.drawString(
+            doc_.leftMargin,
+            page_h - 0.42 * inch,
+            "BLACK BOX — FORENSIC REPORT",
+        )
+        canvas.setFont("Courier", 8)
+        canvas.setFillColor(colors.HexColor("#6b6b66"))
+        canvas.drawRightString(
+            page_w - doc_.rightMargin,
+            page_h - 0.42 * inch,
+            f"CASE {case_key} · {mode_label}",
+        )
+        # Footer rule + page number
+        canvas.setStrokeColor(colors.HexColor("#b0ac9f"))
+        canvas.setLineWidth(0.35)
+        canvas.line(
+            doc_.leftMargin,
+            0.58 * inch,
+            page_w - doc_.rightMargin,
+            0.58 * inch,
+        )
+        canvas.setFont("Helvetica", 8)
+        canvas.setFillColor(colors.HexColor("#6b6b66"))
+        canvas.drawString(doc_.leftMargin, 0.42 * inch, "Inference-only · Opus 4.7")
+        canvas.drawRightString(
+            page_w - doc_.rightMargin,
+            0.42 * inch,
+            f"Page {canvas.getPageNumber()}",
+        )
+        canvas.restoreState()
 
     hypotheses = list(report_json.get("hypotheses", []) or [])
     timeline = list(report_json.get("timeline", []) or [])
@@ -219,13 +285,17 @@ def build_report(
     story: list[Any] = []
 
     # ---------- 1. Cover ----------
-    story.append(Spacer(1, 1.4 * inch))
+    story.append(Spacer(1, 1.1 * inch))
+    story.append(Paragraph(
+        "— OFFICIAL CASE REPORT · FOR TECHNICAL REVIEW —",
+        styles["cover_classification"],
+    ))
+    story.append(Spacer(1, 0.12 * inch))
     story.append(Paragraph("BLACK BOX — FORENSIC REPORT", styles["cover_title"]))
     story.append(_rule(content_w * 0.6, colors.black))
     story.append(Spacer(1, 0.3 * inch))
-    story.append(Paragraph(f"Case: <b>{case_meta.get('case_key', 'unknown')}</b>",
-                           styles["cover_meta"]))
-    story.append(Paragraph(f"Mode: {case_meta.get('mode', 'post_mortem')}", styles["cover_meta"]))
+    story.append(Paragraph(case_key, styles["cover_case_key"]))
+    story.append(Paragraph(f"Mode: {mode_label}", styles["cover_meta"]))
     if case_meta.get("bag_path"):
         story.append(Paragraph(f"Source: {case_meta['bag_path']}", styles["cover_meta"]))
     if case_meta.get("duration_s") is not None:
@@ -388,5 +458,5 @@ def build_report(
         story.append(Spacer(1, 6))
         story.append(Preformatted(code_diff, styles["mono"]))
 
-    doc.build(story)
+    doc.build(story, onFirstPage=_draw_page_chrome, onLaterPages=_draw_page_chrome)
     return out_pdf
