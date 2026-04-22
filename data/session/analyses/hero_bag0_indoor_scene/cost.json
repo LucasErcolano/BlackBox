@@ -1,0 +1,15 @@
+{
+  "usd": 0.533805,
+  "wall_s": 44.460487842559814,
+  "tokens": {
+    "cached": 0,
+    "uncached": 27462,
+    "output": 1625
+  },
+  "n_frames": 18,
+  "cameras": [
+    "rear",
+    "left",
+    "right"
+  ]
+}

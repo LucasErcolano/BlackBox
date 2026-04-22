@@ -149,6 +149,23 @@ Bag 0 total pipeline: 449 s extraction + 87 s analysis + $1.48 API. 4 moments in
 - **Curate 3 best frames for demo video**: strongest moment is the overexposure anomaly (bag 1); runner-up is the bag 0 indoor-scene data-integrity flag (very visual, very demo-worthy).
 - **Bag 0 rosbag reindex**: if future workflows need to re-open bag 0 cold repeatedly, run ROS1 `rosbag reindex` once (needs ROS install on another machine) to add/fix the EOF index and make subsequent opens instantaneous.
 
+## Hypothesis revision log
+
+One case this session where a follow-up analysis **disagreed with the original reading and was wrong**. Kept as demo material for the human-in-the-loop story.
+
+### Case 1 — Bag 0 end window, indoor-scene anomaly
+
+| Stage | Diagnosis | Confidence | Verdict |
+|-------|-----------|-----------|---------|
+| Scenario mining (v2, 800×600) | Indoor scenes on rear/left; possible mux artifact, needs audit | 0.90 | Flagged |
+| Manual check (2026-04-22, operator) | Vehicle parked at lab entrance; cameras see interior through open doors. Dataset-quality issue, not software bug. | — | **Correct reading** |
+| Hero deep-dive (hi-res 3.75 MP, 18 frames, `hero_bag0_indoor_scene/`) | `topic_misrouting` — rear/left topics bound to bench cameras | 0.95 | **Rejected by operator** |
+| Operator re-verification (2026-04-22) | Hero reasoning used three faulty domain assumptions (see `verification_note.md`): mistook permanent sensor mount for tripod rig, mistook parked-vehicle static frames for bench-cam evidence, mistook end-of-loop return for within-drive stream switch. | — | Original reading stands |
+
+**Final**: trim last ~120 s of bag 0 before road-scene training. No topic misrouting. No software bug. See `data/session/analyses/hero_bag0_indoor_scene/verification_note.md`.
+
+**Lesson for the tool**: hi-res re-analysis with a confident prompt can over-commit to an integrity-failure hypothesis. Pre-loading the "prior flag" in the prompt biased the model toward confirmation. More pixels ≠ more ground truth. Human verification is a required layer of the pipeline, not optional polish.
+
 ## Artifacts layout
 
 ```
