@@ -94,6 +94,24 @@ class EvalMemory:
             return 0.0
         return sum(1 for r in records if r.match) / len(records)
 
+    def accuracy_by_case(self) -> dict[str, float]:
+        """Per-case_key accuracy — used by the hackathon eval harness."""
+        buckets: dict[str, list[bool]] = {}
+        for r in self.all():
+            buckets.setdefault(r.case_key, []).append(r.match)
+        return {k: sum(vs) / len(vs) for k, vs in buckets.items()}
+
+    def accuracy_by_bug_class(self) -> dict[str, float]:
+        """Per-ground-truth-bug_class accuracy.
+
+        Buckets by the ground-truth class so a per-class weakness shows up
+        even when the model predicted something else entirely.
+        """
+        buckets: dict[str, list[bool]] = {}
+        for r in self.all():
+            buckets.setdefault(r.ground_truth_bug, []).append(r.match)
+        return {k: sum(vs) / len(vs) for k, vs in buckets.items()}
+
 
 @dataclass
 class MemoryStack:

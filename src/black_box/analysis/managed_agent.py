@@ -39,6 +39,7 @@ from anthropic import Anthropic
 from pydantic import ValidationError
 
 from .schemas import PostMortemReport
+from ..memory import CaseRecord, MemoryStack, TaxonomyCount
 
 
 # ---------------------------------------------------------------------------
@@ -294,9 +295,15 @@ def _build_cloud_config(network: str) -> dict:
 class ForensicAgent:
     """Thin wrapper around the Managed Agents control plane."""
 
-    def __init__(self, config: ForensicAgentConfig | None = None, client: Anthropic | None = None) -> None:
+    def __init__(
+        self,
+        config: ForensicAgentConfig | None = None,
+        client: Anthropic | None = None,
+        memory: MemoryStack | None = None,
+    ) -> None:
         self.config = config or ForensicAgentConfig()
         self._client: Anthropic = client or Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        self._memory = memory
 
     def open_session(self, bag_path: Path, case_key: str) -> "ForensicSession":
         beta = self._client.beta
@@ -399,6 +406,7 @@ class ForensicAgent:
             _agent_id=agent.id,
             _environment_id=environment.id,
             _started_at=time.monotonic(),
+            _memory=self._memory,
         )
 
 
@@ -416,6 +424,7 @@ class ForensicSession:
     _environment_id: str | None = None
     _started_at: float = field(default_factory=time.monotonic)
     _final_text: str | None = field(default=None, repr=False)
+    _memory: MemoryStack | None = field(default=None, repr=False)
 
     # -- event stream --------------------------------------------------------
     def stream(self) -> Iterator[dict]:
@@ -564,7 +573,38 @@ class ForensicSession:
             raise RuntimeError(
                 f"assistant JSON did not match PostMortemReport: {exc}"
             ) from exc
-        return report.model_dump()
+        payload = report.model_dump()
+        self._record_memory(payload)
+        return payload
+
+    def _record_memory(self, report: dict) -> None:
+        """Bump L3 taxonomy + append L1 case record for a finalized report.
+
+        No-op if no MemoryStack was bound to the session. Failures are
+        swallowed so memory bookkeeping can never take down a finalize.
+        """
+        if self._memory is None:
+            return
+        try:
+            self._memory.case.log(
+                CaseRecord(
+                    case_key=self.case_key,
+                    kind="hypothesis",
+                    payload={
+                        "root_cause_idx": report.get("root_cause_idx"),
+                        "hypotheses": report.get("hypotheses", []),
+                        "patch_proposal": report.get("patch_proposal", ""),
+                    },
+                )
+            )
+            for h in report.get("hypotheses", []) or []:
+                bug_class = h.get("bug_class", "other")
+                signature = (h.get("summary") or bug_class)[:64]
+                self._memory.taxonomy.log(
+                    TaxonomyCount(bug_class=bug_class, signature=signature)
+                )
+        except Exception:  # never let memory break the pipeline
+            pass
 
     def _log_usage(self, session, wall_time: float) -> None:
         usage = getattr(session, "usage", None)

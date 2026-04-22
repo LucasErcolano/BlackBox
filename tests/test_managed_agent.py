@@ -289,6 +289,96 @@ def test_finalize_parses_last_assistant_and_logs_cost(tmp_path: Path, monkeypatc
     assert entry["usd_cost"] > 0
 
 
+def test_finalize_bumps_memory_stack_when_bound(tmp_path: Path, monkeypatch):
+    """After a successful finalize(), L1 case + L3 taxonomy should both be written."""
+    from black_box.memory import MemoryStack
+
+    report_json = {
+        "timeline": [{"t_ns": 1, "label": "boot", "cross_view": False}],
+        "hypotheses": [
+            {
+                "bug_class": "pid_saturation",
+                "confidence": 0.9,
+                "summary": "Integral wind-up on hip pitch during step initiation",
+                "evidence": [
+                    {
+                        "source": "telemetry",
+                        "topic_or_file": "/cmd_vel",
+                        "t_ns": 12000,
+                        "snippet": "max u for 3s",
+                    }
+                ],
+                "patch_hint": "clamp output to +/-1.0",
+            },
+            {
+                "bug_class": "bad_gain_tuning",
+                "confidence": 0.4,
+                "summary": "Kp too high on LHipPitch",
+                "evidence": [],
+                "patch_hint": "reduce Kp 30%",
+            },
+        ],
+        "root_cause_idx": 0,
+        "patch_proposal": "clamp in control_loop.py",
+    }
+    events = _FakeEvents()
+    events._listed = [
+        _make_event(
+            "agent.message",
+            id="m1",
+            content=[_make_text_block(f"```json\n{json.dumps(report_json)}\n```")],
+        )
+    ]
+    client = _FakeClient(events)
+    mem = MemoryStack.open(tmp_path / "mem")
+    session = ForensicSession(
+        session_id="session_123",
+        case_key="c1_faceplant",
+        _client=client,
+        _memory=mem,
+    )
+    monkeypatch.setattr(ma, "_costs_file", lambda: tmp_path / "costs.jsonl")
+
+    session.finalize()
+
+    # L1: one CaseRecord written for this case
+    case_rows = mem.case.for_case("c1_faceplant")
+    assert len(case_rows) == 1
+    assert case_rows[0].kind == "hypothesis"
+    assert case_rows[0].payload["root_cause_idx"] == 0
+
+    # L3: one count per hypothesis
+    by_class = mem.taxonomy.totals_by_class()
+    assert by_class == {"pid_saturation": 1, "bad_gain_tuning": 1}
+
+
+def test_finalize_without_memory_is_a_noop():
+    """No MemoryStack attached -> finalize succeeds and writes nothing."""
+    report_json = {
+        "timeline": [],
+        "hypotheses": [
+            {"bug_class": "other", "confidence": 0.1, "summary": "n/a",
+             "evidence": [], "patch_hint": ""}
+        ],
+        "root_cause_idx": 0,
+        "patch_proposal": "",
+    }
+    events = _FakeEvents()
+    events._listed = [
+        _make_event(
+            "agent.message",
+            id="m1",
+            content=[_make_text_block(json.dumps(report_json))],
+        )
+    ]
+    client = _FakeClient(events)
+    session = ForensicSession(
+        session_id="s", case_key="c", _client=client, _memory=None
+    )
+    # Should not raise.
+    session._record_memory(report_json)
+
+
 def test_rate_limiter_sleeps_after_burst():
     limiter = _RateLimiter(max_per_window=60, window_seconds=60.0)
     # Pre-fill 60 slots in the limiter's deque at monotonic() time.

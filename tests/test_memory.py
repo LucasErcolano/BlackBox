@@ -97,6 +97,30 @@ def test_eval_memory_accuracy(mem_root):
     assert m.accuracy() == pytest.approx(2 / 3)
 
 
+def test_eval_memory_accuracy_by_case_and_class(mem_root):
+    m = EvalMemory(mem_root)
+    assert m.accuracy_by_case() == {}
+    assert m.accuracy_by_bug_class() == {}
+
+    # Two rows for c1 (one hit, one miss) and one for c2 (hit).
+    m.log(EvalRecord(case_key="c1", predicted_bug="pid_saturation",
+                     ground_truth_bug="pid_saturation", match=True))
+    m.log(EvalRecord(case_key="c1", predicted_bug="bad_gain_tuning",
+                     ground_truth_bug="pid_saturation", match=False))
+    m.log(EvalRecord(case_key="c2", predicted_bug="sensor_timeout",
+                     ground_truth_bug="sensor_timeout", match=True))
+
+    by_case = m.accuracy_by_case()
+    assert by_case == {"c1": pytest.approx(0.5), "c2": pytest.approx(1.0)}
+
+    by_class = m.accuracy_by_bug_class()
+    # pid_saturation: 1 hit, 1 miss = 0.5; sensor_timeout: 1 hit = 1.0
+    assert by_class == {
+        "pid_saturation": pytest.approx(0.5),
+        "sensor_timeout": pytest.approx(1.0),
+    }
+
+
 def test_memory_stack_uses_common_root(mem_root):
     stack = MemoryStack.open(mem_root)
     stack.case.log(CaseRecord(case_key="c1", kind="note", payload={}))
