@@ -1,0 +1,16 @@
+{
+  "anomaly_class": "sensor_overexposure",
+  "confidence": 0.93,
+  "what_is_seen": "At the start of the window both front_left and front_right frames are almost entirely saturated white with only faint bluish ghosts of trees and vehicles visible at the extreme edges, indicating pixel clipping near the sensor's full-well capacity. Over the next 1-2 seconds the images rapidly recover: tree canopy, parked cars on the left, a guard booth, yellow/black bollards, a barrier gate and the ego vehicle's white hood with a Scotland saltire decal become clearly resolved. The scene is a gravel/asphalt parking lot entrance under a bright but overcast sky, and once exposure settles the remainder of the sequence is well-exposed and stable with consistent color and contrast. A brief second saturation event is visible on front_right around img#36-37 before recovering again. No motion blur or geometric distortion is seen, only luminance clipping.",
+  "affected_cameras": [
+    "front_left",
+    "front_right"
+  ],
+  "onset_t_ns": 1709228361059324518,
+  "recovery_t_ns": 1709228365523823377,
+  "duration_s_est": 4.5,
+  "cross_view_consistency": "unknown — side and rear cameras were not provided; however the synchronized bilateral clipping on both front cameras and the bright sky visible after recovery suggest a global illumination / AE convergence issue that could plausibly affect other forward-facing views but not necessarily rear.",
+  "root_cause_hypothesis": "Auto-exposure convergence failure at log/bag start: cameras booted with a long exposure time / high gain configured for a darker calibration scene and took several seconds for the AE control loop to step down shutter and gain under bright overcast daylight. A startup race between AE initialization and frame publication is the most likely cause; direct sun or lens occlusion is unlikely given the symmetric bilateral effect and clean recovery.",
+  "suggested_patch": "Seed AE with a daylight-biased initial exposure/gain prior (e.g., 1-2 ms, unity gain) at driver start, gate frame publication until AE has converged (variance of mean luma below threshold for N frames), and add a fast-reacting anti-windup on the AE PID to prevent saturation persistence >500 ms.",
+  "safety_impact": "High during the blinded interval: forward perception (lane, pedestrian, vehicle, barrier detection) is effectively unavailable on both front cameras for ~4.5 s at scene entry, which in a populated parking lot with visible pedestrians and a barrier gate could lead to missed obstacles; autonomy should remain in a hold/creep state until AE recovery is confirmed."
+}

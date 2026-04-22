@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "black-box"
+version = "0.1.0"
+description = "Forensic copilot for robots — Opus 4.7 vision + Managed Agents"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Black Box" }]
+dependencies = [
+  "rosbags>=0.9.22",
+  "opencv-python>=4.8",
+  "numpy>=1.24",
+  "matplotlib>=3.7",
+  "Pillow>=10.0",
+  "anthropic>=0.40.0",
+  "reportlab>=4.0",
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+  "jinja2>=3.1",
+  "python-multipart>=0.0.9",
+  "pydantic>=2.6",
+  "python-dotenv>=1.0",
+  "requests>=2.31",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.3"]
+
+[project.scripts]
+blackbox = "black_box.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

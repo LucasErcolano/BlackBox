@@ -1,0 +1,9 @@
+{
+  "job_id": "602b784ab1af",
+  "stage": "done",
+  "label": "Complete",
+  "progress": 1.0,
+  "mode": "post_mortem",
+  "upload": "602b784ab1af_run.bag",
+  "reasoning": "[post_mortem] Complete for 602b784ab1af_run.bag..."
+}

@@ -1,0 +1,480 @@
+{
+  "bag_id": "bag_3_v2",
+  "total_cost_usd": 2.521605,
+  "wall_s": 126.18790602684021,
+  "windows": {
+    "start": {
+      "summary": {
+        "per_camera": {
+          "front_left": "Quiet suburban residential street with parked cars on the left (white pickup), trees, and houses on the right behind fences; the scene shifts slightly forward across frames suggesting slow forward motion or a gentle turn.",
+          "front_right": "Views of the same residential street with a parked dark SUV/pickup ahead and a grey sedan parked at a driveway on the right; no moving traffic or pedestrians visible.",
+          "right": "Close views of residential fences, hedges, a tiled sidewalk, and a gated house frontage; the last frame shows a blurred hedge suggesting the camera is passing close to vegetation.",
+          "rear": "Tree-lined street receding behind the vehicle with parked cars on both sides and a large pickup truck visible; a bicycle handlebar is consistently in the lower frame, indicating a cyclist directly behind the ego vehicle.",
+          "left": "Parked cars along the curb (SUV, sedans, white hatchback) with trees and houses; routine stationary scene with no active road users."
+        },
+        "overall": "Slow transit through a quiet tree-lined residential street with a cyclist trailing behind.",
+        "interesting": true,
+        "reason": "A cyclist is persistently close behind the ego vehicle (visible in rear camera across all frames), which is a vulnerable road user worth confirming for following distance and ego speed behavior."
+      },
+      "summary_cost": 0.102525,
+      "deep": {
+        "moments": [
+          {
+            "t_ns": 1692032581997700712,
+            "label": "Oncoming white SUV passing at close range",
+            "cameras": {
+              "shows": [
+                "front_left",
+                "front_right",
+                "left"
+              ],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1692032581997700712,
+                "snippet": "White Ford EcoSport approaching head-on in the same narrow lane, growing rapidly across frames img#8-9, centered just left of ego path"
+              },
+              {
+                "source": "camera",
+                "camera": "front_right",
+                "t_ns": 1692032582002183619,
+                "snippet": "Same white SUV visible front-center-left, very close, with dark pickup behind it also occupying the lane"
+              },
+              {
+                "source": "camera",
+                "camera": "left",
+                "t_ns": 1692032583128188032,
+                "snippet": "White EcoSport now abeam on left side, close lateral clearance as it passes ego"
+              }
+            ],
+            "why_review": "Narrow residential street with parked vehicles on both sides; oncoming vehicle passes at close lateral margin. Worth reviewing clearance and any evasive steering.",
+            "confidence": 0.7,
+            "inferred_ego_motion": "Slow forward, possible slight slowdown for passing vehicle"
+          },
+          {
+            "t_ns": 1692032588309805259,
+            "label": "Roundabout/traffic island negotiation",
+            "cameras": {
+              "shows": [
+                "front_left",
+                "front_right",
+                "rear",
+                "left"
+              ],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1692032588309805259,
+                "snippet": "Circular planted island with trees directly ahead; road splits around it, ego steering to navigate"
+              },
+              {
+                "source": "camera",
+                "camera": "front_right",
+                "t_ns": 1692032588309529319,
+                "snippet": "Same island visible, horizon rotates between img#15 and img#16 indicating yaw"
+              },
+              {
+                "source": "camera",
+                "camera": "left",
+                "t_ns": 1692032588361645272,
+                "snippet": "Scene sweeps laterally as ego curves around island"
+              },
+              {
+                "source": "camera",
+                "camera": "rear",
+                "t_ns": 1692032588343946138,
+                "snippet": "Rear view shows street curving away, consistent with turning maneuver"
+              }
+            ],
+            "why_review": "Unsigned/uncontrolled roundabout negotiation in a residential area \u2014 verify path planning and yielding behavior.",
+            "confidence": 0.6,
+            "inferred_ego_motion": "Yaw rotation (curving right around island)"
+          }
+        ],
+        "rationale": "Window shows low-speed residential driving on a tree-lined street with parked cars on both sides, one oncoming-vehicle close pass, and negotiation of a small planted traffic island/roundabout. No sudden braking, swerve artifacts, sensor occlusion, pedestrians, animals, or cross-camera inconsistencies were observed. Ego motion is steady forward with a gentle yaw at the roundabout."
+      },
+      "deep_cost": 1.08429
+    },
+    "middle": {
+      "summary": {
+        "per_camera": {
+          "front_left": "Quiet residential street lined with palms, high walls, and trees; pedestrians/joggers appear on the right sidewalk in the mid-window frames, then the scene opens to a wider suburban intersection with parked cars.",
+          "front_right": "Same forward view showing a tree-lined street with pedestrians visible on the right sidewalk; later frames transition to a more open intersection with houses and parked vehicles, no immediate hazards in path.",
+          "right": "Side view of a long brick boundary wall with sidewalk, later transitioning to a street-name signpost ('Jos\u00e9...') at a corner; motion blur on wall texture suggests steady forward travel.",
+          "rear": "Rear view shows the road receding with a roundabout featuring a red truck parked to the side, then a downhill street with a 30 km/h speed limit sign, then a jogger and a person walking a dog on the right.",
+          "left": "Left side shows shaded stone/ivy-covered walls and hedges along the sidewalk, ending with a view across a side-street intersection with houses and large trees \u2014 consistent with passing a cross street."
+        },
+        "overall": "Routine low-speed drive through a quiet tree-lined residential area with pedestrians on sidewalks and an approaching intersection.",
+        "interesting": false,
+        "reason": "No close-margin encounters, no erratic ego motion indicators, clear weather, and pedestrians remain on sidewalks well clear of the vehicle path."
+      },
+      "summary_cost": 0.10417499999999999,
+      "deep": null,
+      "deep_cost": 0.0
+    },
+    "end": {
+      "summary": {
+        "per_camera": {
+          "front_left": "Residential tree-lined street with parked cars on the right and a dark SUV ahead; ego appears to approach and then reach an intersection with utility poles and cones visible in the later frames.",
+          "front_right": "Mirrors the front_left view showing the same quiet street, parked vehicles, and an intersection ahead with what looks like orange cones and signage near a pole cluster.",
+          "right": "Side view of sidewalk, grass strips, trees, and residential buildings; a parked white car and later a portable blue toilet/container appear, indicating passage along the block.",
+          "rear": "Rear view shows the street behind with oncoming/following cars including a dark SUV and a small hatchback, plus a cyclist's handlebar visible in frame suggesting a bike-mounted or trailing cyclist close behind.",
+          "left": "Left side shows grass verges, trees, shadows on pavement, and in the final frame a black sedan very close alongside with a visible driver, indicating a passing or adjacent vehicle at close lateral range."
+        },
+        "overall": "Low-speed drive along a quiet residential street ending near an intersection, with a close-passing black sedan on the left at the end.",
+        "interesting": true,
+        "reason": "The final left-camera frame shows a black sedan at very close lateral proximity with motion blur, and a cyclist appears consistently behind in the rear view \u2014 both warrant closer review for margin and interaction safety."
+      },
+      "summary_cost": 0.103575,
+      "deep": {
+        "moments": [
+          {
+            "t_ns": 1692033722715076573,
+            "label": "Oncoming vehicle close pass on narrow tree-lined street",
+            "cameras": {
+              "shows": [
+                "front_left",
+                "front_right",
+                "right"
+              ],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1692033722701364302,
+                "snippet": "White hatchback approaches in oncoming lane on narrow two-way residential street with parked cars constricting lane width"
+              },
+              {
+                "source": "camera",
+                "camera": "front_right",
+                "t_ns": 1692033722702055920,
+                "snippet": "Same white Ford Fiesta visible head-on in left portion of frame, gold hatchback parked on right further narrowing passable space"
+              },
+              {
+                "source": "camera",
+                "camera": "right",
+                "t_ns": 1692033722715076573,
+                "snippet": "Gold parked hatchback on right curb very close to ego path"
+              }
+            ],
+            "why_review": "Tight lateral clearance between oncoming car and parked vehicles; verify planner behavior in constricted two-way corridor",
+            "confidence": 0.55,
+            "inferred_ego_motion": "slow forward travel, steady heading"
+          },
+          {
+            "t_ns": 1692033731114869539,
+            "label": "Pedestrian near traffic cones at gated checkpoint / level crossing",
+            "cameras": {
+              "shows": [
+                "front_left",
+                "front_right",
+                "left"
+              ],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1692033731114869539,
+                "snippet": "Person standing beside small booth with orange traffic cones at intersection; railroad crossing signal pole visible ahead"
+              },
+              {
+                "source": "camera",
+                "camera": "front_right",
+                "t_ns": 1692033731117761975,
+                "snippet": "Railroad crossing with signal, barriers and cones visible ahead-right"
+              },
+              {
+                "source": "camera",
+                "camera": "left",
+                "t_ns": 1692033731128272742,
+                "snippet": "Close view of person standing next to booth with cones on left side"
+              }
+            ],
+            "why_review": "Pedestrian stands at edge of roadway near cones and rail crossing infrastructure \u2014 unusual static actor and rail-grade crossing warrant perception/planning review",
+            "confidence": 0.7,
+            "inferred_ego_motion": "slowing to near-stop approaching rail crossing"
+          },
+          {
+            "t_ns": 1692033734231281371,
+            "label": "Lens flare / sun glare artifact in forward view",
+            "cameras": {
+              "shows": [
+                "front_left",
+                "front_right"
+              ],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1692033734231281371,
+                "snippet": "Orange/purple lens-flare blob visible in upper-center of frame against bright sky"
+              },
+              {
+                "source": "camera",
+                "camera": "front_right",
+                "t_ns": 1692033734232871880,
+                "snippet": "Similar flare artifact and washed-out bright region in the same area"
+              }
+            ],
+            "why_review": "Sun glare / lens flare may degrade forward perception in this segment; verify detection robustness",
+            "confidence": 0.6,
+            "inferred_ego_motion": "slow forward, roughly straight"
+          },
+          {
+            "t_ns": 1692033724815530136,
+            "label": "Possible near-stall / very low forward progress",
+            "cameras": {
+              "shows": [
+                "front_left",
+                "front_right"
+              ],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1692033723711087632,
+                "snippet": "Parked Jeep on right at mid-frame distance"
+              },
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1692033724815530136,
+                "snippet": "Same Jeep scene nearly identical composition ~1s later, minimal scene compression"
+              }
+            ],
+            "why_review": "Consecutive front frames show minimal change in scale/position of the parked Jeep, suggesting very low speed or brief stop \u2014 check for unexplained hesitation",
+            "confidence": 0.4,
+            "inferred_ego_motion": "near-zero forward velocity briefly"
+          }
+        ],
+        "rationale": "Visual-only review of 20s window shows residential low-speed cruising on tree-lined streets. Notable items: a tight two-way passing scene with an oncoming hatchback between parked cars, approach to a level/rail crossing with a pedestrian and traffic cones, visible sun/lens flare in forward cameras, and a brief apparent near-stall inferred from minimal scene change between consecutive front frames. No hard brake, swerve, or cross-camera object dropout was observed."
+      },
+      "deep_cost": 1.12704
+    }
+  },
+  "all_moments": [
+    {
+      "t_ns": 1692032581997700712,
+      "label": "Oncoming white SUV passing at close range",
+      "cameras": {
+        "shows": [
+          "front_left",
+          "front_right",
+          "left"
+        ],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1692032581997700712,
+          "snippet": "White Ford EcoSport approaching head-on in the same narrow lane, growing rapidly across frames img#8-9, centered just left of ego path"
+        },
+        {
+          "source": "camera",
+          "camera": "front_right",
+          "t_ns": 1692032582002183619,
+          "snippet": "Same white SUV visible front-center-left, very close, with dark pickup behind it also occupying the lane"
+        },
+        {
+          "source": "camera",
+          "camera": "left",
+          "t_ns": 1692032583128188032,
+          "snippet": "White EcoSport now abeam on left side, close lateral clearance as it passes ego"
+        }
+      ],
+      "why_review": "Narrow residential street with parked vehicles on both sides; oncoming vehicle passes at close lateral margin. Worth reviewing clearance and any evasive steering.",
+      "confidence": 0.7,
+      "inferred_ego_motion": "Slow forward, possible slight slowdown for passing vehicle",
+      "window": "start"
+    },
+    {
+      "t_ns": 1692032588309805259,
+      "label": "Roundabout/traffic island negotiation",
+      "cameras": {
+        "shows": [
+          "front_left",
+          "front_right",
+          "rear",
+          "left"
+        ],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1692032588309805259,
+          "snippet": "Circular planted island with trees directly ahead; road splits around it, ego steering to navigate"
+        },
+        {
+          "source": "camera",
+          "camera": "front_right",
+          "t_ns": 1692032588309529319,
+          "snippet": "Same island visible, horizon rotates between img#15 and img#16 indicating yaw"
+        },
+        {
+          "source": "camera",
+          "camera": "left",
+          "t_ns": 1692032588361645272,
+          "snippet": "Scene sweeps laterally as ego curves around island"
+        },
+        {
+          "source": "camera",
+          "camera": "rear",
+          "t_ns": 1692032588343946138,
+          "snippet": "Rear view shows street curving away, consistent with turning maneuver"
+        }
+      ],
+      "why_review": "Unsigned/uncontrolled roundabout negotiation in a residential area \u2014 verify path planning and yielding behavior.",
+      "confidence": 0.6,
+      "inferred_ego_motion": "Yaw rotation (curving right around island)",
+      "window": "start"
+    },
+    {
+      "t_ns": 1692033722715076573,
+      "label": "Oncoming vehicle close pass on narrow tree-lined street",
+      "cameras": {
+        "shows": [
+          "front_left",
+          "front_right",
+          "right"
+        ],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1692033722701364302,
+          "snippet": "White hatchback approaches in oncoming lane on narrow two-way residential street with parked cars constricting lane width"
+        },
+        {
+          "source": "camera",
+          "camera": "front_right",
+          "t_ns": 1692033722702055920,
+          "snippet": "Same white Ford Fiesta visible head-on in left portion of frame, gold hatchback parked on right further narrowing passable space"
+        },
+        {
+          "source": "camera",
+          "camera": "right",
+          "t_ns": 1692033722715076573,
+          "snippet": "Gold parked hatchback on right curb very close to ego path"
+        }
+      ],
+      "why_review": "Tight lateral clearance between oncoming car and parked vehicles; verify planner behavior in constricted two-way corridor",
+      "confidence": 0.55,
+      "inferred_ego_motion": "slow forward travel, steady heading",
+      "window": "end"
+    },
+    {
+      "t_ns": 1692033731114869539,
+      "label": "Pedestrian near traffic cones at gated checkpoint / level crossing",
+      "cameras": {
+        "shows": [
+          "front_left",
+          "front_right",
+          "left"
+        ],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1692033731114869539,
+          "snippet": "Person standing beside small booth with orange traffic cones at intersection; railroad crossing signal pole visible ahead"
+        },
+        {
+          "source": "camera",
+          "camera": "front_right",
+          "t_ns": 1692033731117761975,
+          "snippet": "Railroad crossing with signal, barriers and cones visible ahead-right"
+        },
+        {
+          "source": "camera",
+          "camera": "left",
+          "t_ns": 1692033731128272742,
+          "snippet": "Close view of person standing next to booth with cones on left side"
+        }
+      ],
+      "why_review": "Pedestrian stands at edge of roadway near cones and rail crossing infrastructure \u2014 unusual static actor and rail-grade crossing warrant perception/planning review",
+      "confidence": 0.7,
+      "inferred_ego_motion": "slowing to near-stop approaching rail crossing",
+      "window": "end"
+    },
+    {
+      "t_ns": 1692033734231281371,
+      "label": "Lens flare / sun glare artifact in forward view",
+      "cameras": {
+        "shows": [
+          "front_left",
+          "front_right"
+        ],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1692033734231281371,
+          "snippet": "Orange/purple lens-flare blob visible in upper-center of frame against bright sky"
+        },
+        {
+          "source": "camera",
+          "camera": "front_right",
+          "t_ns": 1692033734232871880,
+          "snippet": "Similar flare artifact and washed-out bright region in the same area"
+        }
+      ],
+      "why_review": "Sun glare / lens flare may degrade forward perception in this segment; verify detection robustness",
+      "confidence": 0.6,
+      "inferred_ego_motion": "slow forward, roughly straight",
+      "window": "end"
+    },
+    {
+      "t_ns": 1692033724815530136,
+      "label": "Possible near-stall / very low forward progress",
+      "cameras": {
+        "shows": [
+          "front_left",
+          "front_right"
+        ],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1692033723711087632,
+          "snippet": "Parked Jeep on right at mid-frame distance"
+        },
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1692033724815530136,
+          "snippet": "Same Jeep scene nearly identical composition ~1s later, minimal scene compression"
+        }
+      ],
+      "why_review": "Consecutive front frames show minimal change in scale/position of the parked Jeep, suggesting very low speed or brief stop \u2014 check for unexplained hesitation",
+      "confidence": 0.4,
+      "inferred_ego_motion": "near-zero forward velocity briefly",
+      "window": "end"
+    }
+  ]
+}

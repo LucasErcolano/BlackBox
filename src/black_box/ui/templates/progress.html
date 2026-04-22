@@ -1,0 +1,31 @@
+{% set stage = status.get('stage', 'queued') %}
+{% set pct = (status.get('progress', 0.0) * 100) | round(0, 'floor') %}
+{% set done = stage in ['done', 'failed'] %}
+<div
+  class="progress-card {% if stage == 'failed' %}failed{% endif %}"
+  {% if not done %}
+  hx-get="/status/{{ job_id }}"
+  hx-trigger="every 1s"
+  hx-swap="outerHTML"
+  {% endif %}
+>
+  <div class="progress-head">
+    <span class="stage-label">{{ status.get('label', stage) }}</span>
+    <span class="stage-pct">{{ pct }}%</span>
+  </div>
+
+  <svg class="bar" viewBox="0 0 100 4" preserveAspectRatio="none" aria-hidden="true">
+    <rect x="0" y="0" width="100" height="4" class="bar-bg"/>
+    <rect x="0" y="0" width="{{ pct }}" height="4" class="bar-fg"/>
+  </svg>
+
+  <pre class="reasoning">{{ status.get('reasoning', '') }}</pre>
+
+  <div class="meta">
+    <span>job <code>{{ job_id }}</code></span>
+    <span>mode {{ status.get('mode', '—') }}</span>
+    {% if stage == 'done' %}
+      <a href="/report/{{ job_id }}">Download report</a>
+    {% endif %}
+  </div>
+</div>

@@ -1,0 +1,13 @@
+{
+  "bug_class": "pid_saturation",
+  "evidence_hints": [
+    "PWM on /pwm pegs at 255 for all 4 motors starting at ~12.0s",
+    "/odom/pose yaw and y drift from /reference after ~15.0s",
+    "/cmd_vel linear command keeps rising while pose stops tracking"
+  ],
+  "patch_hint": "Add anti-windup to PIDController.step: only accumulate the integral when the unclamped output is inside [PWM_MIN, PWM_MAX] or when the error would reduce saturation.",
+  "window_s": [
+    12.0,
+    18.0
+  ]
+}

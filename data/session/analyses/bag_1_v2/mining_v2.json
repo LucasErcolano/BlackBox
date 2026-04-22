@@ -1,0 +1,429 @@
+{
+  "bag_id": "bag_1_v2",
+  "total_cost_usd": 1.4972400000000001,
+  "wall_s": 95.61194372177124,
+  "windows": {
+    "start": {
+      "summary": {
+        "per_camera": {
+          "front_left": "Frames are almost entirely white/washed out with faint blue artifacts; camera appears severely overexposed or malfunctioning, providing no usable scene information.",
+          "front_right": "Shows a stationary view of a gravel parking area with parked cars, bollards, a small structure/kiosk, and trees; scene is essentially unchanged across all four frames indicating the ego vehicle is stopped.",
+          "right": "Views a garden area with ornamental grasses, a brick building with AC condenser units, and a person in a red jacket/garment near the units; scene is static across frames.",
+          "rear": "Interior garage/workshop view with a projector, whiteboard, shelving, traffic cones, and equipment; vehicle appears to be parked with rear facing into a garage bay, no motion.",
+          "left": "Shows a person in a green shirt leaning toward the vehicle window in the first frame, then a row of parked cars (Fiestas, sedans) in a gravel lot for subsequent frames; no vehicle motion apparent."
+        },
+        "overall": "Ego vehicle is stationary in a parking/garage area with a person interacting near the left window; front_left camera is failed/overexposed.",
+        "interesting": true,
+        "reason": "Front_left camera is completely washed out (sensor failure or severe exposure fault) which is a notable data-quality anomaly; additionally a person is in close proximity to the left side of the vehicle. No erratic motion, but the camera fault merits flagging."
+      },
+      "summary_cost": 0.105075,
+      "deep": {
+        "moments": [
+          {
+            "t_ns": 1709228361059324518,
+            "label": "Severe overexposure on front_left and front_right cameras",
+            "cameras": {
+              "shows": [
+                "front_left",
+                "front_right"
+              ],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1709228361059324518,
+                "snippet": "Frame almost entirely white; only faint blue/purple traces of foliage at left edge. No road geometry recoverable."
+              },
+              {
+                "source": "camera",
+                "camera": "front_right",
+                "t_ns": 1709228361062330176,
+                "snippet": "Heavily washed out; parked cars faintly visible on left and right, center of image fully saturated white."
+              },
+              {
+                "source": "camera",
+                "camera": "right",
+                "t_ns": 1709228360820566672,
+                "snippet": "Properly exposed: shows parking lot, trees, building at normal brightness."
+              },
+              {
+                "source": "camera",
+                "camera": "left",
+                "t_ns": 1709228360802858269,
+                "snippet": "Properly exposed: parked cars, gravel lot, trees normal."
+              }
+            ],
+            "why_review": "Front cameras are effectively blind for several seconds at the start of the window while side cameras expose correctly. Forward perception would be unavailable \u2014 critical for any AV driving decision. Suggests auto-exposure failure or ND mismatch on front sensors.",
+            "confidence": 0.95,
+            "inferred_ego_motion": "stationary or very slow (scene barely changes on side cams)"
+          },
+          {
+            "t_ns": 1709228378594796770,
+            "label": "Recurrent front-camera overexposure after recovery",
+            "cameras": {
+              "shows": [
+                "front_left",
+                "front_right"
+              ],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1709228378594796770,
+                "snippet": "Frame again saturates to near-white with only faint trees/cars visible; after having been properly exposed moments earlier."
+              },
+              {
+                "source": "camera",
+                "camera": "front_right",
+                "t_ns": 1709228378595382569,
+                "snippet": "Also saturates white with foliage barely discernable."
+              },
+              {
+                "source": "camera",
+                "camera": "right",
+                "t_ns": 1709228378651051972,
+                "snippet": "Normal exposure, building and grass clearly visible."
+              }
+            ],
+            "why_review": "Second overexposure episode on both front cameras mid-window indicates repeated AE instability, not a one-off startup artifact. Needs investigation of exposure controller.",
+            "confidence": 0.9,
+            "inferred_ego_motion": "stationary (side/rear scenes identical across frames)"
+          },
+          {
+            "t_ns": 1709228371316907342,
+            "label": "Ego vehicle appears stationary for extended period",
+            "cameras": {
+              "shows": [
+                "front_left",
+                "front_right",
+                "right",
+                "rear",
+                "left"
+              ],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "front_right",
+                "t_ns": 1709228371475427002,
+                "snippet": "Scene of parking-lot entrance with barriers, booth, and parked cars is essentially unchanged across ~10 consecutive frames."
+              },
+              {
+                "source": "camera",
+                "camera": "rear",
+                "t_ns": 1709228371316907342,
+                "snippet": "Garage interior with cones/bike is identical across many frames \u2014 no motion parallax."
+              },
+              {
+                "source": "camera",
+                "camera": "left",
+                "t_ns": 1709228371303451489,
+                "snippet": "Parked car line identical; no translation."
+              }
+            ],
+            "why_review": "Extended stall/idle \u2014 confirm whether vehicle is intentionally parked, waiting at a gate, or whether a planner stall occurred. Helps calibrate motion-from-video baseline since no telemetry exists.",
+            "confidence": 0.8,
+            "inferred_ego_motion": "stationary"
+          },
+          {
+            "t_ns": 1709228379701669870,
+            "label": "Person at close range to left side of vehicle (door-open scenario)",
+            "cameras": {
+              "shows": [
+                "left"
+              ],
+              "misses": [
+                "front_left",
+                "rear"
+              ]
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "left",
+                "t_ns": 1709228379701669870,
+                "snippet": "Bearded person in green jacket leaning in very close to the left side of the vehicle, head just outside/through the window frame; door pillar visible indicating door may be open."
+              },
+              {
+                "source": "camera",
+                "camera": "left",
+                "t_ns": 1709228380770812939,
+                "snippet": "Next left-camera frame shows parked cars directly with a door frame in foreground and no person \u2014 person has moved or door configuration changed."
+              },
+              {
+                "source": "camera",
+                "camera": "front_left",
+                "t_ns": 1709228380728400594,
+                "snippet": "Forward view shows parking lot normally; no indication of nearby person."
+              }
+            ],
+            "why_review": "Human at arm's length from the vehicle with an apparent open door suggests ingress/egress or operator interaction while the rig is recording. Safety-critical to confirm vehicle was not autonomously active at this moment; also tests whether other cameras should have observed the person.",
+            "confidence": 0.75,
+            "inferred_ego_motion": "stationary, door open"
+          },
+          {
+            "t_ns": 1709228360819386816,
+            "label": "Rear camera shows indoor garage while other cameras show outdoor lot",
+            "cameras": {
+              "shows": [
+                "rear"
+              ],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "camera",
+                "camera": "rear",
+                "t_ns": 1709228360819386816,
+                "snippet": "Interior of a workshop/garage: ceiling tiles, whiteboards, toolbox, traffic cones, projector \u2014 clearly indoor environment framed by a vehicle's rear hatch."
+              },
+              {
+                "source": "camera",
+                "camera": "front_right",
+                "t_ns": 1709228365524307474,
+                "snippet": "Outdoor parking lot with trees and gate booth."
+              },
+              {
+                "source": "camera",
+                "camera": "right",
+                "t_ns": 1709228360820566672,
+                "snippet": "Outdoor building facade and grass."
+              }
+            ],
+            "why_review": "The rear camera is pointed into an indoor garage while front/side cameras see an outdoor lot. Either the vehicle is parked half-inside a garage opening, or the rear camera feed is mis-wired/stale. Important to verify camera-to-topic mapping and that rear feed is live.",
+            "confidence": 0.7,
+            "inferred_ego_motion": "stationary, rear of vehicle inside/near garage opening"
+          }
+        ],
+        "rationale": "Window is dominated by a stationary or near-stationary vehicle in a parking-lot/garage setting. Notable items are sensor-health issues rather than traffic events: (1) front_left and front_right cameras are severely overexposed at the start and again mid-window while side cameras expose normally, indicating an auto-exposure fault on the forward pair; (2) ego appears essentially static for most of the 20s window; (3) a person appears very close to the left side with an apparent open door near the end, suggesting human interaction with the rig; (4) the rear camera consistently shows a garage interior while other cameras show an outdoor lot, worth verifying as either physical positioning or a topic/mapping issue. No true near-misses, swerves, or sudden brake events were observed."
+      },
+      "deep_cost": 1.1927400000000001
+    },
+    "middle": {
+      "summary": {
+        "per_camera": {
+          "front_left": "Quiet residential street with parked cars on both sides, trees lining the road; ego moves forward slowly and approaches an intersection with a yellow-curbed corner. No pedestrians or dynamic hazards visible.",
+          "front_right": "Mirror view of the same residential street showing parked vehicles, trees, and a clear road ahead; forward progress is modest and steady through the intersection.",
+          "right": "Side view pans past parked cars, house facades, hedges, and a corner building marked '701'; consistent with slow forward travel, no close-margin hazards.",
+          "rear": "Rear view shows an empty residential street behind the ego (appears to be a bicycle-mounted camera given handlebars visible); no following vehicles or pedestrians.",
+          "left": "Left side shows parked cars, house gates, and trees slipping by; one parked dark SUV appears close but ego clears it without issue."
+        },
+        "overall": "Routine low-speed traversal of a quiet residential street with parked cars and no dynamic actors.",
+        "interesting": false,
+        "reason": "No unusual road users, no close margins, clear weather, and no visual evidence of sudden braking or yaw; scene is uneventful."
+      },
+      "summary_cost": 0.09809999999999999,
+      "deep": null,
+      "deep_cost": 0.0
+    },
+    "end": {
+      "summary": {
+        "per_camera": {
+          "front_left": "Ego vehicle is at an intersection near a graffiti-covered concrete wall with trees, then proceeds down a narrow semi-industrial street lined with walls and power poles; no other road users visible ahead.",
+          "front_right": "Similar forward view showing the same concrete wall/corner and then the street lined with walls, utility poles, and overhead wires; road is empty with scattered debris on the shoulders.",
+          "right": "Side view of a long graffiti-covered concrete wall, then a gated driveway and finally a billboard with a fast-food (pollo) ad; pedestrian sidewalk with litter, no people or vehicles close.",
+          "rear": "Rear views show the street behind with a parked car near a tree, then intersection and straight street receding; no following traffic, clear margin.",
+          "left": "Left side shows a residential/industrial area with a parked car across a lot, more walls with graffiti, and piles of litter/debris on the shoulder; no pedestrians or dynamic hazards."
+        },
+        "overall": "Ego moves forward through a quiet semi-industrial alley between graffiti walls with no other road users.",
+        "interesting": false,
+        "reason": "Scene is uneventful: empty road, no pedestrians or vehicles near ego, steady forward motion with no visual signs of braking or sharp yaw."
+      },
+      "summary_cost": 0.101325,
+      "deep": null,
+      "deep_cost": 0.0
+    }
+  },
+  "all_moments": [
+    {
+      "t_ns": 1709228361059324518,
+      "label": "Severe overexposure on front_left and front_right cameras",
+      "cameras": {
+        "shows": [
+          "front_left",
+          "front_right"
+        ],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1709228361059324518,
+          "snippet": "Frame almost entirely white; only faint blue/purple traces of foliage at left edge. No road geometry recoverable."
+        },
+        {
+          "source": "camera",
+          "camera": "front_right",
+          "t_ns": 1709228361062330176,
+          "snippet": "Heavily washed out; parked cars faintly visible on left and right, center of image fully saturated white."
+        },
+        {
+          "source": "camera",
+          "camera": "right",
+          "t_ns": 1709228360820566672,
+          "snippet": "Properly exposed: shows parking lot, trees, building at normal brightness."
+        },
+        {
+          "source": "camera",
+          "camera": "left",
+          "t_ns": 1709228360802858269,
+          "snippet": "Properly exposed: parked cars, gravel lot, trees normal."
+        }
+      ],
+      "why_review": "Front cameras are effectively blind for several seconds at the start of the window while side cameras expose correctly. Forward perception would be unavailable \u2014 critical for any AV driving decision. Suggests auto-exposure failure or ND mismatch on front sensors.",
+      "confidence": 0.95,
+      "inferred_ego_motion": "stationary or very slow (scene barely changes on side cams)",
+      "window": "start"
+    },
+    {
+      "t_ns": 1709228378594796770,
+      "label": "Recurrent front-camera overexposure after recovery",
+      "cameras": {
+        "shows": [
+          "front_left",
+          "front_right"
+        ],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1709228378594796770,
+          "snippet": "Frame again saturates to near-white with only faint trees/cars visible; after having been properly exposed moments earlier."
+        },
+        {
+          "source": "camera",
+          "camera": "front_right",
+          "t_ns": 1709228378595382569,
+          "snippet": "Also saturates white with foliage barely discernable."
+        },
+        {
+          "source": "camera",
+          "camera": "right",
+          "t_ns": 1709228378651051972,
+          "snippet": "Normal exposure, building and grass clearly visible."
+        }
+      ],
+      "why_review": "Second overexposure episode on both front cameras mid-window indicates repeated AE instability, not a one-off startup artifact. Needs investigation of exposure controller.",
+      "confidence": 0.9,
+      "inferred_ego_motion": "stationary (side/rear scenes identical across frames)",
+      "window": "start"
+    },
+    {
+      "t_ns": 1709228371316907342,
+      "label": "Ego vehicle appears stationary for extended period",
+      "cameras": {
+        "shows": [
+          "front_left",
+          "front_right",
+          "right",
+          "rear",
+          "left"
+        ],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "front_right",
+          "t_ns": 1709228371475427002,
+          "snippet": "Scene of parking-lot entrance with barriers, booth, and parked cars is essentially unchanged across ~10 consecutive frames."
+        },
+        {
+          "source": "camera",
+          "camera": "rear",
+          "t_ns": 1709228371316907342,
+          "snippet": "Garage interior with cones/bike is identical across many frames \u2014 no motion parallax."
+        },
+        {
+          "source": "camera",
+          "camera": "left",
+          "t_ns": 1709228371303451489,
+          "snippet": "Parked car line identical; no translation."
+        }
+      ],
+      "why_review": "Extended stall/idle \u2014 confirm whether vehicle is intentionally parked, waiting at a gate, or whether a planner stall occurred. Helps calibrate motion-from-video baseline since no telemetry exists.",
+      "confidence": 0.8,
+      "inferred_ego_motion": "stationary",
+      "window": "start"
+    },
+    {
+      "t_ns": 1709228379701669870,
+      "label": "Person at close range to left side of vehicle (door-open scenario)",
+      "cameras": {
+        "shows": [
+          "left"
+        ],
+        "misses": [
+          "front_left",
+          "rear"
+        ]
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "left",
+          "t_ns": 1709228379701669870,
+          "snippet": "Bearded person in green jacket leaning in very close to the left side of the vehicle, head just outside/through the window frame; door pillar visible indicating door may be open."
+        },
+        {
+          "source": "camera",
+          "camera": "left",
+          "t_ns": 1709228380770812939,
+          "snippet": "Next left-camera frame shows parked cars directly with a door frame in foreground and no person \u2014 person has moved or door configuration changed."
+        },
+        {
+          "source": "camera",
+          "camera": "front_left",
+          "t_ns": 1709228380728400594,
+          "snippet": "Forward view shows parking lot normally; no indication of nearby person."
+        }
+      ],
+      "why_review": "Human at arm's length from the vehicle with an apparent open door suggests ingress/egress or operator interaction while the rig is recording. Safety-critical to confirm vehicle was not autonomously active at this moment; also tests whether other cameras should have observed the person.",
+      "confidence": 0.75,
+      "inferred_ego_motion": "stationary, door open",
+      "window": "start"
+    },
+    {
+      "t_ns": 1709228360819386816,
+      "label": "Rear camera shows indoor garage while other cameras show outdoor lot",
+      "cameras": {
+        "shows": [
+          "rear"
+        ],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "camera",
+          "camera": "rear",
+          "t_ns": 1709228360819386816,
+          "snippet": "Interior of a workshop/garage: ceiling tiles, whiteboards, toolbox, traffic cones, projector \u2014 clearly indoor environment framed by a vehicle's rear hatch."
+        },
+        {
+          "source": "camera",
+          "camera": "front_right",
+          "t_ns": 1709228365524307474,
+          "snippet": "Outdoor parking lot with trees and gate booth."
+        },
+        {
+          "source": "camera",
+          "camera": "right",
+          "t_ns": 1709228360820566672,
+          "snippet": "Outdoor building facade and grass."
+        }
+      ],
+      "why_review": "The rear camera is pointed into an indoor garage while front/side cameras see an outdoor lot. Either the vehicle is parked half-inside a garage opening, or the rear camera feed is mis-wired/stale. Important to verify camera-to-topic mapping and that rear feed is live.",
+      "confidence": 0.7,
+      "inferred_ego_motion": "stationary, rear of vehicle inside/near garage opening",
+      "window": "start"
+    }
+  ]
+}

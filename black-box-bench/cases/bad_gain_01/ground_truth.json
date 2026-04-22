@@ -1,0 +1,13 @@
+{
+  "bug_class": "bad_gain_tuning",
+  "evidence_hints": [
+    "/cmd_vel angular oscillates at ~2.5 rad/s with growing amplitude",
+    "/odom/pose yaw overshoots /reference yaw on every swing",
+    "/pwm alternates left/right wheel pairs in square-wave fashion"
+  ],
+  "patch_hint": "Reduce HeadingController.Kp from 4.5 to ~0.8 and add a dead-band guard: if |err| < 1e-3 rad, command 0 angular rate to avoid limit-cycling on sensor noise.",
+  "window_s": [
+    5.0,
+    20.0
+  ]
+}

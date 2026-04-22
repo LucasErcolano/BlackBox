@@ -1,0 +1,18 @@
+{
+  "bag": "/mnt/hdd/1_cam-lidar.bag",
+  "duration_s": 970.21,
+  "start_ns": 1709228345794335367,
+  "end_ns": 1709229316005571860,
+  "topics": {
+    "cameras_compressed": {
+      "/cam1/image_raw/compressed": {"hz": 9.7, "count": 9405, "role_guess": "front_left"},
+      "/cam3/image_raw/compressed": {"hz": 30.0, "count": 29106, "role_guess": "left"},
+      "/cam4/image_raw/compressed": {"hz": 30.0, "count": 29109, "role_guess": "rear"},
+      "/cam5/image_raw/compressed": {"hz": 9.7, "count": 9405, "role_guess": "front_right"},
+      "/cam6/image_raw/compressed": {"hz": 30.0, "count": 29105, "role_guess": "right"}
+    },
+    "lidar": {"/velodyne_points": {"hz": 9.8, "count": 9503}}
+  },
+  "telemetry_topics_present": false,
+  "note": "No odometry, IMU, velocity, steering, or GPS topics present. Vision-only analysis."
+}

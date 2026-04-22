@@ -1,0 +1,9 @@
+{
+  "job_id": "7ae99f114087",
+  "stage": "queued",
+  "label": "Queued",
+  "progress": 0.0,
+  "mode": "post_mortem",
+  "upload": "7ae99f114087_run.bag",
+  "reasoning": "Waiting for worker..."
+}

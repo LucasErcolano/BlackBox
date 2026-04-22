@@ -1,0 +1,13 @@
+{
+  "bug_class": "sensor_timeout",
+  "evidence_hints": [
+    "/scan_range is bit-exactly constant between 10.0s and 13.0s",
+    "/imu/accel continues normally (sensor subsystem alive)",
+    "/cmd_vel angular spikes to +/- 2.5 rad/s with no visible obstacle"
+  ],
+  "patch_hint": "In ObstacleAvoider.step, compare (time.time() - self.last_scan_t) against a SCAN_TIMEOUT_S constant and fall back to a conservative crawl (low linear, zero angular) when the scan is stale.",
+  "window_s": [
+    10.0,
+    14.0
+  ]
+}
