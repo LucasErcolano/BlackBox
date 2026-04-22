@@ -1,0 +1,39 @@
+{
+  "bug_class": "sensor_timeout",
+  "platform": "car_av_ros1",
+  "session": "sanfer_sanisidro 2026-02-03",
+  "source": "real_bag",
+  "bag_duration_s": 3626.8,
+  "mode": "forensic",
+  "window_s": [0.0, 3626.8],
+  "window_note": "failure is session-wide, not a sub-window. Tool must NOT localize to a specific time range and must NOT agree with operator's tunnel hypothesis.",
+  "telemetry_topics": [
+    "/ublox_moving_base/navpvt",
+    "/ublox_rover/navpvt",
+    "/ublox_rover/navrelposned",
+    "/ublox_rover/navheading"
+  ],
+  "evidence_hints": [
+    "rover NavPVT.flags carrier-phase bits (bits 6-7) are 0 (CARR_NONE) for all 18133 samples",
+    "navrelposned.flags never sets bit 2 (FLAGS_REL_POS_VALID); relPosLength / relPosHeading / accLength are 0 for all 18133 samples",
+    "moving_base is healthy for contrast: carrier-phase FLOAT 63.6% + FIXED 30.7%, numSV median 28, hAcc median 0.74m",
+    "rover navpvt.numSV median 29, hAcc median 0.65m, fixType 3 (3D) entire bag — standalone positioning is fine, so standard fix-quality gates miss the failure",
+    "navrelposned.flags DIFF_SOLN bit (bit 1) set on 2715/18133 samples — rover does receive RTCM corrections, so the bug is carrier-phase lock, not the correction stream"
+  ],
+  "patch_hint": "Downstream consumer of /ublox_rover/navrelposned (or /ublox_rover/navheading) must gate on (flags & 0x04) == FLAGS_REL_POS_VALID before consuming relPosHeading. When the flag is low, fall back to magnetometer/IMU yaw with an explicit degraded-heading status on a diagnostic topic, and never silently feed 0.0 heading into the controller.",
+  "patch_target": {
+    "file": null,
+    "function": null,
+    "note": "controller source not in bag artifacts; patch prescription is against canonical ublox dual-antenna consumer pattern"
+  },
+  "anti_hypothesis": {
+    "operator_report": "GPS fails when the car passes under a tunnel",
+    "why_wrong": "rover fix-quality metrics (numSV, hAcc, fixType) and message rates are clean end-to-end, including in any sub-window. The failure is the RTK dual-antenna heading subsystem, which was broken for the entire session, not tunnel-triggered.",
+    "pipeline_must_not": "emit a scoped window, patch a tunnel-specific branch, or confirm the operator's pre-existing hypothesis without cross-source evidence."
+  },
+  "scoring": {
+    "bug_class_match": "sensor_timeout",
+    "required_evidence_topics": ["/ublox_rover/navpvt", "/ublox_rover/navrelposned", "/ublox_moving_base/navpvt"],
+    "grounding_expected": "hypothesis must cite at least 2 of the 3 required topics; must not cite only position/velocity fields"
+  }
+}

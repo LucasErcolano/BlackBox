@@ -34,6 +34,9 @@ Skeleton cases (`status: skeleton_awaiting_bag`) are excluded from totals.
 - `sensor_timeout_01` — stale lidar frames → phantom obstacle maneuvers.
 - `bad_gain_01` — `Kp` too high → heading limit cycle.
 
+### Scoreable (real bag, ground-truth derived from sensor cross-check)
+- `rtk_heading_break_01` — real ROS 1 car session (~1 h). Rover dual-antenna RTK heading never valid entire bag; moving base healthy. Operator-reported "GPS fails under tunnel" is the anti-hypothesis — pipeline must disagree. Tests grounding + cross-source reasoning on unlabelled real data.
+
 ### Skeletons (awaiting bag ingestion)
 - `boat_lidar_01` — USV (ROS 2) with LiDAR; forensic or scenario-mining TBD on first real bag.
 - `sensor_drop_cameras_01` — multi-camera simultaneous drop on autonomous car.
