@@ -41,6 +41,7 @@
 - [ ] 1 patch-proposal screenshot (RTCM3 message IDs + UART check) — readable at 1080p
 - [ ] 1 clean-window pass showing empty moments (grounding gate visible)
 - [ ] 1 webcam clip of Lucas at the car with operator-quote voice-over (15 s)
+- [ ] 3–5 real frames/short clips from the sanfer_sanisidro cam-lidar bag for the hook and counterfactual beat. Owners cleared public use, faces + plates unblurred OK. Do not ship the full session dump.
 - [ ] Benchmark repo public with README + 4 scoreable cases incl. `rtk_heading_break_01`
 
 ## Backup cut

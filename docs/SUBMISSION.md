@@ -65,7 +65,7 @@ Submit before Day 6 18:00 EST to leave 2 h buffer for form glitches, re-upload, 
 
 - ❌ Mentions of alternative ideas considered before committing
 - ❌ API key or any credentials
-- ❌ Full bag files (too large, not licensed for redistribution)
+- ❌ Full raw bag sessions dumped wholesale. Bag owners cleared frames and short clips for demo / thread / PDF use (faces + plates unblurred OK); the one constraint is we do not re-upload an entire session's recording as a single bundle. Stills and brief clips: green light.
 - ❌ Unreviewed hypotheses (pipeline output that we didn't verify)
 - ❌ Internal handoff notes that weren't cleaned for external readers
 

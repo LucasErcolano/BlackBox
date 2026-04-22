@@ -1,4 +1,11 @@
-"""Legal pre-upload review.
+"""Legal pre-upload review (OPTIONAL).
+
+Status: bag owners have cleared frames and short clips from the
+sanfer_sanisidro and related sessions for public demo / thread / PDF use
+with faces and plates UNBLURRED. Running this script is no longer a
+pre-publication requirement for those bags. Keep it around for (a) bags
+from other sources whose consent is unclear, or (b) optional redaction
+when a particular frame contains a third party you'd rather not show.
 
 Reads images from data/uploads_raw/, runs Haar cascades for faces + plates,
 writes annotated previews to data/uploads_review/ with numbered bboxes so

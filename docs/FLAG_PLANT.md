@@ -8,7 +8,10 @@
 - [ ] Plot: rover carrier-phase vs moving-base carrier-phase over 1 h. File: `docs/assets/rtk_carrier_contrast.png`. Used in tweet 1.
 - [ ] Plot: REL_POS_VALID flag (flat zero for 1 h). File: `docs/assets/rel_pos_valid.png`. Used in tweet 3.
 - [ ] Screenshot: patch proposal from `runs/sample/rtk_heading_break_01.json` (RTCM3 msg IDs + UART check). File: `docs/assets/rtk_patch.png`. Used in tweet 4.
+- [ ] Optional: real frame from sanfer_sanisidro cam-lidar bag overlaid with the operator's quote. Cleared for public use. Faces + plates unblurred OK. Strengthens tweet 1's hook.
 - [ ] Public URLs: repo, benchmark repo, gist.
+
+**Rights note:** owners of the car-AV bags have cleared frames and short clips for public use on this thread, in the demo video, and in the PDF report — faces and license plates unblurred. Do NOT upload a full raw session dump in one go (not cleared); stills and brief clips are.
 
 **Pinning:** Pin thread after posting. Keep pinned through submission.
 

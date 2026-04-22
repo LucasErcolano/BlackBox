@@ -64,4 +64,4 @@ Pipeline output must satisfy:
 - `telemetry.npz` — numpy arrays extracted from the real bag (297 KB)
 - `README.md` — this file
 
-Full bag not redistributed (145 MB sensors + 364 GB cam-lidar, not licensed for public release).
+Full bag not bundled in this case directory — the cam-lidar split is 364 GB, which is a size constraint, not a licensing one. Bag owners have cleared frames and short clips (including with faces and license plates unblurred) for use in write-ups, demos, and the hackathon submission, with the one constraint that the full raw session must not be redistributed in a single dump. So selective stills / brief clips from this bag are fair game for the demo video and flag-plant thread; wholesale re-upload is not.
