@@ -13,6 +13,9 @@ from anthropic import Anthropic
 from pydantic import BaseModel, ValidationError
 from dotenv import load_dotenv
 
+from .grounding import ground_post_mortem, ground_scenario_mining
+from .schemas import PostMortemReport, ScenarioMiningReport
+
 
 load_dotenv()
 
@@ -260,6 +263,11 @@ class ClaudeClient:
 
         # Append to costs.jsonl
         self._append_cost_log(cost_log)
+
+        if isinstance(result, PostMortemReport):
+            result = ground_post_mortem(result)
+        elif isinstance(result, ScenarioMiningReport):
+            result = ground_scenario_mining(result)
 
         return result, cost_log
 
