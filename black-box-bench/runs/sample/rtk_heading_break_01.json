@@ -1,0 +1,111 @@
+{
+  "timeline": [
+    {
+      "t_ns": 0,
+      "label": "session_start_both_receivers_publishing",
+      "cross_view": false
+    },
+    {
+      "t_ns": 0,
+      "label": "rover_navpvt_carrier_phase_CARR_NONE_100pct_entire_session",
+      "cross_view": false
+    },
+    {
+      "t_ns": 0,
+      "label": "moving_base_navpvt_shows_FLOAT_63pct_FIXED_31pct_so_base_itself_has_RTK",
+      "cross_view": true
+    },
+    {
+      "t_ns": 0,
+      "label": "navrelposned_DIFF_SOLN_only_15pct_REL_POS_VALID_0pct_entire_session",
+      "cross_view": true
+    },
+    {
+      "t_ns": 3626400000000,
+      "label": "session_end_no_valid_relative_heading_ever_produced",
+      "cross_view": false
+    }
+  ],
+  "hypotheses": [
+    {
+      "bug_class": "other",
+      "confidence": 0.9,
+      "summary": "Moving-base RTK link to rover is broken: the rover never receives a usable stream of RTCM corrections from the moving base, so NAV-RELPOSNED never becomes valid. FLAGS_REL_POS_VALID is 0% for the whole 1-hour session, relPosLength/relPosHeading/accLength are identically zero, and FLAGS_DIFF_SOLN is only set on 15% of samples. Meanwhile the moving-base receiver itself is healthy (FLOAT 63.6% + FIXED 30.7%) and the rover has a clean 3D fix at 100% with numSV median 29, so neither sky view nor receiver health is the problem. This is a configuration/wiring issue in the moving-base -> rover RTCM pipeline (UART/USB bridge, RTCM3 1077/1087/1097/1127/4072.0/4072.1 message set, or the node republishing corrections), not a GPS outage and not a tunnel. The operator's 'tunnel' hypothesis is inconsistent with the telemetry: numSV never collapses, hAcc stays sub-metre, there are no dropouts, and the failure is 100% of the session rather than a localized window.",
+      "evidence": [
+        {
+          "source": "telemetry",
+          "topic_or_file": "/ublox_rover/navrelposned",
+          "t_ns": null,
+          "snippet": "FLAGS_REL_POS_VALID set on 0.0% of 18133 samples; relPosLength min=max=0; accLength min=max=0"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "/ublox_rover/navrelposned",
+          "t_ns": null,
+          "snippet": "FLAGS_DIFF_SOLN set on only 15.0% of samples (rover rarely sees RTCM from base)"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "/ublox_moving_base/navpvt",
+          "t_ns": null,
+          "snippet": "carrier-phase FLOAT=63.6%, FIXED=30.7% -> moving-base receiver itself is healthy"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "/ublox_rover/navpvt",
+          "t_ns": null,
+          "snippet": "carrier-phase CARR_NONE=100.0% -> rover never enters RTK despite good sky (numSV median 29, hAcc 0.65 m)"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "bag_rates",
+          "t_ns": null,
+          "snippet": "All five topics publish at expected rate for full 3626 s; no dropouts, no frozen windows -> not a sensor_timeout"
+        }
+      ],
+      "patch_hint": "Fix the RTCM bridge from the moving-base receiver to the rover receiver. Concretely: (1) On the moving-base ublox, enable output of RTCM3 messages 1077, 1087, 1097, 1127, and 4072.0 + 4072.1 on the port wired to the rover. (2) On the rover ublox, enable RTCM3 input on the corresponding port and set CFG-NAVSPG-DYNMODEL consistent between the two. (3) Verify the physical UART/USB link between the two receivers (or the ROS node that forwards /ublox_moving_base/rtcm to /ublox_rover) is actually running and that rover reports DIFF_SOLN ~100%, not 15%. The 15% non-zero DIFF_SOLN hints that corrections arrive only intermittently - likely wrong baud rate, half-duplex wiring, or a relay node dropping messages."
+    },
+    {
+      "bug_class": "other",
+      "confidence": 0.15,
+      "summary": "Antenna baseline / installation issue: the two GNSS antennas may be too close together, shadowed by each other, or the 'moving base' and 'rover' roles are swapped in firmware, so even when RTCM reaches the rover it cannot fix a valid relative vector. Less likely because when DIFF_SOLN is set (15% of the time) we would still expect at least FLOAT rel-pos validity, which is never observed.",
+      "evidence": [
+        {
+          "source": "telemetry",
+          "topic_or_file": "/ublox_rover/navrelposned",
+          "t_ns": null,
+          "snippet": "Even in the 15% of samples with DIFF_SOLN=1, REL_POS_VALID stays 0% and relPosLength=0"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "/ublox_moving_base/navpvt",
+          "t_ns": null,
+          "snippet": "hAcc max=4.06 m on moving base vs 1.29 m on rover -> possible antenna placement asymmetry"
+        }
+      ],
+      "patch_hint": "Confirm antenna separation is >= ~30 cm with clear sky for both, verify CFG-TMODE / moving-base role assignment, and swap antenna cables to test if the roles are inverted."
+    },
+    {
+      "bug_class": "sensor_timeout",
+      "confidence": 0.05,
+      "summary": "Operator-suggested tunnel/GPS-outage hypothesis. Kept for completeness but contradicted by the data.",
+      "evidence": [
+        {
+          "source": "telemetry",
+          "topic_or_file": "/ublox_rover/navpvt",
+          "t_ns": null,
+          "snippet": "fixType==3 on 100.0% of samples; numSV min=16; hAcc max=1.29 m -> no tunnel-like outage anywhere in the 3626 s bag"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "bag_rates",
+          "t_ns": null,
+          "snippet": "No dropouts or frozen windows on any of the five topics"
+        }
+      ],
+      "patch_hint": "No action; operator report is not supported by telemetry."
+    }
+  ],
+  "root_cause_idx": 0,
+  "patch_proposal": "Target: the moving-base -> rover RTCM correction path feeding /ublox_rover/navrelposned. Required changes: (a) on /ublox_moving_base, enable RTCM3 output messages 1077, 1087, 1097, 1127, 4072.0, 4072.1 on the link to the rover; (b) on /ublox_rover, enable RTCM3 input on the matching port; (c) verify the physical UART/USB or ROS relay between the two receivers is up for the entire session - success criterion is FLAGS_DIFF_SOLN ~100% (currently 15%) and FLAGS_REL_POS_VALID > 95% (currently 0%) on /ublox_rover/navrelposned, with non-zero relPosLength/relPosHeading/accLength. Do not chase the operator's tunnel hypothesis: /ublox_rover/navpvt keeps a 3D fix with numSV median 29 and hAcc median 0.65 m for the full 3626 s, so the failure is in the dual-antenna RTK pipeline, not in GNSS reception."
+}

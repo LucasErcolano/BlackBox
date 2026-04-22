@@ -146,6 +146,7 @@ class ClaudeClient:
         user_fields: dict | None = None,
         resolution: Literal["thumb", "hires"] = "thumb",
         max_tokens: int = 4000,
+        apply_grounding: bool = True,
     ) -> tuple[BaseModel, CostLog]:
         """
         Run Claude analysis with aggressive caching.
@@ -264,10 +265,11 @@ class ClaudeClient:
         # Append to costs.jsonl
         self._append_cost_log(cost_log)
 
-        if isinstance(result, PostMortemReport):
-            result = ground_post_mortem(result)
-        elif isinstance(result, ScenarioMiningReport):
-            result = ground_scenario_mining(result)
+        if apply_grounding:
+            if isinstance(result, PostMortemReport):
+                result = ground_post_mortem(result)
+            elif isinstance(result, ScenarioMiningReport):
+                result = ground_scenario_mining(result)
 
         return result, cost_log
 

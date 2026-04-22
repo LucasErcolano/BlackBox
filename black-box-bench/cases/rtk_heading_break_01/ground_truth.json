@@ -32,8 +32,10 @@
     "pipeline_must_not": "emit a scoped window, patch a tunnel-specific branch, or confirm the operator's pre-existing hypothesis without cross-source evidence."
   },
   "scoring": {
-    "bug_class_match": "sensor_timeout",
+    "bug_class_match": ["other", "sensor_timeout", "calibration_drift"],
+    "bug_class_rationale": "the failure is a never-valid RTCM/carrier-phase configuration — closed taxonomy has no exact slot. 'other' is the most honest match; 'sensor_timeout' and 'calibration_drift' are accepted as approximate alternatives.",
     "required_evidence_topics": ["/ublox_rover/navpvt", "/ublox_rover/navrelposned", "/ublox_moving_base/navpvt"],
-    "grounding_expected": "hypothesis must cite at least 2 of the 3 required topics; must not cite only position/velocity fields"
+    "grounding_expected": "hypothesis must cite at least 2 of the 3 required topics; must not cite only position/velocity fields",
+    "required_refutations": ["operator tunnel hypothesis must be rejected or assigned confidence <= 0.2"]
   }
 }
