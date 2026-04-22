@@ -89,8 +89,9 @@ class ForensicAgentConfig:
     model: str = MODEL
     system_prompt: str = (
         "You are Black Box, a forensic copilot for robot incidents. "
-        "Use the mounted bag at /mnt/bag and the source tree at /mnt/src "
-        "to produce an evidence-grounded post-mortem."
+        "Uploaded artifacts (bag, source tree, etc.) are mounted under "
+        "/mnt/session/uploads/ — list that directory first to discover them. "
+        "Produce an evidence-grounded post-mortem."
     )
     tools: tuple[str, ...] = BUILTIN_TOOLS
     mcp_servers: list[dict] = field(default_factory=list)
@@ -322,7 +323,7 @@ class ForensicAgent:
                 {
                     "type": "file",
                     "file_id": metadata.id,
-                    "mount_path": f"/mnt/bag/{path.name}",
+                    "mount_path": path.name,
                 }
             )
 
@@ -375,7 +376,9 @@ class ForensicAgent:
             f"Case key: {case_key}\n"
             f"Mode: post_mortem\n"
             f"Budget: {self.config.task_budget_minutes} minutes.\n"
-            "Analyze the mounted rosbag. Return a single JSON object that "
+            "Uploaded artifacts are under /mnt/session/uploads/ — run `ls "
+            "/mnt/session/uploads/` to discover the bag and any extras. "
+            "Analyze the rosbag and return a single JSON object that "
             "validates against the PostMortemReport schema: keys timeline, "
             "hypotheses, root_cause_idx, patch_proposal."
         )
