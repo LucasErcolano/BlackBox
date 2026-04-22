@@ -234,7 +234,7 @@ class ClaudeClient:
         wall_time = time.time() - start_time
 
         cached_input = getattr(usage, "cache_read_input_tokens", 0)
-        uncached_input = usage.input_tokens - cached_input
+        uncached_input = usage.input_tokens
         cache_creation = getattr(usage, "cache_creation_input_tokens", 0)
         output = usage.output_tokens
 

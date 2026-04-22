@@ -181,7 +181,7 @@ class TestCostCalculation:
                 mock_anthropic.return_value = mock_client
 
                 mock_usage = MagicMock()
-                mock_usage.input_tokens = 500000  # 400K cached + 100K uncached
+                mock_usage.input_tokens = 100000  # uncached only (Anthropic API semantics)
                 mock_usage.cache_read_input_tokens = 400000
                 mock_usage.cache_creation_input_tokens = 0
                 mock_usage.output_tokens = 2000
