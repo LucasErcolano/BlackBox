@@ -77,5 +77,11 @@ Applied changes (2026-04-22):
 - Budget check: continuing would burn ≥3 hrs of wallclock on extraction alone for questionable return. SKIPPING per rule "Si te empantanás en debugging de un error: 15 min MAX, después workaround o skip."
 - Workaround for future session: run `rosbag reindex` (requires ROS1 install on a machine with capacity), or copy bag 0 to SSD once SSD has 210+ GB free, or slice bag 0 into smaller bags with `rosbag filter --duration` first.
 
-## Phase 6 (summary + commit) — IN PROGRESS
+## Phase 6 (summary + commit) — DONE
+
+- SESSION_SUMMARY.md written, copied into `data/session/`.
+- Hero deep-dive on bag 1 overexposure: $0.48, anomaly_class=sensor_overexposure, conf=0.93, onset→recovery 4.5s, root cause = AE startup convergence failure. Full JSON at `data/session/analyses/hero_bag1_overexposure/hero_report.json`.
+- `git init` + initial commit `0639b7c`. 81 files tracked. Bags/frames/reports excluded by .gitignore.
+- Final session spend: **$5.01** of $30 cap.
+
 
