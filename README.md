@@ -6,6 +6,10 @@ Forensic copilot for robots. Feed it a ROS bag, get back a root-cause hypothesis
 
 Built with **Claude Opus 4.7** (vision) + **Managed Agents** (long-horizon bag replay).
 
+## Docs
+- [Build journal & strategy](https://gist.github.com/LucasErcolano/851c5e976c6aa364f69c9e6875544061) — narrative, novelty positioning, findings.
+- [Team onboarding](docs/ONBOARDING.md) — scope, cadence, conventions.
+
 ## Modes
 - **Forensic post-mortem** — crash bag in, root cause + patch out.
 - **Scenario mining** — clean bag in, 3–5 moments of interest out.
