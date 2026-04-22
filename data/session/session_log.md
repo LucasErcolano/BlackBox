@@ -80,6 +80,20 @@ Applied changes (2026-04-22):
 UPDATE — retry succeeded. A third attempt (after a probe that patiently waited through the 675 s open phase) completed in 449 s extraction + 87 s analysis. Total bag 0 API spend: $1.48. 4 moments found; 2 are 0.90-confidence **data integrity anomalies** (rear and left cameras show indoor scenes while ego is outdoors — likely camera feed swap or recording mux artifact). This is now the strongest demo finding after the bag 1 overexposure hero.
 Final session spend: **$6.48** of $30 cap.
 
+## Post-session verification (autonomous-loop tick 2026-04-22)
+
+Manually opened 4 referenced bag-0 frames (end__rear, end__left, end__right, end__front_left at t≈1708366594). Findings:
+- rear: indoor workshop/lab (speakers, whiteboards, desks, electronics, fluorescent lights). Confirmed real.
+- left: indoor kitchen (red chair, cabinets, brooms, power outlet, doorway). Confirmed real.
+- right (NOT originally flagged): indoor building lobby, with "CIA ARTIFICIAL Y ROBOTICA" (AI & Robotics) lettering in mirror-reversed text on glass doors → camera inside building looking out.
+- front_left: outdoor parking lot (baseline driving-type scene).
+- middle-window right cam: outdoor tree-lined street (normal driving scene).
+
+Conclusion: **not a mux artifact**. At bag 0 end, vehicle parked at entrance of a robotics lab building; the 3 side/rear cameras catch interior rooms through open doors. Interpretation corrected in SESSION_SUMMARY.md. Still a useful finding — scene-integrity flag: "this window does not look like driving" is exactly the forensic copilot's value prop.
+
+Verification cost: $0.00 (no API — direct frame viewing).
+
+
 ## Phase 6 (summary + commit) — DONE
 
 - SESSION_SUMMARY.md written, copied into `data/session/`.

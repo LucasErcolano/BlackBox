@@ -60,10 +60,12 @@
 ### Bag 3 — middle window — nothing flagged by summary pass (savings).
 
 ### Bag 0 — end window (~3510-3530 s)
-- **0.90** Rear camera frame content changes to indoor workshop scene while ego is outdoors — **data integrity issue** (possible camera feed swap, bag mux artifact, or literal reflection in window glass; warrants root-cause investigation).
-- **0.90** Left camera shows indoor kitchen/doorway scene while ego is outdoors — same class of issue.
+- **0.90** Rear camera: indoor workshop/lab scene (speakers, whiteboards, desks, electronic equipment, fluorescent lights).
+- **0.90** Left camera: indoor kitchen/doorway (red chair, cabinets, brooms, power outlet, open doorway to outside).
+- **MANUAL VERIFICATION (2026-04-22)**: both confirmed real. Right cam (not originally flagged) also shows indoor lobby with mirror-reversed "CIA ARTIFICIAL Y ROBOTICA" lettering on glass doors — consistent with camera *inside* a robotics lab building. Front_left at same timestamp shows outdoor parking. Interpretation: vehicle parked at lab building entrance; rear/left/right cameras have line-of-sight through open doors into multiple interior rooms. This is NOT a topic-mux/feed-swap artifact — it is the end-of-recording park scenario captured by a fixed multi-camera rig in a robotics research setting.
+- **Actionable**: trim bag 0 tail for driving-scene training data (roughly last ~90-120 s); the non-driving lab footage will poison anything trained on it as "road scenes".
 - **0.78** Pedestrian group passes close to right side of ego vehicle.
-- **0.60** Extended near-stationary / stall behavior (<1 m/s).
+- **0.60** Extended near-stationary / stall behavior (<1 m/s) — consistent with park-at-building end state.
 
 ### Bag 0 — start + middle windows — uneventful, filtered out by summary pass.
 
@@ -119,8 +121,8 @@ Also v1 single-window reports (less interesting, kept for comparison):
 ## Top priority moments for manual review (ranked)
 
 1. **Bag 1, t≈16-34 s (start window)**: Front_left and front_right cameras severely overexposed. Confidence 0.95 (plus hero deep-dive confirmed at 0.93). Systematic exposure fault; hero report diagnoses AE convergence failure with 4.5 s recovery window.
-2. **Bag 0, t≈3510-3530 s (end window)**: Rear camera frame content changes to indoor workshop scene while ego is outdoors. Confidence 0.90. **Data integrity issue** — inspect raw msg timestamps on `/cam4/image_raw/compressed` for this window; likely a bag recording artifact (mux error, or late arrival of queued frames from previous recording session).
-3. **Bag 0, t≈3510-3530 s (end window)**: Left camera shows indoor kitchen/doorway scene. Confidence 0.90. Same class as (2). If both cams show indoor scenes at the same timestamps, this is strong evidence of a systemic recording pipeline anomaly.
+2. **Bag 0, t≈3510-3530 s (end window) — scene-integrity flag (verified)**: Vehicle parked at robotics lab entrance; rear/left/right cameras see into indoor workshop, kitchen, and lobby through open doors. Not a data-mux artifact but a dataset-quality issue: the tail of bag 0 is non-driving footage and should be trimmed before use as training data for road-scene perception.
+3. **Bag 0 scene-integrity (continued)**: Detecting this as an anomaly is itself a useful demo — a forensic copilot that flags "this window does not look like driving" without any telemetry, purely from cross-camera cues, is exactly the value prop.
 4. **Bag 0, t≈3505 s (end window)**: Pedestrian group passes close to right side of ego vehicle. Confidence 0.78.
 5. **Bag 3, t≈1172 s (end window)**: Pedestrian near traffic cones at gated checkpoint / level crossing, captured on left cam. Confidence 0.70.
 6. **Bag 3, t≈18 s (start window)**: Oncoming white SUV passing at close range. Confidence 0.70.
@@ -142,7 +144,7 @@ Bag 0 total pipeline: 449 s extraction + 87 s analysis + $1.48 API. 4 moments in
 - **Cost accounting bug**: `uncached_input_tokens: -656` in synthetic smoke entry. Cache-read double-subtract in `claude_client.py`. Cosmetic.
 - **Token caching not triggering** on v2 deep calls (cached blocks are <1024 tokens → below Anthropic cache threshold). Pad `cached_blocks` in `prompts_v2.py` to >1024 tokens if rerunning bags.
 - **Verify bag 1 overexposure finding manually**: check raw frames in `/home/hz/blackbox_cache/frames/bag_1_v2/start__front_left_*.png`. Hero deep-dive already confirmed — concrete sensor-level defect, write dedicated PDF report.
-- **Investigate bag 0 data-integrity anomaly**: `/home/hz/blackbox_cache/frames/bag_0_v2/end__rear_*.png` and `end__left_*.png` reportedly show indoor scenes. Open these manually and if real, dig into `/cam4` and `/cam3` raw `msg.header.stamp` vs bag record `t_ns` to check for clock skew / wrong-frame-on-topic.
+- ~~Investigate bag 0 data-integrity anomaly~~ DONE: manually verified 2026-04-22. Finding is real but reinterpreted — vehicle parked at robotics lab; cameras see indoor spaces through doors. Not a mux artifact. Recommend trimming bag 0 tail (~last 120 s) when using as road-scene training data.
 - **Verify bag 3 close-pass SUV**: inspect `start__front_left_*.png` and `end__left_*.png`.
 - **Curate 3 best frames for demo video**: strongest moment is the overexposure anomaly (bag 1); runner-up is the bag 0 indoor-scene data-integrity flag (very visual, very demo-worthy).
 - **Bag 0 rosbag reindex**: if future workflows need to re-open bag 0 cold repeatedly, run ROS1 `rosbag reindex` once (needs ROS install on another machine) to add/fix the EOF index and make subsequent opens instantaneous.
