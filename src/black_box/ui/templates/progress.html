@@ -1,7 +1,9 @@
 {% set stage = status.get('stage', 'queued') %}
 {% set pct = (status.get('progress', 0.0) * 100) | round(0, 'floor') %}
 {% set done = stage in ['done', 'failed'] %}
+{% set buffer = status.get('reasoning_buffer', []) %}
 <div
+  id="progress-card"
   class="progress-card {% if stage == 'failed' %}failed{% endif %}"
   {% if not done %}
   hx-get="/status/{{ job_id }}"
@@ -19,13 +21,30 @@
     <rect x="0" y="0" width="{{ pct }}" height="4" class="bar-fg"/>
   </svg>
 
-  <pre class="reasoning">{{ status.get('reasoning', '') }}</pre>
+  <div class="reasoning-stream" data-stage="{{ stage }}">
+    <div class="reasoning-header">
+      <span>forensic reasoning</span>
+      <span class="stream-dot {% if done %}done{% endif %}"></span>
+    </div>
+    <pre class="reasoning" id="reasoning-pre">{% for line in buffer -%}
+<span class="reasoning-line">{{ line }}</span>{% if not loop.last %}
+{% endif %}{% endfor %}{% if not done and buffer %}<span class="cursor">▍</span>{% endif %}</pre>
+  </div>
 
   <div class="meta">
     <span>job <code>{{ job_id }}</code></span>
     <span>mode {{ status.get('mode', '—') }}</span>
+    {% if status.get('has_diff') %}
+      <a class="link-diff" href="/diff/{{ job_id }}" target="_blank" rel="noopener">View proposed fix →</a>
+    {% endif %}
     {% if stage == 'done' %}
-      <a href="/report/{{ job_id }}">Download report</a>
+      <a class="link-report" href="/report/{{ job_id }}">Download report</a>
     {% endif %}
   </div>
 </div>
+<script>
+  (function () {
+    var pre = document.getElementById('reasoning-pre');
+    if (pre) { pre.scrollTop = pre.scrollHeight; }
+  })();
+</script>

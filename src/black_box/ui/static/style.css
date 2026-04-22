@@ -111,18 +111,81 @@ button:hover { background: #000; }
 .bar-bg { fill: var(--line); }
 .bar-fg { fill: var(--ink); transition: width 0.4s ease; }
 
+.reasoning-stream {
+  margin: 0.25rem 0 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #141412;
+  color: #e7e4db;
+  overflow: hidden;
+}
+
+.reasoning-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0.75rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9a958a;
+  background: #1e1d1b;
+  border-bottom: 1px solid #2a2825;
+}
+
+.stream-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e0b14b;
+  box-shadow: 0 0 8px #e0b14b;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.stream-dot.done {
+  background: #6fb26f;
+  box-shadow: 0 0 8px #6fb26f;
+  animation: none;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+
 .reasoning {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  font-size: 0.82rem;
-  color: #333;
-  background: #f2efe6;
-  padding: 0.75rem;
-  border-radius: 3px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: #e7e4db;
+  background: transparent;
+  padding: 0.85rem 1rem;
   white-space: pre-wrap;
   margin: 0;
-  max-height: 180px;
+  max-height: 260px;
   overflow: auto;
 }
+
+.reasoning-line {
+  display: block;
+  animation: fade-in 0.28s ease-out;
+}
+.reasoning-line:last-child {
+  color: #fff;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cursor {
+  display: inline-block;
+  color: #e0b14b;
+  animation: blink 0.9s steps(1) infinite;
+  margin-left: 2px;
+}
+@keyframes blink { 50% { opacity: 0; } }
 
 .meta {
   display: flex;
@@ -133,7 +196,8 @@ button:hover { background: #000; }
   flex-wrap: wrap;
 }
 .meta code { font-size: 0.82rem; color: var(--ink); }
-.meta a { color: var(--ink); }
+.meta a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.meta a.link-diff { color: var(--accent); font-weight: 500; }
 
 footer {
   margin-top: 3.5rem;
