@@ -1,14 +1,14 @@
-black-box-bench — LIVE
-URL: https://github.com/LucasErcolano/black-box-bench
-Visibility: public
-Seed commit: 862a990 "feat: seed black-box-bench with 3 cases"
+black-box-bench — LOCATION
 
-Contents shipped:
-  - README.md           — Why / cases / scoring rules
-  - LICENSE             — MIT
-  - cases.yaml          — indexed by key, tier, ground-truth root cause, refutes_operator flag
-  - fixtures/sanfer_tunnel/{stream_events.jsonl, analysis.json}
-  - fixtures/boat_lidar/{stream_events.jsonl, analysis.json}
-  - fixtures/car_1/{stream_events.jsonl, analysis.json}
+Consolidated into THIS repo at ./bench/ per user directive "all should be in same repo".
 
-Use in beat 2:35 of demo video.
+Contents:
+  bench/README.md                                         — Why / cases / scoring rules
+  bench/cases.yaml                                        — index by key, tier, ground-truth root cause, refutes_operator flag
+  bench/fixtures/sanfer_tunnel/{stream_events.jsonl, analysis.json}
+  bench/fixtures/boat_lidar/{stream_events.jsonl, analysis.json}
+  bench/fixtures/car_1/{stream_events.jsonl, analysis.json}
+
+Standalone public repo at github.com/LucasErcolano/black-box-bench still exists as a remote mirror of this seed but should be treated as deprecated.
+  TO REMOVE: `gh auth refresh -h github.com -s delete_repo` then `gh repo delete LucasErcolano/black-box-bench --confirm`.
+  (Current gh token lacks delete_repo scope so this was left for the user to finish.)
