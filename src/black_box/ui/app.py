@@ -15,7 +15,7 @@ import uuid
 from pathlib import Path
 from typing import Literal
 
-from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -125,6 +125,116 @@ def _read_status(job_id: str) -> dict | None:
         return None
 
 
+# ---- real stream replay -----------------------------------------------------
+REPLAY_ROOT = DATA_DIR / "final_runs"
+REPLAY_SCALE = 0.15  # wall-clock / demo-clock ratio
+REPLAY_MAX_SLEEP = 0.8  # cap per-event sleep in seconds
+
+
+def _replay_stage(progress: float) -> tuple[str, str]:
+    if progress < 0.25:
+        return ("ingesting", "Decoding bag and extracting frames")
+    if progress < 0.55:
+        return ("analyzing", "Claude is reviewing evidence")
+    if progress < 0.85:
+        return ("synthesizing", "Cross-checking hypotheses")
+    if progress < 1.0:
+        return ("reporting", "Rendering PDF report")
+    return ("done", "Complete")
+
+
+def _fmt_replay_event(ev: dict) -> str | None:
+    t = ev.get("type")
+    p = ev.get("payload") or {}
+    if t == "status":
+        state = p.get("state", "")
+        if state in {"running", "user.message", "idle", "completed"}:
+            return f"[status] {state}"
+        return None  # skip chatty span.* events
+    if t == "reasoning":
+        return "[reasoning] (thinking...)"
+    if t == "tool_call":
+        name = p.get("name", "tool")
+        inp = p.get("input") or {}
+        preview = inp.get("command") or json.dumps(inp)[:140]
+        return f"[tool:{name}] {preview[:180]}"
+    if t == "tool_result":
+        text = (p.get("text") or "").replace("\n", " ⏎ ")
+        err = "ERR " if p.get("is_error") else ""
+        return f"[result] {err}{text[:180]}"
+    if t == "assistant":
+        text = (p.get("text") or "").replace("\n", " ")
+        return f"[assistant] {text[:220]}"
+    return None
+
+
+def _run_pipeline_replay(job_id: str, replay_name: str) -> None:
+    """Replay a recorded ForensicSession event stream at demo-scaled speed."""
+    jsonl = REPLAY_ROOT / replay_name / "stream_events.jsonl"
+    buffer: list[str] = []
+    try:
+        events = [json.loads(line) for line in jsonl.read_text().splitlines() if line.strip()]
+        if not events:
+            raise ValueError(f"no events in {jsonl}")
+        t0 = float(events[0].get("ts", 0.0))
+        last_ts = t0
+        total = len(events)
+        for i, ev in enumerate(events):
+            line = _fmt_replay_event(ev)
+            if line is not None:
+                buffer.append(line)
+            progress = (i + 1) / total
+            stage, label = _replay_stage(progress)
+            _write_status(
+                job_id,
+                {
+                    "job_id": job_id,
+                    "stage": stage,
+                    "label": label,
+                    "progress": progress,
+                    "mode": "post_mortem",
+                    "upload": f"replay:{replay_name}",
+                    "reasoning_buffer": list(buffer[-200:]),
+                    "has_diff": stage == "done",
+                },
+            )
+            ts = float(ev.get("ts", last_ts))
+            delta = max(0.0, ts - last_ts)
+            last_ts = ts
+            sleep_s = min(delta * REPLAY_SCALE, REPLAY_MAX_SLEEP)
+            if sleep_s > 0:
+                time.sleep(sleep_s)
+        # Patch artifact so the /diff route works for the replay job too.
+        _patch_path(job_id).write_text(json.dumps(_STUB_PATCH, indent=2))
+        _write_status(
+            job_id,
+            {
+                "job_id": job_id,
+                "stage": "done",
+                "label": "Complete",
+                "progress": 1.0,
+                "mode": "post_mortem",
+                "upload": f"replay:{replay_name}",
+                "reasoning_buffer": list(buffer[-200:]),
+                "has_diff": True,
+            },
+        )
+    except Exception as e:  # pragma: no cover - defensive
+        buffer.append(f"ERROR: {e!r}")
+        _write_status(
+            job_id,
+            {
+                "job_id": job_id,
+                "stage": "failed",
+                "label": "Replay error",
+                "progress": 0.0,
+                "mode": "post_mortem",
+                "reasoning_buffer": list(buffer),
+                "has_diff": False,
+            },
+        )
+
+
 # ---- background stub --------------------------------------------------------
 def _run_pipeline_stub(job_id: str, upload_path: Path, mode: Mode) -> None:
     """Fake pipeline: streams reasoning chunks and walks through stages.
@@ -176,6 +286,44 @@ def _run_pipeline_stub(job_id: str, upload_path: Path, mode: Mode) -> None:
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(request, "index.html", {})
+
+
+@app.get("/analyze", response_class=HTMLResponse)
+async def analyze_replay(
+    request: Request,
+    background: BackgroundTasks,
+    replay: str = Query(..., description="name of data/final_runs/<name>/ to replay"),
+) -> HTMLResponse:
+    jsonl = REPLAY_ROOT / replay / "stream_events.jsonl"
+    if not jsonl.exists():
+        raise HTTPException(404, f"no recorded stream for replay={replay!r}")
+
+    job_id = uuid.uuid4().hex[:12]
+    _write_status(
+        job_id,
+        {
+            "job_id": job_id,
+            "stage": "queued",
+            "label": f"Queued replay: {replay}",
+            "progress": 0.0,
+            "mode": "post_mortem",
+            "upload": f"replay:{replay}",
+            "reasoning_buffer": [f"Replaying recorded session: {replay}"],
+            "has_diff": False,
+        },
+    )
+    background.add_task(_run_pipeline_replay, job_id, replay)
+
+    # Render the full shell with the progress card already injected so the
+    # demo link `?replay=...` loads a styled page, not a bare HTMX fragment.
+    progress_html = templates.get_template("progress.html").render(
+        request=request, job_id=job_id, status=_read_status(job_id) or {}
+    )
+    return templates.TemplateResponse(
+        request,
+        "index.html",
+        {"initial_html": progress_html},
+    )
 
 
 @app.post("/analyze", response_class=HTMLResponse)

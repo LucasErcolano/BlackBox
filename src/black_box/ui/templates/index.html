@@ -49,7 +49,7 @@
       <button type="submit">Analyze</button>
     </form>
 
-    <div id="result" aria-live="polite"></div>
+    <div id="result" aria-live="polite">{% if initial_html %}{{ initial_html | safe }}{% endif %}</div>
 
     <footer>
       <small>Opus 4.7 &middot; Managed Agents &middot; hackathon build</small>

@@ -22,6 +22,10 @@ class Hypothesis(BaseModel):
         "missing_null_check",
         "calibration_drift",
         "latency_spike",
+        "sensor_dropout",
+        "config_error",
+        "degraded_state_estimation",
+        "communication_failure",
         "other",
     ]
     confidence: float  # 0..1
