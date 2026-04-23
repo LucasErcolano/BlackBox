@@ -16,6 +16,14 @@ from .prompts import (
     scenario_mining_prompt,
     synthetic_qa_prompt,
 )
+from .resolution_budgeter import (
+    ResolutionBudgeter,
+    ResolutionDecision,
+    ResolutionTier,
+    ambiguity_from_top_two_confidences,
+    legacy_tier_to_string,
+    saliency_from_telemetry_z,
+)
 
 __all__ = [
     "ClaudeClient",
@@ -24,11 +32,17 @@ __all__ = [
     "Hypothesis",
     "Moment",
     "PostMortemReport",
+    "ResolutionBudgeter",
+    "ResolutionDecision",
+    "ResolutionTier",
     "ScenarioMiningReport",
     "SelfEval",
     "SyntheticQAReport",
     "TimelineEvent",
+    "ambiguity_from_top_two_confidences",
+    "legacy_tier_to_string",
     "post_mortem_prompt",
+    "saliency_from_telemetry_z",
     "scenario_mining_prompt",
     "synthetic_qa_prompt",
 ]
