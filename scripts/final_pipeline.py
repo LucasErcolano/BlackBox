@@ -828,10 +828,12 @@ def run_bag(spec: BagSpec, memory: MemoryStack, global_budget_remaining: float) 
         p = bundle / a
         if p.exists() and p.is_file():
             mounted.append(p)
-    # Cap upload set at 50 files to keep upload time sane
-    if len(mounted) > 60:
-        log(f"[{spec.name}] truncating mounted set from {len(mounted)} to 60")
-        mounted = mounted[:60]
+    # Cap upload set to keep upload time sane. Sanfer hero uses ~54 frames +
+    # CSVs; generic cases stay under 40. 90 leaves headroom without runaway.
+    _MOUNT_CAP = int(os.environ.get("BLACKBOX_MOUNT_CAP", "90"))
+    if len(mounted) > _MOUNT_CAP:
+        log(f"[{spec.name}] truncating mounted set from {len(mounted)} to {_MOUNT_CAP}")
+        mounted = mounted[:_MOUNT_CAP]
 
     # Strip default seed; pass our own prompt via steer as first user message
     # Actually ForensicAgent.open_session sends a generic seed. We'll steer afterwards.
