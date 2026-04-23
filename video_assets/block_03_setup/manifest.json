@@ -1,0 +1,44 @@
+{
+  "block_id": "block_03_setup",
+  "duration_target": "14-15s",
+  "duration_actual": 14.5,
+  "resolution": "1920x1080",
+  "fps": 30,
+  "deliverable_mode": "FINAL_NOW",
+  "source_assets_used": [
+    "data/final_runs/sanfer_tunnel/bundle/summary.json (case, duration, platform, artifact list)",
+    "data/final_runs/sanfer_tunnel/bundle/frames/*.jpg (4 real extracted frames)"
+  ],
+  "text_overlays_used": [
+    "Session handed in",
+    "one real recording · not previously analyzed",
+    "$ ls data/final_runs/sanfer_tunnel/bundle/",
+    "UNSEEN",
+    "no prior analysis",
+    "Single case in",
+    "isolated from the rest of the fleet",
+    "case_manifest.json",
+    "case / duration / platform / artifacts / prior labels / prior rubric",
+    "Raw evidence",
+    "no curation · no pre-sorting · same case only",
+    "telemetry streams",
+    "all artifacts · one case · sanfer_tunnel",
+    "no labels",
+    "no handcrafted rubric",
+    "the system starts from raw evidence",
+    "find what matters.",
+    "reject what doesn't · return a grounded hypothesis",
+    "BLACK  BOX  —  forensic copilot"
+  ],
+  "edits_performed": [
+    "4-beat structure: folder listing (3.2s), single-case manifest (3.6s), raw evidence tiles+pills (4.0s), negation→final lockup (3.7s)",
+    "crossfade 0.38s between beats (between block_02's 0.35s and block_07's 0.45s)",
+    "staggered terminal-line reveal in beat A (real ls of bundle/)",
+    "staggered tile + pill reveal in beat C",
+    "amber ACCENT (255,184,64) restored for intake energy; used sparingly vs block_08",
+    "two negations struck through with muted red, then dissolve into final lockup",
+    "shared grid_bg, drop shadows, 4-dot beat indicator from blocks 01/02/07/08"
+  ],
+  "ui_dependency_level": "none",
+  "remaining_work": []
+}
