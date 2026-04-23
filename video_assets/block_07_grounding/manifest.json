@@ -1,0 +1,81 @@
+{
+  "block_id": "block_07_grounding",
+  "duration_target": "16-18s",
+  "duration_actual": "16.5s",
+  "fps": 30,
+  "resolution": "1920x1080",
+  "deliverable_mode": "FINAL_NOW",
+  "narration": "And if the evidence is weak, Black Box does not force an answer. It can return empty moments, reject low-support explanations, and keep the report narrow. The rule is simple: no evidence, no claim.",
+  "visual_language": {
+    "shared_with_blocks": ["block_01_hook", "block_02_problem"],
+    "shared_palette": {"bg": "#0a0c10", "fg": "#e6e8ec", "dim": "#78808c", "panel": "#12141a", "border": "#3c424e"},
+    "shared_system": ["DejaVu Sans / Sans Mono fonts", "80px grid backdrop", "drop-shadow recipe", "4-dot beat indicator"],
+    "stricter_phase_modifiers": {
+      "amber": "desaturated #c49648 (was #ffb840), used sparingly — hairline accent + conclusion word only",
+      "rejection_mark": "#aa5656 muted red, used only for strike-throughs and REJECTED tags",
+      "motion": "slower 450–600ms crossfades, no stagger swarms, long holds on final card",
+      "element_count": "never more than 2 primary elements on screen",
+      "negative_space": "generous margins; principle card fills <40% of frame area"
+    }
+  },
+  "beats": [
+    {"t": "0.0-3.2s",   "name": "candidates",       "content": "4 real candidate hypotheses listed as neutral cards (pid_saturation, calibration_drift, other, latency_spike)"},
+    {"t": "3.2-7.0s",   "name": "rejection sweep",  "content": "each candidate struck through one at a time at 0.4s/1.3s/2.2s/3.1s with its real drop reason callout"},
+    {"t": "7.0-11.5s",  "name": "narrowed report",  "content": "single large gated_report.json card showing hypotheses: [] and the real 'No anomaly detected…' patch_proposal string"},
+    {"t": "11.5-16.5s", "name": "principle",        "content": "centered 'no evidence, no claim.' + grounding thresholds subtitle, held 5s"}
+  ],
+  "source_assets_used": [
+    "demo_assets/grounding_gate/clean_recording/raw_hypotheses.json (4 hypotheses, bug_class + confidence + summary + evidence count)",
+    "demo_assets/grounding_gate/clean_recording/drop_reasons.json (reason_dropped per hypothesis)",
+    "demo_assets/grounding_gate/clean_recording/gated_report.json (empty hypotheses[], real patch_proposal string)",
+    "src/black_box/analysis/grounding.py (thresholds: min_confidence 0.40, min_evidence 2, min_sources 2 — reflected in subtitle)"
+  ],
+  "text_overlays_used": [
+    "Candidates under review",
+    "4 hypotheses emitted by the model · grounding gate pending",
+    "pid_saturation",
+    "calibration_drift",
+    "other",
+    "latency_spike",
+    "conf 0.72 / 0.60 / 0.55 / 0.22",
+    "evidence: 1 / 2 / 2 / 1",
+    "REJECTED",
+    "drop reason",
+    "only 1 evidence row(s) (need >= 2)",
+    "only 1 source (camera) — need >= 2",
+    "bug_class=other with 2 evidence rows (need >= 3)",
+    "confidence 0.22 < 0.4",
+    "Narrowed report",
+    "all four candidates dropped · report emitted empty",
+    "gated_report.json",
+    "\"hypotheses\": [],",
+    "\"No anomaly detected with sufficient evidence to support a scoped fix.\"",
+    "empty moment · insufficient evidence · narrowed report",
+    "no evidence,",
+    "no claim.",
+    "grounding gate · min 2 evidence · min 2 sources · conf ≥ 0.40",
+    "BLACK  BOX  —  forensic copilot",
+    "block 07 · grounding (4-dot indicator, muted amber)"
+  ],
+  "edits_performed": [
+    "PIL compositing of 4 beats at 30fps",
+    "real grounding-gate JSON parsed for candidate titles, confidences, evidence counts, drop reasons",
+    "beat A: neutral candidate rows, no motion, long hold",
+    "beat B: scheduled strike-through at t = 0.4 / 1.3 / 2.2 / 3.1s, right-side drop-reason callout follows most recent rejection",
+    "beat C: single gated_report.json card, amber only on the empty array line",
+    "beat D: centered principle lockup, generous whitespace, 5s hold",
+    "450–600ms smoothstep crossfades (slower than block_01/02 for clinical cadence)",
+    "ffmpeg libx264 CRF 18, yuv420p, +faststart"
+  ],
+  "ui_dependency_level": "none",
+  "remaining_work": [
+    "optional: tie the 4-dot progress indicator to a full 7-block sequence map if later blocks dictate it",
+    "optional: shorten beat D hold to 4s if VO lands earlier",
+    "optional: add a tiny corner timestamp to each candidate row if the final edit wants to emphasize t_ns"
+  ],
+  "render_script": "scripts/render_block_07_grounding.py",
+  "outputs": {
+    "clip": "video_assets/block_07_grounding/clip.mp4",
+    "preview": "video_assets/block_07_grounding/preview.png"
+  }
+}
