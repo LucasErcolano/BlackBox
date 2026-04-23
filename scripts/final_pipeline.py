@@ -913,14 +913,45 @@ def run_bag(spec: BagSpec, memory: MemoryStack, global_budget_remaining: float) 
                 log(f"[{spec.name}] event count {event_count} cap — finalizing")
                 break
 
-        # Attempt finalize (this writes the per-call cost entry)
+        # Attempt finalize. If it fails because the last assistant message
+        # wasn't JSON, steer once with an explicit "JSON only" nudge and
+        # drain a short additional event burst before retrying.
+        def _try_finalize():
+            return session.finalize()
+
         try:
-            report_payload = session.finalize()
+            report_payload = _try_finalize()
             log(f"[{spec.name}] finalize ok — {len(report_payload.get('hypotheses', []))} hypotheses")
         except Exception as e:
-            log(f"[{spec.name}] finalize failed: {e}")
-            status = "finalize_failed"
-            error_msg = str(e)[:400]
+            msg = str(e)
+            if "not valid JSON" in msg or "no assistant message" in msg:
+                log(f"[{spec.name}] finalize failed ({msg[:120]}); steering JSON-only retry")
+                try:
+                    session.steer(
+                        "Output ONLY the PostMortemReport JSON object now. "
+                        "No preamble, no disclaimer, no markdown fences. "
+                        "Start your response with '{' and end with '}'."
+                    )
+                    retry_ev_budget = 40
+                    retry_deadline = time.monotonic() + 120.0
+                    for ev in session.stream():
+                        event_count += 1
+                        events_f.write(json.dumps(ev) + "\n")
+                        retry_ev_budget -= 1
+                        if retry_ev_budget <= 0 or time.monotonic() > retry_deadline:
+                            break
+                    events_f.flush()
+                    report_payload = _try_finalize()
+                    log(f"[{spec.name}] finalize ok after retry — "
+                        f"{len(report_payload.get('hypotheses', []))} hypotheses")
+                except Exception as e2:
+                    log(f"[{spec.name}] finalize still failed after retry: {e2}")
+                    status = "finalize_failed"
+                    error_msg = str(e2)[:400]
+            else:
+                log(f"[{spec.name}] finalize failed: {e}")
+                status = "finalize_failed"
+                error_msg = msg[:400]
     except Exception as e:
         log(f"[{spec.name}] session exception: {e}")
         traceback.print_exc()

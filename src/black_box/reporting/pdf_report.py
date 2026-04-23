@@ -5,6 +5,12 @@ import io
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from xml.sax.saxutils import escape as _xml_escape
+
+
+def _esc(s: Any) -> str:
+    """Escape untrusted text for reportlab Paragraph mini-XML."""
+    return _xml_escape("" if s is None else str(s), {'"': "&quot;", "'": "&apos;"})
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import LETTER
@@ -314,7 +320,7 @@ def build_report(
         one_sent = first.get("summary") or first.get("bug_class") or "See body for details."
     else:
         one_sent = "Nothing anomalous detected."
-    story.append(Paragraph(f"<i>{one_sent}</i>", styles["cover_meta"]))
+    story.append(Paragraph(f"<i>{_esc(one_sent)}</i>", styles["cover_meta"]))
     story.append(PageBreak())
 
     # ---------- 2. Executive summary ----------
@@ -342,8 +348,8 @@ def build_report(
             summary = h.get("summary", "")
             conf = float(h.get("confidence", 0.0) or 0.0)
             label_html = (
-                f"<b>{i + 1}. {bug_class}</b>{tag}<br/>"
-                f"<font size=9>{summary}</font>"
+                f"<b>{i + 1}. {_esc(bug_class)}</b>{tag}<br/>"
+                f"<font size=9>{_esc(summary)}</font>"
             )
             rows.append([
                 Paragraph(label_html, styles["body"]),
@@ -426,11 +432,11 @@ def build_report(
             story.append(Spacer(1, 6))
             bug_class = h.get("bug_class", "unclassified")
             conf = float(h.get("confidence", 0.0) or 0.0)
-            story.append(Paragraph(f"{i + 1}. {bug_class} &nbsp; "
+            story.append(Paragraph(f"{i + 1}. {_esc(bug_class)} &nbsp; "
                                    f"<font color='grey'>confidence {conf:.2f}</font>",
                                    styles["h2"]))
             if h.get("summary"):
-                story.append(Paragraph(h["summary"], styles["body"]))
+                story.append(Paragraph(_esc(h["summary"]), styles["body"]))
             evidence = h.get("evidence") or []
             if evidence:
                 story.append(Paragraph("<b>Evidence</b>", styles["body"]))
@@ -441,12 +447,12 @@ def build_report(
                     snippet = ev.get("snippet", "")
                     tns_str = f" @ t_ns={tns}" if tns is not None else ""
                     story.append(Paragraph(
-                        f"&bull; <b>{src}</b> <i>{topic}</i>{tns_str}<br/>"
-                        f"<font face='Courier' size=8>{snippet}</font>",
+                        f"&bull; <b>{_esc(src)}</b> <i>{_esc(topic)}</i>{_esc(tns_str)}<br/>"
+                        f"<font face='Courier' size=8>{_esc(snippet)}</font>",
                         styles["body_small"],
                     ))
             if h.get("patch_hint"):
-                story.append(Paragraph(f"<b>Patch hint:</b> {h['patch_hint']}",
+                story.append(Paragraph(f"<b>Patch hint:</b> {_esc(h['patch_hint'])}",
                                        styles["body_small"]))
 
     # ---------- 7. Proposed patch ----------

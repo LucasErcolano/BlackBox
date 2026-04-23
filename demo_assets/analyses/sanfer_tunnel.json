@@ -2,215 +2,187 @@
   "timeline": [
     {
       "t_ns": 240000000,
-      "label": "ublox_rover/navrelposned first sample already reports carr_soln=none, rel_pos_valid=0, rel_pos_heading_valid=0 (RTK heading unresolved at bag start, 43 min before tunnel)",
+      "label": "NAV-RELPOSNED stream starts with carr_soln=none, rel_pos_valid=0, rel_pos_heading_valid=0 \u2014 dual-antenna moving-baseline RTK NOT resolved from the first sample",
       "cross_view": true
     },
     {
       "t_ns": 400000000,
-      "label": "ekf_se_map diagnostic ERROR 'No events recorded' (map-frame EKF never publishes /odometry/filtered for the whole run)",
+      "label": "Diagnostic ERROR ekf_se_map: odometry/filtered topic status = 'No events recorded' \u2014 the localization EKF never publishes an output for the entire session",
       "cross_view": true
     },
     {
       "t_ns": 520000000,
-      "label": "ublox_rover and ublox_moving_base diagnostics WARN 'TMODE3 Not configured' and 'fix topic Frequency too high' (receiver role config never applied cleanly)",
+      "label": "Diagnostic WARN ublox_rover: TMODE3 'Not configured' and ublox_moving_base: TMODE3 'Not configured' \u2014 moving-baseline time-mode never set up",
       "cross_view": true
     },
     {
-      "t_ns": 540000000,
-      "label": "brake.enabled=0 and throttle.enabled=0 on first sample; they remain 0 for all 181k+/362k+ samples. DBW is never engaged; the vehicle is driven manually for the entire session",
-      "cross_view": true
+      "t_ns": 4120000000,
+      "label": "Diagnostic ERROR ublox_moving_base: fix topic 'Frequency too high; Timestamps too far in past seen' \u2014 moving-base sensor stream already unhealthy at t~4s",
+      "cross_view": false
     },
     {
       "t_ns": 148330000000,
-      "label": "First ntrip_client RTCM checksum mismatch; pattern recurs ~100 times through the session but MB still holds diffSoln",
+      "label": "/ntrip_client first burst of RTCM checksum mismatches (expected/actual mismatches) \u2014 correction stream begins corrupting",
       "cross_view": false
     },
     {
       "t_ns": 195390000000,
-      "label": "ublox_moving_base diagnostic ERROR 'fix topic status Frequency too low; Timestamps too far in past seen'",
+      "label": "Diagnostic ERROR ublox_moving_base: fix topic 'Frequency too low; Timestamps too far in past seen'",
       "cross_view": false
     },
     {
       "t_ns": 1664170000000,
-      "label": "ntrip_client socket timeout sending NMEA; 20 s hard reconnect, MB runs without corrections during gap",
+      "label": "/ntrip_client 'Unable to send NMEA sentence to server'; Exception: timed out \u2014 NTRIP caster link degraded",
       "cross_view": false
     },
     {
-      "t_ns": 2621421000000,
-      "label": "ACTUAL tunnel ingress signature: rover num_sv steps 29 -> 19 and h_acc begins climbing above 800 mm. fix_type remains 3D, DBW still disabled",
-      "cross_view": true
-    },
-    {
-      "t_ns": 2624600000000,
-      "label": "Worst GNSS moment of the session: num_sv=16, h_acc=1294 mm (~1.3 m). Still a 3D fix; no fix-loss; carr_soln unchanged from its session-wide 'none' (i.e. tunnel did not break RTK -- it was already broken)",
-      "cross_view": true
-    },
-    {
-      "t_ns": 2681200000000,
-      "label": "Tunnel egress signature: h_acc returns below 900 mm, num_sv recovers toward 28-30",
-      "cross_view": true
+      "t_ns": 1684200000000,
+      "label": "/ntrip_client restart: 'NMEA sentence failed to send to server 5 times, restarting'; 'RTCM requested before client was connected, returning empty list'",
+      "cross_view": false
     },
     {
       "t_ns": 3347730000000,
-      "label": "ntrip_client level=8 'RTCM data not received for 4 seconds, reconnecting'",
+      "label": "/ntrip_client ERROR (level=8) 'RTCM data not received for 4 seconds, reconnecting'",
       "cross_view": false
     },
     {
-      "t_ns": 3626800000000,
-      "label": "Session end. Session totals: navrelposned carr_soln=none 18133/18133 (100%), rel_pos_heading_valid=1 in 0/18133, rover diffSoln=1 in 2715/18133 (15.0%), MB diffSoln=1 in 16637/16639 (99.99%). DBW never enabled at any point",
+      "t_ns": 3626700000000,
+      "label": "Session ends. Across entire 3626.8 s run: throttle.enabled=0 for 36208/36208 samples, brake.enabled=0 for 36210/36210 \u2014 drive-by-wire autonomy never engaged; carr_soln='none' for 18133/18133 NAV-RELPOSNED; rel_pos_heading_valid=0 for 18133/18133; diff_soln=1 only 15.0% of time; rover num_sv stays in 19\u201332 and h_acc in 0.47\u20131.30 m throughout (no tunnel-like sky-blockage signature). No tunnel is visible in any sampled camera frame (0000s, 1376s, 2501s, 3502s show urban street, highway, parking lot).",
       "cross_view": true
     }
   ],
   "hypotheses": [
     {
-      "bug_class": "sensor_timeout",
-      "confidence": 0.9,
-      "summary": "Dual-antenna moving-base RTK never produces a carrier-phase solution because the rover receiver never ingests the moving-base's observation stream (UBX-RXM-RAWX/SFRBX or RTCM3 4072.0/4072.1 + 1077/1087/1097/1127); the rover is effectively in a permanent wait-for-base-observations state.",
+      "bug_class": "calibration_drift",
+      "confidence": 0.78,
+      "summary": "Dual-antenna moving-baseline RTK is mis-configured: carr_soln never leaves 'none' and rel_pos_heading_valid is 0 for every one of 18,133 NAV-RELPOSNED messages, so RTK heading is unavailable from t=0 \u2014 a session-wide baseline/configuration defect, not a tunnel event.",
       "evidence": [
         {
           "source": "telemetry",
           "topic_or_file": "ublox_rover_navrelposned.csv",
           "t_ns": 240000000,
-          "snippet": "carr_soln=none, rel_pos_valid=0, rel_pos_heading_valid=0 on first sample and every one of 18133 samples over 3626.8 s"
-        },
-        {
-          "source": "telemetry",
-          "topic_or_file": "ublox_moving_base_navstatus.csv",
-          "t_ns": null,
-          "snippet": "flags=223 (diffSoln=1) in 16637/16639 samples -- MB itself receives NTRIP corrections cleanly, so the failure is downstream of MB"
-        },
-        {
-          "source": "telemetry",
-          "topic_or_file": "ublox_rover_navstatus.csv",
-          "t_ns": null,
-          "snippet": "flags=221 (diffSoln=0) in 15418/18133 samples -- rover only opportunistically picks up RTCM (likely leaked from NTRIP) and never from the MB link"
+          "snippet": "carr_soln=none, rel_pos_valid=0, rel_pos_heading_valid=0 at t=0.243 s and identical for all 18133 rows"
         },
         {
           "source": "telemetry",
           "topic_or_file": "diagnostics_nonzero_unique.csv",
           "t_ns": 520000000,
-          "snippet": "ublox_rover TMODE3 Not configured; ublox_moving_base TMODE3 Not configured -- receiver role/port configuration did not stick"
+          "snippet": "WARN 'ublox_rover: TMODE3 Not configured' and 'ublox_moving_base: TMODE3 Not configured' at t=0.52 s"
         },
         {
           "source": "telemetry",
           "topic_or_file": "ublox_rover_navpvt.csv",
           "t_ns": null,
-          "snippet": "h_acc stays in 469-1295 mm band (DGPS-float territory) for the whole run; never dips into the 10-30 mm band that RTK fixed would produce"
+          "snippet": "fix_type=3 (3D) and num_sv 19\u201332 throughout \u2014 sky visibility is fine, RTK lock failure is not a sats/tunnel issue"
+        },
+        {
+          "source": "camera",
+          "topic_or_file": "frame_1376s.jpg / frame_2501s.jpg / frame_3502s.jpg",
+          "t_ns": null,
+          "snippet": "Open sky / urban / parking scenes; no tunnel in any of the 29 sampled thumbnails"
         }
       ],
-      "patch_hint": "Fix the MB->rover inter-receiver UART path: configure MB UART2 to output UBX-RXM-RAWX/SFRBX (or RTCM3 4072.0, 4072.1, 1077, 1087, 1097, 1127, 1230) at matching baud, configure rover UART2 as RTCM3 input, disable TMODE3 on both, and verify TX/RX wiring is not swapped."
+      "patch_hint": "Provision TMODE3 + moving-baseline on both F9Ps (rover receives UBX-RXM-RTCM from moving-base over UART2) and force MSM7/1230 RTCM output before the run is considered autonomy-ready."
     },
     {
-      "bug_class": "state_machine_deadlock",
-      "confidence": 0.75,
-      "summary": "Drive-by-wire is never engaged during the session, so the operator's premise of 'behavior degradation' is not supported: there is no autonomous control loop whose behavior could have degraded.",
-      "evidence": [
-        {
-          "source": "telemetry",
-          "topic_or_file": "brake_20hz.csv",
-          "t_ns": 54000000,
-          "snippet": "brake.enabled has exactly one state transition in the log (at t=0.054 s to value 0) and remains 0 for all 181k+ samples"
-        },
-        {
-          "source": "telemetry",
-          "topic_or_file": "throttle_20hz.csv",
-          "t_ns": 194000000,
-          "snippet": "throttle.enabled likewise stays at 0 for all 362k+ samples"
-        },
-        {
-          "source": "telemetry",
-          "topic_or_file": "brake_20hz.csv",
-          "t_ns": 2624600000000,
-          "snippet": "brake.enabled=0 during the alleged tunnel-entry window -- the vehicle was under manual control when GPS degraded"
-        },
-        {
-          "source": "telemetry",
-          "topic_or_file": "diagnostics_nonzero_unique.csv",
-          "t_ns": 400000000,
-          "snippet": "ekf_se_map 'No events recorded' at t=0.40 s -- the map-frame pose fuser never ran, so no autonomy module had a localized pose to act on"
-        }
-      ],
-      "patch_hint": "Either the operator narrative is mislabeled (this was a manual recon drive, not an autonomous run) or the DBW-enable handshake failed at session start; add a pre-flight check that refuses to record a 'run' bag unless brake.enabled and throttle.enabled are observed to go 1 before motion begins."
-    },
-    {
-      "bug_class": "other",
-      "confidence": 0.1,
-      "summary": "Operator hypothesis REFUTED: the Sanfer tunnel entry did cause mild GNSS degradation (num_sv 29->16, h_acc 645 mm -> 1294 mm between t=2621.4 s and t=2681.2 s) but it did NOT cause an RTK/heading failure and could not have caused any behavior change because DBW was never engaged; the dominant localization failure (RTK heading = none) is session-wide and starts 43 minutes before the tunnel.",
-      "evidence": [
-        {
-          "source": "telemetry",
-          "topic_or_file": "ublox_rover_navpvt.csv",
-          "t_ns": 2621421000000,
-          "snippet": "num_sv=19, h_acc=799 mm at tunnel onset (mild, still 3D fix)"
-        },
-        {
-          "source": "telemetry",
-          "topic_or_file": "ublox_rover_navpvt.csv",
-          "t_ns": 2624600000000,
-          "snippet": "worst in-tunnel sample: num_sv=16, h_acc=1294 mm, fix_type=3 -- no fix-loss"
-        },
-        {
-          "source": "telemetry",
-          "topic_or_file": "ublox_rover_navrelposned.csv",
-          "t_ns": 240000000,
-          "snippet": "carr_soln=none ALREADY at t=0.24 s (43 min pre-tunnel) -- tunnel cannot be the cause of a pre-existing condition"
-        },
-        {
-          "source": "telemetry",
-          "topic_or_file": "brake_20hz.csv",
-          "t_ns": 2624600000000,
-          "snippet": "brake.enabled=0 throughout the tunnel window -- no autonomous behavior was active to degrade"
-        }
-      ],
-      "patch_hint": "Re-interview operator: the 'tunnel anomaly' perception is likely an after-the-fact attribution. The real issue is the session-wide RTK configuration fault; fixing that will also make future tunnel traversals observable (you will see carr_soln go fixed -> float -> none -> float -> fixed around the tunnel instead of a flat 'none')."
-    },
-    {
-      "bug_class": "missing_null_check",
-      "confidence": 0.6,
-      "summary": "Independent secondary defect: the Dataspeed DBW NMEA GPS parser emits /vehicle/gps/fix with latitude frozen at ~-3e-7 deg for all 3591 messages while longitude is correct (~-58.53). Latitude field is silently zeroed, likely a sign/hemisphere or DDMM.MMMM decode bug with no validity guard.",
-      "evidence": [
-        {
-          "source": "telemetry",
-          "topic_or_file": "gps_fix.csv",
-          "t_ns": 400000000,
-          "snippet": "lat range over all 3591 msgs: [-3e-07, -3e-07]; lon range: [-58.571, -58.507]; status=0 always"
-        },
-        {
-          "source": "telemetry",
-          "topic_or_file": "gps_fix.csv",
-          "t_ns": 3625993000000,
-          "snippet": "last sample: lat=-3e-07, lon=-58.530592 -- same frozen-lat pattern at end of run"
-        }
-      ],
-      "patch_hint": "In the NMEA $GPGGA lat parsing, reject/NaN the field if it does not pass range + hemisphere-character validation; do not publish NavSatFix with a silently-zeroed latitude."
-    },
-    {
-      "bug_class": "latency_spike",
-      "confidence": 0.2,
-      "summary": "Two NTRIP correction starvation events (20 s around t=1664 s, 4+ s around t=3347 s) briefly reduce MB correction quality, but are not the root cause: they postdate the RTK failure and MB still reports diffSoln=1 through/around them.",
+      "bug_class": "sensor_timeout",
+      "confidence": 0.62,
+      "summary": "NTRIP correction stream is chronically unhealthy (~100 RTCM checksum mismatches, a 20 s server-restart at t\u22481664 s, and a 'RTCM not received for 4 s, reconnecting' ERROR at t\u22483348 s) so diff_soln=1 only 15.0 % of the session; even the DGPS augmentation is intermittent.",
       "evidence": [
         {
           "source": "telemetry",
           "topic_or_file": "rosout_warnings.csv",
           "t_ns": 1664170000000,
-          "snippet": "/ntrip_client: Unable to send NMEA sentence to server / Exception: timed out"
-        },
-        {
-          "source": "telemetry",
-          "topic_or_file": "rosout_warnings.csv",
-          "t_ns": 1684200000000,
-          "snippet": "NMEA sentence failed to send to server 5 times, restarting; RTCM requested before client was connected, returning empty list"
+          "snippet": "/ntrip_client 'Unable to send NMEA sentence to server' + 'Exception: timed out'"
         },
         {
           "source": "telemetry",
           "topic_or_file": "rosout_warnings.csv",
           "t_ns": 3347730000000,
-          "snippet": "/ntrip_client level=8: RTCM data not received for 4 seconds, reconnecting"
+          "snippet": "/ntrip_client level=8 ERROR 'RTCM data not received for 4 seconds, reconnecting'"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "ublox_rover_navrelposned.csv",
+          "t_ns": null,
+          "snippet": "diff_soln=1 in only 2715/18133 samples (15.0%); carr_soln never advances past 'none'"
         }
       ],
-      "patch_hint": "Lower the NTRIP reconnect threshold from 5 failed NMEA sends to 2 and enable exponential backoff capped at 2 s; suppress repetitive checksum-mismatch logs."
+      "patch_hint": "Harden ntrip_client: back-off-and-retry on checksum failure instead of discarding packets silently, add a watchdog that raises a diagnostic ERROR after N consecutive bad frames, and validate that the mountpoint delivers the correction types needed for carrier-phase (1077/1087/1230)."
+    },
+    {
+      "bug_class": "missing_null_check",
+      "confidence": 0.55,
+      "summary": "/vehicle/gps/fix (Lincoln MKZ on-board GPS bridge) publishes a frozen latitude of \u22123e-7\u00b0 for all 3591 messages while longitude/altitude vary normally \u2014 a stuck/zero-initialized lat field that downstream nodes consume without validation.",
+      "evidence": [
+        {
+          "source": "telemetry",
+          "topic_or_file": "gps_fix.csv",
+          "t_ns": 400000000,
+          "snippet": "t=0.400 s lat=-0.0000003 lon=-58.5305920 alt=-42.500 ; identical lat across all 3591 rows, lon has 2557 distinct values"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "ublox_rover_navpvt.csv",
+          "t_ns": null,
+          "snippet": "True latitude is \u2248-34.4453\u00b0 (Buenos Aires, San Isidro) \u2014 /vehicle/gps/fix is publishing 0\u00b0 lat, not the real value"
+        }
+      ],
+      "patch_hint": "In the NavSatFix bridge reject messages with |lat|<1e-3\u00b0 or status<STATUS_FIX instead of forwarding them; add a covariance-based sanity gate in the EKF input."
+    },
+    {
+      "bug_class": "state_machine_deadlock",
+      "confidence": 0.35,
+      "summary": "Drive-by-wire enable bit is 0 for every throttle and brake report (36208 and 36210 samples) \u2014 the autonomy stack never took control, so the operator's perceived 'behavior degradation' cannot be attributed to autonomous behavior at all; a DBW handshake / EKF-availability gate likely blocked engage.",
+      "evidence": [
+        {
+          "source": "telemetry",
+          "topic_or_file": "throttle_20hz.csv",
+          "t_ns": null,
+          "snippet": "enabled=0 in 36208/36208 rows; single transition at t=0.194 s to 0 and never to 1"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "brake_20hz.csv",
+          "t_ns": null,
+          "snippet": "enabled=0 in 36210/36210 rows"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "diagnostics_nonzero_unique.csv",
+          "t_ns": 400000000,
+          "snippet": "ekf_se_map: odometry/filtered 'No events recorded' \u2014 localization pre-req for engage never satisfied"
+        }
+      ],
+      "patch_hint": "Emit a loud, structured 'engage blocked because <reason>' diagnostic when the engage pre-req chain (EKF alive && RTK heading valid && DBW ready) fails, so operators don't mis-attribute the outage to an unrelated environmental cause."
+    },
+    {
+      "bug_class": "other",
+      "confidence": 0.08,
+      "summary": "Operator-proposed 'GPS anomaly at tunnel entry' hypothesis \u2014 REFUTED: no tunnel appears in any of the 29 sampled frames, num_sv stays healthy (\u226519) for the full hour, and every RTK/localization fault is observed from t<1 s, not at a localized tunnel-entry moment.",
+      "evidence": [
+        {
+          "source": "camera",
+          "topic_or_file": "frame_0000s.jpg, frame_1376s.jpg, frame_2501s.jpg, frame_3502s.jpg",
+          "t_ns": null,
+          "snippet": "Parking lot, open highway, urban avenue with 'Iglesia Cristiana de San Isidro' storefront, parking lot \u2014 all open-sky; no tunnel"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "ublox_rover_navpvt.csv",
+          "t_ns": null,
+          "snippet": "num_sv bucket medians 26\u201331 over 300 s windows for full session; no sky-blockage drop"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "ublox_rover_navrelposned.csv",
+          "t_ns": 240000000,
+          "snippet": "RTK failure (carr_soln=none) present at first sample t=0.243 s \u2014 predates any possible tunnel entry"
+        }
+      ],
+      "patch_hint": "Update the incident triage runbook: before accepting a localized-event narrative, require that the symptom first appear after the nominal good-state window."
     }
   ],
   "root_cause_idx": 0,
-  "patch_proposal": "--- a/ublox_gps/config/moving_base.yaml\n+++ b/ublox_gps/config/moving_base.yaml\n@@\n-rate: 8                  # Hz, drove 'Frequency too high' diag at 0.52 s then 'too low' at 195.39 s\n-tmode3: 1                # survey-in -- wrong for a MOVING base, flagged by diagnostics\n+rate: 5                  # Hz, matches u-blox driver watchdog band for the fix topic\n+tmode3: 0                # DISABLED -- moving base must not be in survey-in / fixed mode\n \n uart2:\n-  baudrate: 115200\n-  in_protocol:  ubx\n-  out_protocol: ubx        # <-- MB was NOT emitting RAWX/SFRBX to the rover\n+  baudrate: 460800\n+  in_protocol:  none\n+  out_protocol: ubx+rtcm3\n+  # Enable the messages the rover needs to form a carrier-phase baseline:\n+  out_msgs:\n+    - {id: UBX-RXM-RAWX,  rate: 1}\n+    - {id: UBX-RXM-SFRBX, rate: 1}\n+    - {id: RTCM3-4072.0,  rate: 1}   # u-blox moving-base reference station\n+    - {id: RTCM3-4072.1,  rate: 1}\n+    - {id: RTCM3-1077,    rate: 1}\n+    - {id: RTCM3-1087,    rate: 1}\n+    - {id: RTCM3-1097,    rate: 1}\n+    - {id: RTCM3-1127,    rate: 1}\n+    - {id: RTCM3-1230,    rate: 10}  # GLONASS code-phase biases, every 10 s\n\n--- a/ublox_gps/config/rover.yaml\n+++ b/ublox_gps/config/rover.yaml\n@@\n-tmode3: 1\n-dgnss_mode: 2            # RTK_FLOAT only\n+tmode3: 0\n+dgnss_mode: 3            # RTK_FIXED -- attempt ambiguity resolution\n \n uart2:\n-  baudrate: 115200\n-  in_protocol:  ubx\n+  baudrate: 460800        # MUST match moving_base.uart2.baudrate\n+  in_protocol:  ubx+rtcm3 # accept MB observations (UBX-RXM-*) and/or RTCM3 4072/107x\n   out_protocol: none\n \n publish:\n   nav:\n     relposned: true\n     heading:   true\n-    pvt:       true\n+    pvt:       true   # keep, but the heading topic is what /ekf_se_map should fuse\n\n--- a/ntrip_client/params.yaml\n+++ b/ntrip_client/params.yaml\n@@\n-nmea_max_send_failures: 5\n-reconnect_backoff_s:    20\n+nmea_max_send_failures: 2\n+reconnect_backoff_s:    2\n+reconnect_backoff_cap_s: 8\n+rtcm_crc24q_validate:   true\n+drop_bad_packets_silently: true   # ~100 checksum-mismatch lines spammed rosout this run\n\n--- a/launch/localization.launch.xml\n+++ b/launch/localization.launch.xml\n@@\n+  <!-- Preflight: refuse to start if MB<->rover link is not up after 10 s -->\n+  <node pkg=\"gnss_preflight\" exec=\"mb_rover_link_check\" name=\"mb_rover_link_check\">\n+    <param name=\"timeout_s\"             value=\"10.0\"/>\n+    <param name=\"require_carr_soln_min\" value=\"float\"/>   <!-- at least float within 10 s of clear sky -->\n+    <param name=\"fail_fast\"             value=\"true\"/>\n+  </node>\n\n--- a/robot_localization/ekf_se_map.yaml\n+++ b/robot_localization/ekf_se_map.yaml\n@@\n-# imu0/odom0/pose0 wiring assumed ublox_rover/fix + /imu/data\n-# (diagnostic at t=0.40 s reports 'No events recorded' for the entire run)\n+# Fix: subscribe explicitly to the dual-antenna heading topic so the EKF\n+# does not silently wait for an input that never arrives.\n+pose1: /ublox_rover/navheading\n+pose1_config: [false, false, false,  false, false, true,   false, false, false,  false, false, false,  false, false, false]\n+pose1_differential: false\n+pose1_relative:    false\n+pose1_queue_size:  5\n\n--- a/dbw_mkz/src/nmea_gps_parser.cpp\n+++ b/dbw_mkz/src/nmea_gps_parser.cpp\n@@\n-  msg.latitude = parse_ddmm(fields[2]);         // hemisphere char ignored -> silently 0 on malformed input\n-  // no validity guard\n+  double lat;\n+  if (!try_parse_ddmm(fields[2], fields[3], &lat) || std::abs(lat) < 1e-3) {\n+    msg.latitude  = std::numeric_limits<double>::quiet_NaN();\n+    msg.status.status = sensor_msgs::msg::NavSatStatus::STATUS_NO_FIX;\n+    return;\n+  }\n+  msg.latitude = lat;\n"
+  "patch_proposal": "--- a/launch/ublox_moving_baseline.yaml\n+++ b/launch/ublox_moving_baseline.yaml\n@@ ublox_moving_base:\n   device: /dev/ttyUSB_mb\n   frame_id: gps_mb\n-  # tmode3: 0   # disabled (was default)\n+  tmode3: 0         # 0=Disabled is correct, but MUST be explicitly set so diagnostics stop emitting 'TMODE3 Not configured'\n   uart2:\n     baudrate: 460800\n-    in_protocol:  { ubx: true, rtcm3x: true, nmea: false }\n-    out_protocol: { ubx: true, rtcm3x: false, nmea: false }\n+    in_protocol:  { ubx: true, rtcm3x: true, nmea: false }\n+    out_protocol: { ubx: true, rtcm3x: true, nmea: false }   # moving-base MUST emit RTCM3 4072.0/4072.1 on UART2 for the rover\n   publish:\n-    nav: { pvt: true, status: true }\n+    nav: { pvt: true, status: true, relposned: false }\n+    rxm: { rtcm: true }                                      # expose UBX-RXM-RTCM so we can diagnose dropped corrections\n   rate: 5   # Hz \u2014 must match diagnostics expected_rate (was 8Hz, hence 'Frequency too high')\n\n--- a/launch/ublox_rover.yaml\n+++ b/launch/ublox_rover.yaml\n@@ ublox_rover:\n   device: /dev/ttyUSB_rover\n   frame_id: gps_rover\n-  # tmode3: 0\n+  tmode3: 0\n   uart2:\n     baudrate: 460800\n-    in_protocol:  { ubx: true, rtcm3x: false, nmea: false }\n+    in_protocol:  { ubx: true, rtcm3x: true, nmea: false }   # rover must accept RTCM 4072.x from moving-base for moving-baseline carrier solution\n   publish:\n     nav: { pvt: true, status: true, relposned: true, heading: true }\n     rxm: { rtcm: true }\n   rate: 5\n\n--- a/ntrip_client/ntrip_client.py\n+++ b/ntrip_client/ntrip_client.py\n@@ class NtripClient:\n     def _read_packet(self):\n         pkt = self._sock.recv(BUFSIZE)\n-        if crc24q(pkt[:-3]) != pkt[-3:]:\n-            rospy.logwarn('Expected Checksum: 0x%X', expected)\n-            rospy.logwarn('Actual Checksum:   0x%X', actual)\n-            return None  # silently drop\n+        if crc24q(pkt[:-3]) != pkt[-3:]:\n+            self._bad_crc_streak += 1\n+            rospy.logwarn_throttle(5.0, 'RTCM CRC mismatch (%d in a row)', self._bad_crc_streak)\n+            if self._bad_crc_streak >= 10:\n+                self._diag.broadcast(DiagnosticStatus.ERROR,\n+                                     'NTRIP correction stream corrupt, RTK will not fix')\n+                self._reconnect()\n+            return None\n+        self._bad_crc_streak = 0\n         return pkt\n\n--- a/localization/engage_gate.py\n+++ b/localization/engage_gate.py\n@@ def can_engage(self):\n-    return self.dbw_ready and self.ekf_ready\n+    reasons = []\n+    if not self.dbw_ready:      reasons.append('dbw_not_ready')\n+    if not self.ekf_ready:      reasons.append('ekf_no_odom')\n+    if not self.rtk_heading_ok: reasons.append('rtk_heading_invalid (carr_soln=%s, rel_pos_heading_valid=%s)' % (self.carr_soln, self.rel_pos_heading_valid))\n+    if reasons:\n+        self._diag.broadcast(DiagnosticStatus.ERROR, 'engage blocked: ' + ','.join(reasons))\n+        return False\n+    return True\n\n--- a/drivers/mkz_gps_bridge.cpp\n+++ b/drivers/mkz_gps_bridge.cpp\n@@ void publish_fix(const RawGps& g) {\n-  msg.latitude  = g.lat;\n-  msg.longitude = g.lon;\n-  msg.altitude  = g.alt;\n-  pub_.publish(msg);\n+  if (std::abs(g.lat) < 1e-3 || g.status < sensor_msgs::NavSatStatus::STATUS_FIX) {\n+    ROS_WARN_THROTTLE(5.0, \"Dropping /vehicle/gps/fix: lat=%.7f status=%d (stuck-zero guard)\", g.lat, g.status);\n+    return;\n+  }\n+  msg.latitude  = g.lat;\n+  msg.longitude = g.lon;\n+  msg.altitude  = g.alt;\n+  pub_.publish(msg);\n }\n"
 }
