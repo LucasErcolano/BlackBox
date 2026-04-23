@@ -1,0 +1,15 @@
+black-box-bench — PUBLIC REPO STATUS
+
+Checked 2026-04-23: no repo exists at github.com/LucasErcolano/black-box-bench
+(or theaayushstha1/black-box-bench).
+
+Creating a public repo is a shared-state action and needs explicit OK, so it
+was NOT auto-created in this asset pass.
+
+Say "create the bench repo" (or run `gh repo create LucasErcolano/black-box-bench --public`)
+and I will push:
+  - README teaser (Why / what / 3 cases / how to reproduce)
+  - fixtures/ directory with the 3 cases' stream_events + analysis.json
+    (sourced from demo_assets/streams/ + demo_assets/analyses/)
+  - LICENSE (MIT per CLAUDE.md note)
+  - A minimal `cases.yaml` index so `black_box.eval` runners can load them.

@@ -1,0 +1,103 @@
+{
+  "timeline": [
+    {
+      "t_ns": 15000000000,
+      "label": "camera fully saturated (white frame)",
+      "cross_view": false
+    },
+    {
+      "t_ns": 45000000000,
+      "label": "ego stopped at gate w/ pedestrian+cart",
+      "cross_view": false
+    },
+    {
+      "t_ns": 75000000000,
+      "label": "still stopped, identical pose",
+      "cross_view": false
+    },
+    {
+      "t_ns": 105000000000,
+      "label": "still stopped, identical pose",
+      "cross_view": false
+    },
+    {
+      "t_ns": 135000000000,
+      "label": "still stopped (~90s dwell)",
+      "cross_view": false
+    },
+    {
+      "t_ns": 165000000000,
+      "label": "resumed motion; pedestrian passes very close to front-left",
+      "cross_view": false
+    },
+    {
+      "t_ns": 405000000000,
+      "label": "close follow behind white Peugeot",
+      "cross_view": false
+    }
+  ],
+  "hypotheses": [
+    {
+      "bug_class": "other",
+      "confidence": 0.75,
+      "summary": "Ego remains stationary for ~90s at a parking-lot egress with a pedestrian and hand-cart in the lane under an already-raised drop-arm barrier, with no observable progress or escalation.",
+      "evidence": [
+        {
+          "source": "camera",
+          "topic_or_file": "frame_0045s.jpg",
+          "t_ns": 45000000000,
+          "snippet": "Ego at gate; barrier arm raised; pedestrian and small cart in near lane; parked sedans left."
+        },
+        {
+          "source": "camera",
+          "topic_or_file": "frame_0075s.jpg",
+          "t_ns": 75000000000,
+          "snippet": "Same viewpoint as t=45s \u2014 hood crest, barrier angle, parked-car positions identical; no yaw/translation."
+        },
+        {
+          "source": "camera",
+          "topic_or_file": "frame_0105s.jpg",
+          "t_ns": 105000000000,
+          "snippet": "Still identical framing; cart shifted a few pixels, ego has not advanced."
+        },
+        {
+          "source": "camera",
+          "topic_or_file": "frame_0135s.jpg",
+          "t_ns": 135000000000,
+          "snippet": "Fourth consecutive 30s-spaced sample with no ego pose change \u2014 ~90s cumulative dwell."
+        }
+      ],
+      "patch_hint": "Add progress watchdog in behavior planner: if v<0.1 m/s with dynamic obstacle in corridor for >15s, attempt bypass/horn; >45s escalate to remote assistance; >90s execute minimum-risk pull-over."
+    },
+    {
+      "bug_class": "other",
+      "confidence": 0.5,
+      "summary": "Forward camera stream is globally saturated at session start, indicating auto-exposure/gain failed to converge for the first ~15-30s.",
+      "evidence": [
+        {
+          "source": "camera",
+          "topic_or_file": "frame_0015s.jpg",
+          "t_ns": 15000000000,
+          "snippet": "Entire image near-white (luma>240); only faint blue LiDAR projection overlay visible \u2014 no scene content recoverable."
+        }
+      ],
+      "patch_hint": "Add camera-health monitor: if median luminance > 240 for >2s, raise SENSOR_DEGRADED and inhibit forward motion until stream recovers; verify AE initial gain/shutter on node start."
+    },
+    {
+      "bug_class": "other",
+      "confidence": 0.35,
+      "summary": "When ego finally resumes motion it passes the previously-blocking pedestrian at very small lateral clearance off the front-left corner.",
+      "evidence": [
+        {
+          "source": "camera",
+          "topic_or_file": "frame_0165s.jpg",
+          "t_ns": 165000000000,
+          "snippet": "Woman in dark dress at extreme left image edge, lower body cropped by hood line \u2014 estimated lateral gap <1 m while ego is moving."
+        }
+      ],
+      "patch_hint": "Enforce minimum lateral clearance (>=1.0 m scaled by speed) around pedestrian-class obstacles in trajectory optimizer; slow or halt if constraint infeasible."
+    }
+  ],
+  "root_cause_idx": 0,
+  "patch_proposal": "Primary: add liveness/progress watchdog to behavior planner with tiered escalation (courtesy signal -> remote assist -> safe pull-over) so ego cannot dwell indefinitely behind a dynamic obstacle. Secondary: camera-saturation health gate and pedestrian lateral-clearance constraint."
+}

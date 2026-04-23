@@ -1,0 +1,5 @@
+{"bug_class":"sensor_timeout","signature":"Dual-antenna moving-base RTK never produces a carrier-phase solu","count":1,"t_logged":"2026-04-23T00:02:17.495951+00:00"}
+{"bug_class":"state_machine_deadlock","signature":"Drive-by-wire is never engaged during the session, so the operat","count":1,"t_logged":"2026-04-23T00:02:17.496086+00:00"}
+{"bug_class":"other","signature":"Operator hypothesis REFUTED: the Sanfer tunnel entry did cause m","count":1,"t_logged":"2026-04-23T00:02:17.496175+00:00"}
+{"bug_class":"missing_null_check","signature":"Independent secondary defect: the Dataspeed DBW NMEA GPS parser ","count":1,"t_logged":"2026-04-23T00:02:17.496255+00:00"}
+{"bug_class":"latency_spike","signature":"Two NTRIP correction starvation events (20 s around t=1664 s, 4+","count":1,"t_logged":"2026-04-23T00:02:17.496332+00:00"}

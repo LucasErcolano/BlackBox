@@ -1,0 +1,17 @@
+L3 TaxonomyCount — snapshot 2026-04-23T00:02:17Z
+Source: data/final_runs/.memory/L3_taxonomy.jsonl
+
+bug_class                    count  exemplar_signature
+---------------------------  -----  -------------------------------------------------
+sensor_timeout                   1  Dual-antenna moving-base RTK never produces a carrier-phase solu…
+state_machine_deadlock           1  Drive-by-wire is never engaged during the session, so the operat…
+missing_null_check               1  Independent secondary defect: the Dataspeed DBW NMEA GPS parser …
+latency_spike                    1  Two NTRIP correction starvation events (20 s around t=1664 s, 4+…
+other                            1  Operator hypothesis REFUTED: the Sanfer tunnel entry did cause m…
+
+Total unique signatures: 5 (all from sanfer_tunnel Tier-1 post-mortem)
+L1 case entries: 1 (sanfer_tunnel)
+
+Note: boat_lidar + car_1 ran as scenario-mining/Tier-2 with bug_class="other" fallback —
+their findings land in L1 case memory but do not populate the taxonomy histogram until a
+Tier-1 post-mortem produces a closed-taxonomy bug_class.
