@@ -4,7 +4,7 @@
 |------|----------------------:|-----------|-----:|---------|----------------|---------------|
 | sanfer_tunnel | 240000000 | sensor_timeout | 0.60 | Moving-baseline RTCM uplink from `/ublox_moving_base` to `/ublox_rover` is silently dead for the whole session — rover's differential-input port never receives MB carrier-phase observations, so `carr_soln` never leaves `none`. A tunnel pass IS visible in frames 2617–2696 s (num_sv 29→16, h_acc 1.3 m), but the autonomy fault pre-existed: it only became operationally visible at the tunnel. | `ublox_rover_navrelposned.csv` + dense cam1 frames 2617–2696 s | Enable RTCM3 4072.0/4072.1 + MSM7 (1077/1087/1097/1127) on MB UART2 and `CFG-UART2INPROT-RTCM3X=1` on rover UART2; add pre-drive diagnostic that blocks launch until `carr_soln ∈ {float,fixed}` for ≥10 s. |
 | boat_lidar | 1756916766957187027 | other | 0.85 | `/lidar_imu` topic declared w/ QoS but msg_count=0 over 416.76s. Platform is LIDAR-only (no GPS/encoder/camera), so IMU silence removes the only inertial reference on an autonomous USV. | `/lidar_imu` (sensor_msgs/msg/Imu) | Enable IMU output in LIDAR driver config (Ouster `imu_port` / Livox `publish_imu_data: true`); add liveness watchdog aborting mission if `/lidar_imu` silent >1s. |
-| car_1 | 45000000000 | other | 0.75 | Ego stationary ~90s at parking-lot egress w/ pedestrian+hand-cart in lane under raised barrier; no escalation or progress. | `frame_0045s..0135s` (identical framing across four 30s-spaced samples) | Progress watchdog in behavior planner: v<0.1 m/s w/ dynamic obstacle for >15s → courtesy; >45s → remote assist; >90s → min-risk pull-over. |
+| car_1 | 20100000000 | state_machine_deadlock | 0.60 | Ego stationary ~130 s at parking-lot barrier/gate (frames 20 s–150 s visually identical — same cars, same pedestrian position, same booth) before finally departing onto the adjacent street. Second vision pass with dense 5 s stride across 0–180 s window confirms the dwell is continuous, not intermittent. | `frame_00020.1s..00150.0s_dense.jpg` (27 dense frames across the dwell) | Planner/controller timeout + operator alert when ego stationary > N s with no lead obstacle inside stop distance; verify closed-gate detection path. |
 
 ## Secondary findings
 
@@ -17,7 +17,7 @@
 ### boat_lidar
 - (0.70, other) 10 Hz PointCloud2 without synchronized IMU → no motion compensation for wave-induced roll/pitch/yaw.
 - (0.55, other) Rosbag recorder subscription raced un-launched or misnamed IMU publisher.
+- *Note: session discovery (`discover_session_assets`) correctly identifies `/mnt/ssd_boat/rosbag2_2025_09_17-14_01_14/` as a single ROS2 sqlite3 bag. No camera stream present, so telemetry-anchored vision re-run is a no-op — pipeline keeps its original metadata-only analysis. Demonstrates the pipeline's graceful degradation path on platforms without cameras.*
 
 ### car_1
-- (0.50, other) Forward camera globally saturated for first ~15-30s (AE/gain didn't converge) — luma>240 in `frame_0015s`.
-- (0.35, other) On motion resume ego passes pedestrian at <1m lateral clearance off front-left.
+- (0.55, other) Forward camera severely overexposed for first ~5 s of the stream (`frame_00015.3s` near-pure white, `frame_00017.6s` partial recovery, normalized by `frame_00020.1s`) — AE didn't converge before recording started. Gate perception consumers behind an AE-converged check.

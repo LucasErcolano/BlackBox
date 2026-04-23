@@ -6,7 +6,7 @@ Frames extracted directly from operator-supplied ROS bags — this is the raw pi
 
 Source bag: `1_cam-lidar.bag`, duration 970.2 s, topic `/cam1/image_raw/compressed` (29 109 msgs @ ~30 Hz).
 
-Sampled by the ingestion pipeline at 30 s intervals → 32 JPGs. This is the exact same frame set the vision pipeline saw when producing `data/final_runs/car_1/analysis.json`.
+**Legacy uniform sample** (retired): 32 JPGs at 30 s intervals are still shipped in this dir for demo-script continuity. The production pipeline now uses 48 telemetry-anchored frames (8 baseline + 40 dense) generated via `scripts/extract_session_frames.py`, anchored on the timeline windows [15-180 s] (overexposure + 130 s dwell) and [390-420 s] (close follow). Native pipeline output lives in `data/final_runs/car_1/bundle/frames/`.
 
 | file | what |
 |------|------|

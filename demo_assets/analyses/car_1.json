@@ -1,103 +1,108 @@
 {
   "timeline": [
     {
-      "t_ns": 15000000000,
-      "label": "camera fully saturated (white frame)",
+      "t_ns": 15300000000,
+      "label": "camera fully blown-out (saturated white)",
       "cross_view": false
     },
     {
-      "t_ns": 45000000000,
-      "label": "ego stopped at gate w/ pedestrian+cart",
+      "t_ns": 17600000000,
+      "label": "exposure partially recovers, scene still washed",
       "cross_view": false
     },
     {
-      "t_ns": 75000000000,
-      "label": "still stopped, identical pose",
+      "t_ns": 20100000000,
+      "label": "first usable frame: ego stopped at parking-lot barrier/gate",
       "cross_view": false
     },
     {
-      "t_ns": 105000000000,
-      "label": "still stopped, identical pose",
+      "t_ns": 150000000000,
+      "label": "after ~130 s, ego still at identical barrier pose (stuck scene)",
       "cross_view": false
     },
     {
-      "t_ns": 135000000000,
-      "label": "still stopped (~90s dwell)",
-      "cross_view": false
-    },
-    {
-      "t_ns": 165000000000,
-      "label": "resumed motion; pedestrian passes very close to front-left",
-      "cross_view": false
-    },
-    {
-      "t_ns": 405000000000,
-      "label": "close follow behind white Peugeot",
+      "t_ns": 180000000000,
+      "label": "ego has finally moved onto adjacent street",
       "cross_view": false
     }
   ],
   "hypotheses": [
     {
-      "bug_class": "other",
-      "confidence": 0.75,
-      "summary": "Ego remains stationary for ~90s at a parking-lot egress with a pedestrian and hand-cart in the lane under an already-raised drop-arm barrier, with no observable progress or escalation.",
+      "bug_class": "state_machine_deadlock",
+      "confidence": 0.6,
+      "summary": "Ego vehicle remains at the same parking-lot barrier/gate pose for ~130 s (frames 20 s\u2013150 s are visually near-identical) before proceeding, suggesting a prolonged idle/stuck state at the gate.",
       "evidence": [
         {
           "source": "camera",
-          "topic_or_file": "frame_0045s.jpg",
-          "t_ns": 45000000000,
-          "snippet": "Ego at gate; barrier arm raised; pedestrian and small cart in near lane; parked sedans left."
+          "topic_or_file": "frame_00020.1s_dense.jpg",
+          "t_ns": 20100000000,
+          "snippet": "Ego stopped facing boom barrier with parked cars on left and gate ticket booth ahead."
         },
         {
           "source": "camera",
-          "topic_or_file": "frame_0075s.jpg",
-          "t_ns": 75000000000,
-          "snippet": "Same viewpoint as t=45s \u2014 hood crest, barrier angle, parked-car positions identical; no yaw/translation."
+          "topic_or_file": "frame_00050.1s_dense.jpg",
+          "t_ns": 50100000000,
+          "snippet": "Identical viewpoint 30 s later \u2014 same cars, same barrier, same pedestrian position \u2014 no measurable ego motion."
         },
         {
           "source": "camera",
-          "topic_or_file": "frame_0105s.jpg",
-          "t_ns": 105000000000,
-          "snippet": "Still identical framing; cart shifted a few pixels, ego has not advanced."
+          "topic_or_file": "frame_00100.1s_dense.jpg",
+          "t_ns": 100100000000,
+          "snippet": "Still identical parking-lot/barrier scene ~80 s after first usable frame."
         },
         {
           "source": "camera",
-          "topic_or_file": "frame_0135s.jpg",
-          "t_ns": 135000000000,
-          "snippet": "Fourth consecutive 30s-spaced sample with no ego pose change \u2014 ~90s cumulative dwell."
+          "topic_or_file": "frame_00180.0s_dense.jpg",
+          "t_ns": 180000000000,
+          "snippet": "Scene finally changes \u2014 ego has departed onto adjacent residential street."
         }
       ],
-      "patch_hint": "Add progress watchdog in behavior planner: if v<0.1 m/s with dynamic obstacle in corridor for >15s, attempt bypass/horn; >45s escalate to remote assistance; >90s execute minimum-risk pull-over."
+      "patch_hint": "Check planner/controller behavior at closed gates; add timeout + operator alert if ego is stationary >N s with no lead obstacle within stop distance.",
+      "notes": [
+        "original_class=stuck_planner"
+      ],
+      "evidence_refs": [
+        "frame_00020.1s_dense.jpg",
+        "frame_00050.1s_dense.jpg",
+        "frame_00100.1s_dense.jpg",
+        "frame_00180.0s_dense.jpg"
+      ]
     },
     {
       "bug_class": "other",
-      "confidence": 0.5,
-      "summary": "Forward camera stream is globally saturated at session start, indicating auto-exposure/gain failed to converge for the first ~15-30s.",
+      "confidence": 0.55,
+      "summary": "Initial ~5 s of camera stream is severely overexposed (near-pure-white), indicating auto-exposure convergence failure or recording started before ISP stabilized.",
       "evidence": [
         {
           "source": "camera",
-          "topic_or_file": "frame_0015s.jpg",
-          "t_ns": 15000000000,
-          "snippet": "Entire image near-white (luma>240); only faint blue LiDAR projection overlay visible \u2014 no scene content recoverable."
-        }
-      ],
-      "patch_hint": "Add camera-health monitor: if median luminance > 240 for >2s, raise SENSOR_DEGRADED and inhibit forward motion until stream recovers; verify AE initial gain/shutter on node start."
-    },
-    {
-      "bug_class": "other",
-      "confidence": 0.35,
-      "summary": "When ego finally resumes motion it passes the previously-blocking pedestrian at very small lateral clearance off the front-left corner.",
-      "evidence": [
+          "topic_or_file": "frame_00015.3s_dense.jpg",
+          "t_ns": 15300000000,
+          "snippet": "Almost entirely saturated white image; only faint foliage edges visible."
+        },
         {
           "source": "camera",
-          "topic_or_file": "frame_0165s.jpg",
-          "t_ns": 165000000000,
-          "snippet": "Woman in dark dress at extreme left image edge, lower body cropped by hood line \u2014 estimated lateral gap <1 m while ego is moving."
+          "topic_or_file": "frame_00017.6s_dense.jpg",
+          "t_ns": 17600000000,
+          "snippet": "Still heavily blown out; partial recovery, parked cars barely resolvable at edges."
+        },
+        {
+          "source": "camera",
+          "topic_or_file": "frame_00020.1s_dense.jpg",
+          "t_ns": 20100000000,
+          "snippet": "Exposure has normalized \u2014 scene now correctly exposed."
         }
       ],
-      "patch_hint": "Enforce minimum lateral clearance (>=1.0 m scaled by speed) around pedestrian-class obstacles in trajectory optimizer; slow or halt if constraint infeasible."
+      "patch_hint": "Reject / mask perception outputs until AE has converged (e.g., gate on image mean-luma + histogram saturation ratio) and/or pre-warm the camera before autonomy-engage.",
+      "notes": [
+        "original_class=sensor_exposure"
+      ],
+      "evidence_refs": [
+        "frame_00015.3s_dense.jpg",
+        "frame_00017.6s_dense.jpg",
+        "frame_00020.1s_dense.jpg"
+      ]
     }
   ],
   "root_cause_idx": 0,
-  "patch_proposal": "Primary: add liveness/progress watchdog to behavior planner with tiered escalation (courtesy signal -> remote assist -> safe pull-over) so ego cannot dwell indefinitely behind a dynamic obstacle. Secondary: camera-saturation health gate and pedestrian lateral-clearance constraint."
+  "patch_proposal": "Primary concern: ego remained stationary at the parking-lot barrier for ~130 s \u2014 validate whether the planner correctly detected a closed gate and whether human takeover was required; add a stuck-state detector with operator alert. Secondary: guard perception consumers against the ~5 s of saturated-white camera frames at session start (likely AE not yet converged)."
 }

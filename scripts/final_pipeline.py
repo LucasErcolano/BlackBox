@@ -598,13 +598,24 @@ def extract_boat(out_dir: Path) -> dict:
 
 def extract_camlidar_generic(bag_path: Path, case_name: str, out_dir: Path,
                              target_dt_s: float = 30.0, max_frames: int = 40) -> dict:
-    """Generic extractor for huge car cam-lidar bags — topics + sparse frames."""
+    """Generic extractor for huge car cam-lidar bags — topics + sparse frames.
+
+    If frames/frame_*.jpg already exist (e.g. pre-extracted via
+    scripts/extract_session_frames.py with telemetry-anchored windows),
+    reuses them instead of re-sampling uniformly. Topics + summary are
+    still regenerated from the bag.
+    """
     frames_dir = out_dir / "frames"
     frames_dir.mkdir(exist_ok=True)
     artifacts: list[str] = []
     topics_txt: list[str] = [f"# {bag_path.name}"]
     frame_count = 0
     duration_s = 0.0
+
+    existing_frames = sorted(frames_dir.glob("frame_*.jpg"))
+    reuse = bool(existing_frames)
+    if reuse:
+        log(f"  reusing {len(existing_frames)} pre-extracted frames from {frames_dir}")
 
     with AnyReader([bag_path]) as r:
         start_ns = int(r.start_time)
@@ -626,6 +637,12 @@ def extract_camlidar_generic(bag_path: Path, case_name: str, out_dir: Path,
         if image_conns:
             chosen = image_conns[0]
             topics_txt.append(f"# chosen frame topic: {chosen.topic}")
+        if reuse:
+            for p in existing_frames:
+                artifacts.append(f"frames/{p.name}")
+            frame_count = len(existing_frames)
+        elif image_conns:
+            chosen = image_conns[0]
             last_kept_s = -999.0
             frame_deadline = time.monotonic() + 240.0
             for conn, t_ns, raw in r.messages(connections=[chosen]):
@@ -775,6 +792,83 @@ class BagSpec:
     prompt: str
     cost_cap_usd: float
     extra_config: dict | None = None
+
+
+_BUG_CLASS_REMAP = {
+    # Closed-set taxonomy shim: models occasionally propose descriptive labels
+    # that aren't in the enum. Map them rather than discarding the analysis.
+    "stuck_planner": "state_machine_deadlock",
+    "planner_stuck": "state_machine_deadlock",
+    "sensor_exposure": "other",
+    "ae_convergence": "other",
+    "auto_exposure": "other",
+    "overexposed": "other",
+    "exposure_failure": "other",
+    "gnss_dropout": "sensor_timeout",
+    "rtk_failure": "sensor_timeout",
+    "gps_dropout": "sensor_timeout",
+    "tunnel_dropout": "sensor_timeout",
+    "frozen_sensor": "missing_null_check",
+    "stale_data": "sensor_timeout",
+}
+
+
+def _salvage_from_stream(stream_events_path: Path, case_name: str) -> dict | None:
+    """Reconstruct a PostMortemReport from raw assistant text.
+
+    When the model emits a response that contains the JSON but prepends a
+    disclaimer or uses a bug_class outside the closed set, session.finalize
+    rejects the whole payload. This helper:
+      1. scans the stream events jsonl for assistant text blocks,
+      2. picks the one with the largest JSON-looking substring,
+      3. remaps non-enum bug_class values via _BUG_CLASS_REMAP (or 'other'),
+      4. returns the parsed dict so the downstream reporter can use it.
+    Returns None if nothing salvageable.
+    """
+    import re
+    try:
+        events = [json.loads(l) for l in open(stream_events_path)]
+    except Exception:
+        return None
+    best: str | None = None
+    for ev in events:
+        if ev.get("type") != "assistant":
+            continue
+        text = ev.get("payload", {}).get("text", "") or ""
+        m = re.search(r"\{.*\}", text, re.DOTALL)
+        if not m:
+            continue
+        cand = m.group(0)
+        if best is None or len(cand) > len(best):
+            best = cand
+    if not best:
+        return None
+    try:
+        data = json.loads(best)
+    except Exception:
+        return None
+    if not isinstance(data, dict) or "hypotheses" not in data:
+        return None
+
+    valid = {"pid_saturation", "sensor_timeout", "state_machine_deadlock",
+             "bad_gain_tuning", "missing_null_check", "calibration_drift",
+             "latency_spike", "sensor_dropout", "config_error",
+             "degraded_state_estimation", "communication_failure", "other"}
+    for h in data.get("hypotheses", []):
+        bc = h.get("bug_class", "other")
+        if bc in valid:
+            continue
+        mapped = _BUG_CLASS_REMAP.get(bc, "other")
+        h["bug_class"] = mapped
+        notes = h.setdefault("notes", [])
+        if isinstance(notes, list):
+            notes.append(f"remapped_from={bc}")
+        if "evidence" in h and "evidence_refs" not in h:
+            h["evidence_refs"] = [
+                e.get("topic_or_file") or e.get("source", "") for e in h["evidence"]
+            ]
+    log(f"[{case_name}] salvaged {len(data.get('hypotheses', []))} hypotheses")
+    return data
 
 
 def run_bag(spec: BagSpec, memory: MemoryStack, global_budget_remaining: float) -> dict:
@@ -948,12 +1042,24 @@ def run_bag(spec: BagSpec, memory: MemoryStack, global_budget_remaining: float) 
                         f"{len(report_payload.get('hypotheses', []))} hypotheses")
                 except Exception as e2:
                     log(f"[{spec.name}] finalize still failed after retry: {e2}")
-                    status = "finalize_failed"
-                    error_msg = str(e2)[:400]
+                    report_payload = _salvage_from_stream(stream_events_path, spec.name)
+                    if report_payload is not None:
+                        log(f"[{spec.name}] SALVAGED from stream — "
+                            f"{len(report_payload.get('hypotheses', []))} hypotheses")
+                        status = "salvaged_finalize_failure"
+                    else:
+                        status = "finalize_failed"
+                        error_msg = str(e2)[:400]
             else:
                 log(f"[{spec.name}] finalize failed: {e}")
-                status = "finalize_failed"
-                error_msg = msg[:400]
+                report_payload = _salvage_from_stream(stream_events_path, spec.name)
+                if report_payload is not None:
+                    log(f"[{spec.name}] SALVAGED from stream — "
+                        f"{len(report_payload.get('hypotheses', []))} hypotheses")
+                    status = "salvaged_finalize_failure"
+                else:
+                    status = "finalize_failed"
+                    error_msg = msg[:400]
     except Exception as e:
         log(f"[{spec.name}] session exception: {e}")
         traceback.print_exc()
