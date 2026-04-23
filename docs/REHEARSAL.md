@@ -71,6 +71,12 @@ Pre-answered, 2 sentences each:
 **"What happens on a bug class you don't know?"**
 > The tool reports the evidence and labels the hypothesis `unknown`. No patch emitted. Human takes the handoff.
 
+**"GPS failure isn't in your taxonomy. How does this fit?"**
+> The taxonomy describes failure *mode*, not *sensor*. A GPS failure partitions into one of three modes: `sensor_timeout` (stale / no fix / dropouts), `calibration_drift` (dual-antenna baseline, wheel-odom sync), or `missing_null_check` (downstream consumer not validating freshness or fix quality). The sanfer hero case is exactly this — rover antenna never resolves, NTRIP flapping, downstream bridge publishes a frozen latitude: three different bug classes, one broken GPS pipeline.
+
+**"Your first analysis missed the camera. How do you know you aren't missing more?"**
+> Two-pass discipline is in the system now. Pass 1 is telemetry-only and produces a timeline of suspect moments. Pass 2 extracts vision *anchored on those timestamps* — not uniform stride. A single AnyReader pass, so the 27-minute index build on the 364 GB cam-lidar bag is paid once. Session-folder discovery auto-bundles sibling bags (`2_sensors.bag`, `2_cam-lidar.bag`, `2_audio.wav`, `chrony/`) so an operator handing over a folder does not have to pick the right file.
+
 **"Why Opus 4.7 specifically?"**
 > Hi-res vision handles 3.75 MP without degradation. Prompt caching makes the two-stage pipeline affordable. Cross-view reasoning in a single prompt is the unlock.
 

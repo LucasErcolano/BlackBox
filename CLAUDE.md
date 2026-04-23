@@ -22,8 +22,13 @@ Hackathon project (Built with Opus 4.7). Deadline 2026-04-26 20:00 EST. Solo bui
 - `cache_control` on system prompt + bug taxonomy + few-shot examples. Always.
 - Default image resolution: 800×600 thumbnails. Escalate to 3.75 MP only when explicitly requested by the analysis step.
 - Two-step frame sampling: telemetry timeline → pick suspicious windows → densify frames there only.
+  Implemented by `black_box.analysis.windows.from_timeline` + `black_box.ingestion.frame_sampler.sample_frames` (one AnyReader pass for baseline + windowed dense extraction). Uniform-stride sampling is a bug; never use it for hero runs.
 - 5 cameras in ONE prompt (cross-view reasoning). Never 5 separate calls.
 - Every Claude call logs: cached_input_tokens, uncached_input_tokens, output_tokens, USD cost. Append to `data/costs.jsonl`.
+
+## Session discovery
+- Input is a *folder*, not a single bag. Use `black_box.ingestion.session.discover_session_assets(root)` — it groups sibling `.bag` files by numeric prefix (`2_*.bag`), matches peripheral assets (audio, chrony NTP logs) by mtime window, and excludes historical clutter (old `.webm`, archived `ros_logs/<uuid>/` launch dirs filtered by UUIDv1 timestamp).
+- Never hardcode bag paths in new extractors. Operators hand over whole directories.
 
 ## Bug taxonomy (closed set)
 1. PID saturation / wind-up

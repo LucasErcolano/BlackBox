@@ -20,6 +20,13 @@ from .lidar import (
     decode_pointcloud2,
     top_down_render,
 )
+from .session import (
+    SessionAssets,
+    discover_session_assets,
+    discover_session_bags,
+    describe_session,
+)
+from .frame_sampler import sample_frames
 
 __all__ = [
     "BagData",
@@ -36,4 +43,9 @@ __all__ = [
     "decode_laserscan",
     "decode_pointcloud2",
     "top_down_render",
+    "SessionAssets",
+    "discover_session_assets",
+    "discover_session_bags",
+    "describe_session",
+    "sample_frames",
 ]
