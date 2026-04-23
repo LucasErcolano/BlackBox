@@ -406,12 +406,17 @@ def extract_sanfer(out_dir: Path) -> dict:
                   "throttle_20hz.csv", "brake_20hz.csv"]
 
     # ---- frames from 2_cam-lidar.bag: ~1 fps across whole session -----
-    # NOTE: opening the 363GB cam-lidar bag with rosbags stalls for >4min
-    # on index build. Skip entirely unless SANFER_FRAMES=1. The RTK / diag /
-    # dataspeed evidence is self-sufficient for the forensic analysis.
-    log("  skipping cam-lidar frame extraction (SANFER_FRAMES=0 default)")
+    # If frames already present (pre-extracted out-of-band), reuse them.
+    # Opening the 364GB cam-lidar bag via rosbags takes ~27 min for index
+    # build, so we favor the pre-extracted path.
     frame_count = 0
-    if os.environ.get("SANFER_FRAMES") == "1" and camlidar.exists():
+    existing = sorted(frames_dir.glob("frame_*.jpg"))
+    if existing:
+        for p in existing:
+            artifacts.append(f"frames/{p.name}")
+        frame_count = len(existing)
+        log(f"  reusing {frame_count} pre-extracted cam1 frames from {frames_dir}")
+    elif os.environ.get("SANFER_FRAMES") == "1" and camlidar.exists():
         try:
             with AnyReader([camlidar]) as r:
                 start_ns = int(r.start_time)

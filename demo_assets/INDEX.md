@@ -58,6 +58,7 @@ demo_assets/
 
 - `data/final_runs/sanfer_tunnel/bundle/` frames + per-topic CSVs (~6.4 MB) — NOT copied. Raw ingestion bundles, not demo-visible. Already in-repo.
 - `car_0` run — NOT included. Only `bundle/` exists, no analysis.json/report.pdf. Not a demo case.
+- sanfer_tunnel boat_lidar lidar BEV render — NOT done. PointCloud2 rasterization script would be a small addition but is not required by any demo beat.
 
 ## Sizes
 
