@@ -38,7 +38,3 @@ data/*
 !data/bags/
 !data/synthetic/
 !data/reports/
-
-# Render QC stills are local verification artifacts, not deliverables.
-video_assets/**/qc_frames/
-demo_assets/**/qc_frames/
