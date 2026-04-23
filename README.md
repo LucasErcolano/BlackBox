@@ -85,6 +85,23 @@ sequenceDiagram
     Rep-->>UI: artifacts ready
 ```
 
+## Grounding gate (two exits)
+
+Every hypothesis Claude emits runs through a deterministic post-filter before it reaches the PDF. The gate has two visible exits — refuse the operator narrative, or ship silence — and both are in-tree as demo assets.
+
+```mermaid
+flowchart LR
+    CL[Claude hypotheses] --> G{Grounding gate}
+    G -->|conf &ge; 0.4<br/>&ge;2 evidence rows<br/>&ge;2 distinct sources| KEEP[ship report]
+    G -->|all hypotheses fail| NONE[ship<br/>&quot;nothing anomalous detected&quot;]
+    G -->|telemetry refutes operator| REF[ship refutation<br/>as ranked hypothesis]
+```
+
+- **Refutation exit** — [`demo_assets/grounding_gate/README.md`](demo_assets/grounding_gate/README.md) — sanfer_tunnel: operator said "tunnel caused the anomaly," telemetry said RTK was already degraded 43 min pre-tunnel. The gate promoted the refutation to a ranked hypothesis with its own confidence and patch_hint.
+- **Silence exit** — [`demo_assets/grounding_gate/clean_recording/README.md`](demo_assets/grounding_gate/clean_recording/README.md) — clean recording fed in, model produced four plausible-but-under-evidenced hypotheses, gate dropped all four (one per rule) and shipped `"No anomaly detected with sufficient evidence to support a scoped fix."`
+
+Rules live in `src/black_box/analysis/grounding.py :: GroundingThresholds`. Regenerate the silence-exit fixture with `python scripts/build_grounding_gate_demo.py`.
+
 ## Package layout
 
 ```mermaid

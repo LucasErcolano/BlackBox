@@ -1,0 +1,92 @@
+{
+  "timeline": [
+    {
+      "t_ns": 0,
+      "label": "session start",
+      "cross_view": false
+    },
+    {
+      "t_ns": 180000000000,
+      "label": "session end",
+      "cross_view": false
+    }
+  ],
+  "hypotheses": [
+    {
+      "bug_class": "pid_saturation",
+      "confidence": 0.72,
+      "summary": "Minor overshoot visible on /cmd_vel near t=90s",
+      "evidence": [
+        {
+          "source": "telemetry",
+          "topic_or_file": "/cmd_vel",
+          "t_ns": 90000000000,
+          "snippet": "peak 0.18 m/s, within nominal band"
+        }
+      ],
+      "patch_hint": "clamp max velocity tighter"
+    },
+    {
+      "bug_class": "calibration_drift",
+      "confidence": 0.6,
+      "summary": "Two frames on camera 2 look slightly tilted vs camera 1",
+      "evidence": [
+        {
+          "source": "camera",
+          "topic_or_file": "/cam2/image",
+          "t_ns": 30000000000,
+          "snippet": "horizon tilt ~1deg"
+        },
+        {
+          "source": "camera",
+          "topic_or_file": "/cam2/image",
+          "t_ns": 60000000000,
+          "snippet": "horizon tilt ~1deg"
+        }
+      ],
+      "patch_hint": "recalibrate cam2 extrinsics"
+    },
+    {
+      "bug_class": "other",
+      "confidence": 0.55,
+      "summary": "Ambient vibration signature looks a little noisy",
+      "evidence": [
+        {
+          "source": "telemetry",
+          "topic_or_file": "/imu",
+          "t_ns": 45000000000,
+          "snippet": "accel RMS 0.4 m/s^2"
+        },
+        {
+          "source": "timeline",
+          "topic_or_file": "derived",
+          "t_ns": 45000000000,
+          "snippet": "no correlated control event"
+        }
+      ],
+      "patch_hint": "add vibration damper"
+    },
+    {
+      "bug_class": "latency_spike",
+      "confidence": 0.22,
+      "summary": "One 15ms jitter on /odom",
+      "evidence": [
+        {
+          "source": "telemetry",
+          "topic_or_file": "/odom",
+          "t_ns": 120000000000,
+          "snippet": "dt 15ms vs 10ms nominal"
+        },
+        {
+          "source": "timeline",
+          "topic_or_file": "derived",
+          "t_ns": 120000000000,
+          "snippet": "isolated single sample"
+        }
+      ],
+      "patch_hint": "widen odom latency budget"
+    }
+  ],
+  "root_cause_idx": 0,
+  "patch_proposal": "clamp velocity + recalibrate cam2 + damp vibration"
+}
