@@ -1,0 +1,25 @@
+{
+  "id": "grounding_gate_dual_exit",
+  "title": "Grounding Gate - Refutation and Silence",
+  "phase": 1,
+  "kind": "non_ui_clip",
+  "primary_asset": "grounding_gate_dual_exit.mp4",
+  "preview_still": "grounding_gate_dual_exit_preview.png",
+  "duration_s": 12.0,
+  "fps": 24,
+  "resolution": {
+    "width": 1920,
+    "height": 1080
+  },
+  "ui_independent": true,
+  "final_ready": true,
+  "script": "scripts/render_phase1_grounding_gate_dual_exit.py",
+  "source_artifacts": [
+    "demo_assets/grounding_gate/README.md",
+    "demo_assets/analyses/sanfer_tunnel.json",
+    "demo_assets/grounding_gate/clean_recording/drop_reasons.json",
+    "demo_assets/grounding_gate/clean_recording/gated_report.json",
+    "docs/assets/rtk_numsv.png",
+    "black-box-bench/cases/rtk_heading_break_01/telemetry.npz"
+  ]
+}
