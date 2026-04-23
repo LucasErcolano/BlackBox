@@ -1,0 +1,41 @@
+{
+  "model": "claude-opus-4-7",
+  "timestamp_utc": "20260423T140758Z",
+  "budget_usd": 20.0,
+  "n_cases": 3,
+  "n_match": 2,
+  "accuracy": 0.6666666666666666,
+  "total_cost_usd": 0.45660150000000005,
+  "rows": [
+    {
+      "case_key": "bad_gain_01",
+      "ground_truth_bug": "bad_gain_tuning",
+      "predicted_bug": "bad_gain_tuning",
+      "match": true,
+      "confidence": 0.88,
+      "cost_usd": 0.19041750000000002,
+      "wall_time_s": 27.816136121749878,
+      "notes": "ok"
+    },
+    {
+      "case_key": "pid_saturation_01",
+      "ground_truth_bug": "pid_saturation",
+      "predicted_bug": "pid_saturation",
+      "match": true,
+      "confidence": 0.78,
+      "cost_usd": 0.12926700000000002,
+      "wall_time_s": 22.508201837539673,
+      "notes": "ok"
+    },
+    {
+      "case_key": "sensor_timeout_01",
+      "ground_truth_bug": "sensor_timeout",
+      "predicted_bug": "bad_gain_tuning",
+      "match": false,
+      "confidence": 0.78,
+      "cost_usd": 0.136917,
+      "wall_time_s": 22.09611701965332,
+      "notes": "ok"
+    }
+  ]
+}
