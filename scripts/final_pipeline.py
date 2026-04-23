@@ -46,7 +46,7 @@ from black_box.analysis.managed_agent import (  # noqa: E402
 )
 from black_box.analysis.schemas import PostMortemReport  # noqa: E402
 from black_box.memory import MemoryStack  # noqa: E402
-from black_box.reporting.pdf_report import build_report  # noqa: E402
+from black_box.reporting import build_report  # noqa: E402  (md_report)
 
 try:
     import cv2

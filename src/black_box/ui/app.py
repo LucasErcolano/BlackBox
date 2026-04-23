@@ -64,7 +64,7 @@ _STAGE_CHUNKS: dict[str, list[str]] = {
     "reporting": [
         "Rendering annotated frames with bbox overlays on hip joint...",
         "Generating unified diff against pid_controller.cpp...",
-        "Writing NTSB-style PDF to data/reports/{job}.pdf.",
+        "Writing NTSB-style Markdown to data/reports/{job}.md.",
     ],
     "done": [
         "Done. Root cause: pid_saturation (confidence 0.82). Patch: clamp integral ±1.0.",
@@ -338,9 +338,9 @@ def _run_pipeline_real(job_id: str, upload_path: Path, mode: Mode) -> None:
         top = (payload.get("hypotheses") or [{}])[0].get("bug_class", "other")
         buffer.append(f"[finalize] top hypothesis: {top}")
 
-        buffer.append("[report] Building NTSB-style PDF...")
-        _push("reporting", "Rendering PDF report", 0.92)
-        out_pdf = REPORTS_DIR / f"{job_id}.pdf"
+        buffer.append("[report] Building NTSB-style Markdown report...")
+        _push("reporting", "Rendering Markdown report", 0.92)
+        out_pdf = REPORTS_DIR / f"{job_id}.md"
         build_report(
             report_json=payload,
             artifacts={},
@@ -515,10 +515,10 @@ async def status(request: Request, job_id: str) -> HTMLResponse:
 
 @app.get("/report/{job_id}")
 async def report(job_id: str) -> FileResponse:
-    pdf = REPORTS_DIR / f"{job_id}.pdf"
-    if not pdf.exists():
+    md = REPORTS_DIR / f"{job_id}.md"
+    if not md.exists():
         raise HTTPException(404, "report not ready")
-    return FileResponse(str(pdf), media_type="application/pdf", filename=pdf.name)
+    return FileResponse(str(md), media_type="text/markdown", filename=md.name)
 
 
 @app.get("/diff/{job_id}", response_class=HTMLResponse)

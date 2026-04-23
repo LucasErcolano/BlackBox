@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, "/home/hz/Desktop/BlackBox/src")
-from black_box.reporting.pdf_report import build_report  # noqa: E402
+from black_box.reporting import build_report  # noqa: E402  (md_report)
 
 ALLOWED = {
     "pid_saturation", "sensor_timeout", "state_machine_deadlock",
