@@ -1,10 +1,10 @@
 # Black Box
 
-Forensic copilot for robots. Feed it a ROS bag, get back a root-cause hypothesis, cross-camera evidence, and a scoped code patch.
+Forensic copilot for robots. Feed it a robot recording, get back a root-cause hypothesis, cross-modal evidence, and a scoped code patch.
 
 > **Pitch placeholder.** When a robot crashes, the flight data recorder tells you *what* happened. Black Box tells you *why* — and hands you the diff.
 
-Built with **Claude Opus 4.7** (vision) + **Managed Agents** (long-horizon bag replay).
+Built with **Claude Opus 4.7** (vision + reasoning) + **Managed Agents** (long-horizon session replay).
 
 ## Docs
 - [Build journal & strategy](https://gist.github.com/LucasErcolano/851c5e976c6aa364f69c9e6875544061) — narrative, novelty positioning, findings.
@@ -18,41 +18,43 @@ Built with **Claude Opus 4.7** (vision) + **Managed Agents** (long-horizon bag r
 - [Rehearsal](docs/REHEARSAL.md) — pitch timing, breath points, Q&A prep.
 
 ## Modes
-- **Forensic post-mortem** — crash bag in, root cause + patch out.
-- **Scenario mining** — clean bag in, 3–5 moments of interest out.
-- **Synthetic QA** — injected-bug bag in, hypothesis + self-eval vs ground truth out.
+- **Forensic post-mortem** — known-crash recording in, root cause + patch out.
+- **Scenario mining** — clean recording in, 3–5 moments of interest out. Conservative: if nothing is found, the answer is "nothing anomalous detected."
+- **Synthetic QA** — injected-bug recording in, hypothesis + self-eval vs ground truth out.
 
 ## Quickstart
 ```bash
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
 export ANTHROPIC_API_KEY=...    # or put in .env
-python -m black_box.eval.runner --case data/synthetic/pid_saturation
+python -m black_box.eval.runner --case-dir black-box-bench/cases
 ```
 
 ## System overview
 
-End-to-end flow from uploaded bag to NTSB-style report + unified diff.
+Platform-agnostic by design: the analysis layer sees a normalized session (telemetry series, multi-view frames, source snapshots) regardless of the source robot or recording format.
 
 ```mermaid
 flowchart LR
-    U[Operator] -->|upload .bag| UI[FastAPI + HTMX]
-    UI --> ING[ingestion<br/>rosbags parser]
-    ING --> SYNC[frame sync<br/>+ plot render]
-    SYNC --> MA[ForensicAgent<br/>Managed Agents SDK]
+    U[Operator] -->|upload recording| UI[FastAPI + HTMX]
+    UI --> ING[ingestion<br/>platform adapters]
+    ING --> NORM[normalized session<br/>telemetry · frames · source]
+    NORM --> MA[ForensicAgent<br/>Managed Agents SDK]
     MA --> CL[Claude Opus 4.7<br/>vision + reasoning]
     CL --> MA
+    MA --> GG{grounding gate<br/>min_evidence · telemetry check}
+    GG -->|kept| REP[reporting<br/>PDF + side-by-side diff]
+    GG -->|dropped| REP
     MA --> MEM[(4-layer memory<br/>L1..L4 JSONL)]
-    MA --> REP[reporting<br/>PDF + side-by-side diff]
     REP --> OUT[case report + patch]
     SYN[synthesis<br/>injected bugs] -.-> ING
-    BENCH[(black-box-bench<br/>ground truth)] -.-> EVAL[eval runner]
+    BENCH[(bench cases)] -.-> EVAL[eval runner]
     EVAL --> MA
 ```
 
 ## Analysis pipeline
 
-The three tiers share one agent loop; the prompt template and the grounding gate change per tier.
+The three modes share one agent loop. The prompt template and the grounding gate change per mode; the memory writes are uniform.
 
 ```mermaid
 sequenceDiagram
@@ -65,15 +67,19 @@ sequenceDiagram
     participant Mem as MemoryStack
     participant Rep as Reporting
 
-    UI->>Ing: parse_bag(path)
-    Ing-->>UI: telemetry + plots + frame index
-    UI->>Ag: start_session(case_key, tier)
-    Ag->>Cl: system + taxonomy (cached) + tier-1 prompt
+    UI->>Ing: ingest(recording)
+    Ing-->>UI: telemetry + frames + source index
+    UI->>Ag: start_session(case_key, mode)
+    Ag->>Cl: system + taxonomy (cached) + mode prompt
     Cl-->>Ag: hypotheses (pydantic)
     Ag->>Gr: validate against telemetry windows
-    Gr-->>Ag: kept vs rejected + evidence refs
-    Ag->>Cl: densify suspicious windows (5 cams/prompt)
-    Cl-->>Ag: root cause + scoped patch
+    alt evidence meets threshold
+        Gr-->>Ag: kept + evidence refs
+        Ag->>Cl: densify suspicious windows (cross-view)
+        Cl-->>Ag: root cause + scoped patch
+    else clean recording
+        Gr-->>Ag: "nothing anomalous detected"
+    end
     Ag->>Mem: log L1 case + L3 taxonomy counts
     Ag->>Rep: build PDF + HTML diff
     Rep-->>UI: artifacts ready
@@ -84,14 +90,14 @@ sequenceDiagram
 ```mermaid
 classDiagram
     class ingestion {
-        +parse_bag(path) Telemetry
-        +sync_frames(topics) FrameIndex
+        +ingest(recording) Session
+        +sync_frames(streams) FrameIndex
         +render_plots(series) PNG
     }
     class analysis {
         +ClaudeClient
         +ForensicAgent
-        +prompts (tier1/tier2/tier3)
+        +prompts (post_mortem/mining/synthetic_qa)
         +schemas (pydantic)
     }
     class memory {
@@ -102,11 +108,12 @@ classDiagram
         +EvalMemory (L4)
     }
     class platforms {
+        +Adapter (abstract)
         +nao6.NAO6Adapter
         +nao6.NAO6_TAXONOMY
     }
     class synthesis {
-        +inject_bug(kind) Bag
+        +inject_bug(kind) Recording
         +emit_video_prompt() str
     }
     class reporting {
@@ -119,7 +126,7 @@ classDiagram
         +HTMX progress poll
     }
     class eval {
-        +TierRunner (1/2/3)
+        +run_tier3() Summary
         +self_eval vs ground truth
     }
 
@@ -130,12 +137,49 @@ classDiagram
     analysis --> reporting
     eval --> analysis
     eval --> synthesis
-    synthesis ..> ingestion : replays as bag
+    synthesis ..> ingestion : replays as recording
 ```
 
-## Memory stack (L1–L4)
+## Bug taxonomy — closed-set benchmark, open-world product
 
-Append-only JSONL, flat code, no vector DB. Each layer has a single narrow responsibility.
+The benchmark scorer requires an **exact-match label** from a closed set of seven common failure modes. That closed set exists for *measurement*, not for *expression* — the product surface accepts any label the model produces and routes unknown labels to a neutral `other` bucket that still carries evidence and a scoped patch.
+
+```mermaid
+classDiagram
+    class BugClass {
+        <<closed benchmark set>>
+        pid_saturation
+        sensor_timeout
+        state_machine_deadlock
+        bad_gain_tuning
+        missing_null_check
+        calibration_drift
+        latency_spike
+        other
+    }
+    class Patch {
+        <<scoped fix shape>>
+        clamp
+        timeout
+        null_check
+        gain_adjust
+    }
+    class Hypothesis {
+        +bug_class: BugClass or str
+        +summary: str
+        +evidence_refs: list
+        +confidence: 0..1
+    }
+    Hypothesis --> BugClass
+    BugClass ..> Patch : shapes the patch kind
+```
+
+- **For the benchmark:** closed 7-class set. A hypothesis scores iff `predicted == ground_truth`.
+- **For production traffic:** open-world labels allowed. `other` is a first-class bucket — the model still has to justify the claim with telemetry + frames, and the patch shape still has to be one of the scoped primitives (clamp / timeout / null check / gain adjust). New failure modes that recur get promoted into the taxonomy via the memory stack, not by changing the prompt.
+
+## Memory stack — substrate today, self-improving loop on the roadmap
+
+Black Box writes an append-only 4-layer JSONL store every run (no vector DB, no RAG). This is the **substrate** for self-improvement. The visible policy loop that consumes L2 priors + L3 frequencies + L4 accuracy to steer the agent between runs is not yet convincingly surfaced in the demo — it's the next piece.
 
 ```mermaid
 flowchart TB
@@ -155,66 +199,87 @@ flowchart TB
     FA[ForensicAgent.finalize] --> L1
     FA --> L3
     BENCH[eval runner] --> L4
-    L2 -.priors.-> FA
-    L3 -.global freq.-> FA
+
+    L2 -. roadmap: prime prompt .-> FA
+    L3 -. roadmap: tie-break .-> FA
+    L4 -. roadmap: regression alarm .-> FA
 ```
 
-## Bug taxonomy (closed set)
+**Shipped:** stack wiring, pydantic records, four independent stores, `MemoryStack.open()`, accuracy roll-ups by case and bug class, taxonomy counts on every finalize.
+
+**Not yet shipped (roadmap):** the policy loop that reads L2 priors to bias the system prompt, uses L3 frequency as a tie-breaker on low-confidence hypotheses, and raises a regression alarm when L4 accuracy on a previously-solved case class drops below a threshold. Calling that "self-improving" would be overclaim until the loop is visible between runs.
+
+## Grounding gate
+
+The gate is the credibility floor: every hypothesis must anchor to at least two sources (telemetry window + frame evidence, or telemetry + source snippet). A clean recording returns `"nothing anomalous detected"` by construction — the gate is why Black Box doesn't hallucinate on calm bags.
 
 ```mermaid
-classDiagram
-    class BugClass {
-        <<enumeration>>
-        pid_saturation
-        sensor_timeout
-        state_machine_deadlock
-        bad_gain_tuning
-        missing_null_check
-        calibration_drift
-        latency_spike
-    }
-    class Patch {
-        <<policy>>
-        clamp
-        timeout
-        null_check
-        gain_adjust
-    }
-    class Hypothesis {
-        +bug_class: BugClass
-        +summary: str
-        +evidence_refs: list
-        +confidence: 0..1
-    }
-    Hypothesis --> BugClass
-    BugClass ..> Patch : scoped fix shape
+flowchart LR
+    H[candidate hypothesis] --> G{min_evidence >= 2?}
+    G -->|telemetry + frames| K[KEEP]
+    G -->|telemetry + source| K
+    G -->|only 1 source| D[DROP]
+    G -->|zero evidence| N["nothing anomalous detected"]
 ```
 
-Closed set (7): `pid_saturation`, `sensor_timeout`, `state_machine_deadlock`, `bad_gain_tuning`, `missing_null_check` (path planning), `calibration_drift` (cameras), `latency_spike` / sync issue.
+## Adaptive resolution budgeter
 
-## Token discipline
+Image resolution is not a fixed dial — it's a budget. The frame sampler chooses resolution per window based on:
+
+- **Saliency** — is this a flagged telemetry spike or a quiet stretch?
+- **Ambiguity** — did the last Claude call return low confidence or conflicting hypotheses?
+- **Cost budget** — remaining per-case token budget against a $500 hackathon cap.
 
 ```mermaid
 flowchart LR
     SP[system + taxonomy + few-shot] -->|cache_control| CACHE[(Anthropic prompt cache)]
     CACHE --> CALL[Opus 4.7 call]
     TEL[telemetry timeline] -->|pick windows| WIN[suspicious windows]
-    WIN -->|densify frames| FR[5 cams · 800x600 thumbs]
-    FR --> CALL
+    WIN --> BUD{adaptive resolution<br/>saliency · ambiguity · $ budget}
+    BUD -->|low signal| THUMB[thumbnail grid]
+    BUD -->|high signal| FULL[full-res crops]
+    THUMB --> CALL
+    FULL --> CALL
     CALL --> LOG[data/costs.jsonl<br/>cached_in · uncached_in · out · USD]
 ```
 
-Escalate to 3.75 MP only on explicit request from the analysis step. Never 5 separate calls for 5 cameras — one cross-view prompt.
+Default tier is a thumbnail grid across the selected views in one cross-view prompt — **never** one call per camera. The budgeter escalates to full-resolution crops only when the analysis step explicitly asks.
+
+## Benchmark status
+
+The benchmark lives in a sibling repo (`black-box-bench/`). Seven cases are present. Scoring requires exact match on `bug_class`.
+
+| Path | Cases | Offline stub | Real Opus 4.7 | Notes |
+|---|---|---|---|---|
+| `run_tier3(use_claude=False)` | 7 | runs | — | deterministic plumbing check; does not call the model |
+| `run_tier3(use_claude=True)` | 7 | — | one case confirmed (`pid_saturation_01` via smoke script) | others pending a budgeted bench pass |
+| Tier-1 forensic batch runner | — | skeleton | skeleton | single-case path works end-to-end; batch CLI not yet wired |
+| Tier-2 scenario-mining batch runner | — | skeleton | skeleton | agent loop exists; bench integration pending |
+| Public-data path (`eval.public_data`) | — | stub | — | downloader + adapter mapping stubbed |
+
+The published sample run in `black-box-bench/runs/sample/` is a hand-written reference, not model output.
+
+## UI status
+
+`src/black_box/ui/` ships the upload → streaming-reasoning → side-by-side-diff UX. Behind the UI, the pipeline worker is currently the streaming **stub** (`_run_pipeline_stub` in `ui/app.py`) that walks through realistic stage chunks and emits a canned patch artifact for the diff viewer. The demo video uses this path.
+
+The real worker (ingestion → `ForensicAgent` session → PDF render) runs today via `scripts/managed_agent_smoke.py`; wiring that into the UI background task is the next worker-level change.
+
+## Implementation notes (current adapters)
+
+- **Ingestion** — `rosbags` for ROS1+ROS2 bag files (pure Python, no ROS runtime). Other adapters plug in under `platforms/`.
+- **First platform** — NAO6 (SoftBank Aldebaran) humanoid. `platforms/nao6/` includes an adapter, a synthetic fall fixture, and a platform-specific taxonomy that maps to the global bug-class set.
+- **Synthesis** — emits telemetry + buggy controllers + text video prompts. Video generation (Wan 2.2 / Nano Banana Pro) is operator-driven on your own GPU; nothing is auto-installed.
 
 ## Architecture (modules)
-- `ingestion/` — `rosbags`-based ROS1+ROS2 parser, frame sync, matplotlib plots.
-- `analysis/` — Claude client with aggressive prompt caching, 3 prompt templates, pydantic schemas, `ForensicAgent` over Managed Agents SDK.
+- `ingestion/` — recording parser, frame sync, plot rendering.
+- `analysis/` — Claude client with aggressive prompt caching, three prompt templates, pydantic schemas, `ForensicAgent` over Managed Agents SDK.
 - `memory/` — 4-layer append-only JSONL stack (case / platform / taxonomy / eval).
-- `platforms/` — robot-specific adapters + taxonomies (NAO6 today).
-- `synthesis/` — injects known bugs, emits ground truth + text video prompts (run Wan 2.2 / Nano Banana Pro yourself).
+- `platforms/` — robot-specific adapters + taxonomies.
+- `synthesis/` — injected-bug recordings + text video prompts.
 - `reporting/` — reportlab PDF (NTSB-style), unified diff + HTML side-by-side.
-- `ui/` — FastAPI + HTMX progress polling.
-- `eval/` — 3-tier runner.
+- `ui/` — FastAPI + HTMX progress polling (stub worker today; real wiring in progress).
+- `eval/` — tier-3 runner + offline stub path; tier-1/tier-2 batch runners pending.
 
 ## License
 MIT.
