@@ -73,13 +73,15 @@ def test_build_report_smoke(tmp_path: Path) -> None:
         "mode": "post_mortem",
     }
 
-    out_pdf = tmp_path / "out.pdf"
-    result = build_report(report_json, artifacts, out_pdf, case_meta)
+    # build_report now emits Markdown; suffix is normalized to .md.
+    out_path = tmp_path / "out.pdf"
+    result = build_report(report_json, artifacts, out_path, case_meta)
 
-    assert result == out_pdf
-    assert out_pdf.exists()
-    size = out_pdf.stat().st_size
-    assert size > 5 * 1024, f"pdf too small: {size} bytes"
+    expected = out_path.with_suffix(".md")
+    assert result == expected
+    assert expected.exists()
+    size = expected.stat().st_size
+    assert size > 1024, f"report too small: {size} bytes"
 
 
 def test_unified_diff_and_scoped_check() -> None:

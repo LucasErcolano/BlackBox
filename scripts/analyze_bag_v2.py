@@ -3,9 +3,16 @@
 Two-stage:
 1. window_summary_prompt at 400x300 → ~$0.15-0.25 per window
 2. visual_mining_prompt at 800x600 only on interesting windows → ~$0.50-1 per window
+
+Prompts are now platform-agnostic (prompts_generic). The 5-camera topic
+list is supplied as a Manifest so the model sees exactly which channels
+exist for this session instead of a hardcoded AV layout. An optional
+operator hypothesis (`--prompt "..."` or `BB_USER_PROMPT=...`) is passed
+through verbatim as a hypothesis to confirm or reject.
 """
 from __future__ import annotations
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -18,10 +25,11 @@ sys.path.insert(0, str(ROOT / "src"))
 load_dotenv(ROOT / ".env")
 
 from black_box.analysis import ClaudeClient  # noqa: E402
-from black_box.analysis.prompts_v2 import (  # noqa: E402
+from black_box.analysis.prompts_generic import (  # noqa: E402
     visual_mining_prompt,
     window_summary_prompt,
 )
+from black_box.ingestion.manifest import Manifest, TopicInfo  # noqa: E402
 from black_box.reporting import build_report  # noqa: E402
 
 
@@ -57,8 +65,31 @@ def build_frames_index(saved: dict, use_small: bool) -> tuple[list[str], str]:
     return files, "\n".join(lines)
 
 
-def run_summary(client: ClaudeClient, frames_dir: Path, win_name: str, win_meta: dict) -> tuple[dict, float]:
-    spec = window_summary_prompt()
+def _build_adhoc_manifest(bag_path: str, duration_s: float) -> Manifest:
+    """Synthesize a Manifest from the pre-extracted camera topic list.
+
+    The script receives already-sampled frames (no bag re-scan), so we
+    build a lightweight manifest with just the camera channels that were
+    extracted. Downstream topics (telemetry/gnss/odom) would normally
+    come from a full scan via `build_manifest`; for this script the
+    cameras-only view is sufficient to ground the prompt.
+    """
+    cams = [TopicInfo(topic=t, msgtype="sensor_msgs/CompressedImage", count=0, kind="camera")
+            for t in CAM_ORDER]
+    return Manifest(
+        root=Path(bag_path).parent if bag_path else Path("."),
+        session_key=None,
+        bags=[Path(bag_path)] if bag_path else [],
+        duration_s=duration_s,
+        t_start_ns=None,
+        t_end_ns=None,
+        cameras=cams,
+    )
+
+
+def run_summary(client: ClaudeClient, frames_dir: Path, win_name: str, win_meta: dict,
+                manifest: Manifest, user_prompt: str | None) -> tuple[dict, float]:
+    spec = window_summary_prompt(manifest=manifest, user_prompt=user_prompt)
     files, idx_text = build_frames_index(win_meta["saved"], use_small=True)
     # Subsample heavily for summary: 4 frames per cam (every 5th) to keep tokens low
     sampled_files = []
@@ -90,8 +121,9 @@ def run_summary(client: ClaudeClient, frames_dir: Path, win_name: str, win_meta:
     return result.model_dump(), cost.usd_cost
 
 
-def run_deep(client: ClaudeClient, frames_dir: Path, win_name: str, win_meta: dict) -> tuple[dict, float]:
-    spec = visual_mining_prompt()
+def run_deep(client: ClaudeClient, frames_dir: Path, win_name: str, win_meta: dict,
+             manifest: Manifest, user_prompt: str | None) -> tuple[dict, float]:
+    spec = visual_mining_prompt(manifest=manifest, user_prompt=user_prompt)
     files, idx_text = build_frames_index(win_meta["saved"], use_small=False)
     images = [Image.open(frames_dir / p).convert("RGB") for p in files]
     user_fields = {
@@ -113,11 +145,13 @@ def run_deep(client: ClaudeClient, frames_dir: Path, win_name: str, win_meta: di
     return result.model_dump(), cost.usd_cost
 
 
-def run(bag_id: str, frames_dir: Path, out_dir: Path, force_deep: bool = False):
+def run(bag_id: str, frames_dir: Path, out_dir: Path, force_deep: bool = False,
+        user_prompt: str | None = None):
     t0 = time.time()
     out_dir.mkdir(parents=True, exist_ok=True)
     wm = json.loads((frames_dir / "windows_manifest.json").read_text())
     client = ClaudeClient()
+    manifest = _build_adhoc_manifest(wm.get("bag", ""), float(wm.get("duration_s", 0.0)))
 
     total_cost = 0.0
     per_window = {}
@@ -126,10 +160,10 @@ def run(bag_id: str, frames_dir: Path, out_dir: Path, force_deep: bool = False):
     for win_name, win_meta in wm["windows"].items():
         # Stage 1: cheap summary
         try:
-            summary, c1 = run_summary(client, frames_dir, win_name, win_meta)
+            summary, c1 = run_summary(client, frames_dir, win_name, win_meta, manifest, user_prompt)
         except Exception as e:
             print(f"[summary] {win_name} FAILED: {e}", flush=True)
-            summary = {"per_camera": {}, "overall": f"summary failed: {e}", "interesting": True, "reason": "fallback to deep"}
+            summary = {"per_channel": {}, "overall": f"summary failed: {e}", "interesting": True, "reason": "fallback to deep"}
             c1 = 0.0
         total_cost += c1
         print(f"[summary] {win_name}: interesting={summary.get('interesting')}  cost=${c1:.4f}  reason={summary.get('reason', '')[:100]}", flush=True)
@@ -139,7 +173,7 @@ def run(bag_id: str, frames_dir: Path, out_dir: Path, force_deep: bool = False):
         do_deep = bool(summary.get("interesting")) or force_deep
         if do_deep:
             try:
-                deep, c2 = run_deep(client, frames_dir, win_name, win_meta)
+                deep, c2 = run_deep(client, frames_dir, win_name, win_meta, manifest, user_prompt)
             except Exception as e:
                 print(f"[deep] {win_name} FAILED: {e}", flush=True)
                 deep = {"moments": [], "rationale": f"deep failed: {e}"}
@@ -165,8 +199,12 @@ def run(bag_id: str, frames_dir: Path, out_dir: Path, force_deep: bool = False):
         "all_moments": all_moments,
     }
     (out_dir / "mining_v2.json").write_text(json.dumps(out, indent=2, default=str))
-    (out_dir / "prompt_used_summary.txt").write_text(json.dumps(window_summary_prompt(), default=str, indent=2)[:5000])
-    (out_dir / "prompt_used_deep.txt").write_text(json.dumps(visual_mining_prompt(), default=str, indent=2)[:5000])
+    (out_dir / "prompt_used_summary.txt").write_text(
+        json.dumps(window_summary_prompt(manifest=manifest, user_prompt=user_prompt), default=str, indent=2)[:5000]
+    )
+    (out_dir / "prompt_used_deep.txt").write_text(
+        json.dumps(visual_mining_prompt(manifest=manifest, user_prompt=user_prompt), default=str, indent=2)[:5000]
+    )
 
     # Build PDF
     timeline = []
@@ -184,7 +222,10 @@ def run(bag_id: str, frames_dir: Path, out_dir: Path, force_deep: bool = False):
             "confidence": float(top.get("confidence", 0.5)),
             "summary": f"{len(all_moments)} visual moments of interest flagged across windows: {', '.join(set(m['window'] for m in all_moments))}.",
             "evidence": [
-                {"source": "camera", "topic_or_file": e.get("camera", "?"), "t_ns": e.get("t_ns"), "snippet": e.get("snippet", "")[:200]}
+                {"source": e.get("source", "camera"),
+                 "topic_or_file": e.get("channel", e.get("camera", "?")),
+                 "t_ns": e.get("t_ns"),
+                 "snippet": e.get("snippet", "")[:200]}
                 for m in all_moments for e in m.get("evidence", [])
             ][:20],
             "patch_hint": "Review flagged moments manually; prioritize by confidence and safety impact.",
@@ -230,8 +271,14 @@ def run(bag_id: str, frames_dir: Path, out_dir: Path, force_deep: bool = False):
 
 
 if __name__ == "__main__":
-    bag_id = sys.argv[1]
-    frames_dir = Path(sys.argv[2])
-    out_dir = Path(sys.argv[3])
-    force = bool(int(sys.argv[4])) if len(sys.argv) > 4 else False
-    run(bag_id, frames_dir, out_dir, force)
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("bag_id")
+    ap.add_argument("frames_dir", type=Path)
+    ap.add_argument("out_dir", type=Path)
+    ap.add_argument("--force", action="store_true", help="Run deep stage on all windows regardless of summary verdict")
+    ap.add_argument("--prompt", type=str, default=None,
+                    help="Optional operator hypothesis (free text). Passed to the model verbatim.")
+    args = ap.parse_args()
+    user_prompt = args.prompt or os.environ.get("BB_USER_PROMPT")
+    run(args.bag_id, args.frames_dir, args.out_dir, args.force, user_prompt)

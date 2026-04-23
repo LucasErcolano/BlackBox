@@ -1,17 +1,24 @@
-"""Boat / USV (unmanned surface vessel) domain context and prompts.
+"""DEPRECATED: platform-specific boat/USV prompts.
 
-Second platform, distinct from the 5-camera AV rig. Primary sensor is LIDAR
-(2D or 3D) over water surface, often paired with GPS/IMU and a forward-
-looking camera. Top-down LIDAR renders are the primary visual input here.
+Superseded by `black_box.analysis.prompts_generic`, which constructs a
+platform-agnostic system prompt from a Manifest (any mix of camera /
+lidar / imu / gnss / odom / cmd topics). The split into per-platform
+modules does not scale: each new platform should not require a new
+prompt file. Generic + manifest handles any sensor combination.
 
-Kept as a separate module from prompts_v2 because the domain vocabulary,
-false-positive patterns, and scoped-patch surface are different enough that
-bundling would hurt prompt-cache hit rates.
+This file is kept temporarily for back-compat. Do not add new callers.
 """
 
 from __future__ import annotations
 
+import warnings
 from typing import Literal
+
+warnings.warn(
+    "black_box.analysis.prompts_boat is deprecated; use prompts_generic instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from pydantic import BaseModel, Field
 

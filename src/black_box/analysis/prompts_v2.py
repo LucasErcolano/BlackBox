@@ -1,7 +1,21 @@
-"""v2 prompts for vision-only AV bag analysis (no telemetry available)."""
+"""DEPRECATED: AV-specific vision-only prompts.
+
+Kept for back-compat with older callers and the mocked grounding-gate
+tests. New code should use `black_box.analysis.prompts_generic`, which
+is platform-agnostic and accepts a Manifest + optional operator prompt.
+
+This module will be removed once scripts and tests are fully migrated.
+"""
+import warnings
 
 from pydantic import BaseModel, Field
 from typing import Literal
+
+warnings.warn(
+    "black_box.analysis.prompts_v2 is deprecated; use prompts_generic instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 # -------- schemas ------------------------------------------------------------
@@ -122,7 +136,8 @@ When reporting moments, label the underlying suspected cause only when visually 
 - Single-frame compression blocks from JPEG encoding.
 - Lens flare on bright pointwise light sources when it does not interfere with hazard detection.
 - Water spray from the ego's own tires in wet conditions, unless it obscures a hazard.
-- Brief sensor exposure change when entering or exiting a tunnel, shadowed area, or overpass.
+
+Environmental transitions (tunnel entry/exit, shadow bands, overpass shadow, glare) are NOT automatically excluded: when they coincide with telemetry degradation or a downstream planning/perception anomaly, report the correlation anchored to a t_ns.
 """
 
 DOMAIN_CONTEXT_BLOCK = {

@@ -27,6 +27,12 @@ from .session import (
     describe_session,
 )
 from .frame_sampler import sample_frames
+from .manifest import (
+    Manifest,
+    TopicInfo,
+    build_manifest,
+    manifest_to_prompt_block,
+)
 
 __all__ = [
     "BagData",
@@ -48,4 +54,8 @@ __all__ = [
     "discover_session_bags",
     "describe_session",
     "sample_frames",
+    "Manifest",
+    "TopicInfo",
+    "build_manifest",
+    "manifest_to_prompt_block",
 ]

@@ -16,6 +16,12 @@ from .prompts import (
     scenario_mining_prompt,
     synthetic_qa_prompt,
 )
+from .prompts_generic import (
+    visual_mining_prompt as visual_mining_prompt_generic,
+    window_summary_prompt as window_summary_prompt_generic,
+    MiningReport as GenericMiningReport,
+    WindowSummary as GenericWindowSummary,
+)
 from .resolution_budgeter import (
     ResolutionBudgeter,
     ResolutionDecision,
@@ -45,4 +51,8 @@ __all__ = [
     "saliency_from_telemetry_z",
     "scenario_mining_prompt",
     "synthetic_qa_prompt",
+    "visual_mining_prompt_generic",
+    "window_summary_prompt_generic",
+    "GenericMiningReport",
+    "GenericWindowSummary",
 ]

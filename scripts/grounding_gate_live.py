@@ -19,10 +19,11 @@ from pathlib import Path
 from PIL import Image
 
 from black_box.analysis import ClaudeClient
-from black_box.analysis.prompts_v2 import (
+from black_box.analysis.prompts_generic import (
     visual_mining_prompt,
     window_summary_prompt,
 )
+from black_box.ingestion.manifest import Manifest, TopicInfo
 
 
 CAMERAS = ["cam1", "cam3", "cam4", "cam5", "cam6"]
@@ -46,9 +47,17 @@ def main() -> int:
     imgs = load_fixture(args.fixture)
     client = ClaudeClient()
 
-    print("Stage 1: window_summary_v2 triage ...")
+    manifest = Manifest(
+        root=args.fixture, session_key=None, bags=[],
+        duration_s=2.0, t_start_ns=None, t_end_ns=None,
+        cameras=[TopicInfo(topic=f"/{c}/image_raw/compressed",
+                           msgtype="sensor_msgs/CompressedImage",
+                           count=0, kind="camera") for c in CAMERAS],
+    )
+
+    print("Stage 1: window_summary triage ...")
     summary, cost1 = client.analyze(
-        window_summary_prompt(),
+        window_summary_prompt(manifest=manifest),
         images=imgs,
         user_fields={
             "window_len_s": 2.0,
@@ -62,9 +71,9 @@ def main() -> int:
     if summary.interesting:
         print("GATE WARNING: clean fixture flagged interesting.", file=sys.stderr)
 
-    print("Stage 2: visual_mining_v2 deep ...")
+    print("Stage 2: visual_mining deep ...")
     mining, cost2 = client.analyze(
-        visual_mining_prompt(),
+        visual_mining_prompt(manifest=manifest),
         images=imgs,
         user_fields={
             "n_images": len(imgs),
