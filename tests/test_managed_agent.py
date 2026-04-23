@@ -379,6 +379,151 @@ def test_finalize_without_memory_is_a_noop():
     session._record_memory(report_json)
 
 
+def test_finalize_applies_advisor_tie_break_and_regression_alarms(
+    tmp_path: Path, monkeypatch
+):
+    """Finalize should fold the PolicyAdvisor's tie-break + alarms into the payload.
+
+    Given an L3 taxonomy that overwhelmingly favors pid_saturation and an L4
+    eval history where sensor_timeout is regressing, a near-tied top-2 must
+    be reordered so pid_saturation wins, root_cause_idx must be rewritten to
+    0, and regression_alarms must surface sensor_timeout.
+    """
+    from black_box.analysis.policy import PolicyAdvisor
+    from black_box.memory import EvalRecord, MemoryStack, TaxonomyCount
+
+    mem = MemoryStack.open(tmp_path / "mem")
+    # L3: pid_saturation is much more common than bad_gain_tuning.
+    mem.taxonomy.log(TaxonomyCount(bug_class="pid_saturation", signature="s", count=50))
+    mem.taxonomy.log(TaxonomyCount(bug_class="bad_gain_tuning", signature="t", count=2))
+    # L4: sensor_timeout regressing — 1/4 correct, below 0.6.
+    mem.eval.log(EvalRecord(case_key="c1", predicted_bug="sensor_timeout",
+                            ground_truth_bug="sensor_timeout", match=True))
+    for i in range(3):
+        mem.eval.log(EvalRecord(case_key=f"c{i+2}", predicted_bug="other",
+                                ground_truth_bug="sensor_timeout", match=False))
+
+    # Top-2 near-tied: bad_gain_tuning (0.55) vs pid_saturation (0.52). Advisor
+    # should promote pid_saturation because its L3 count dwarfs bad_gain_tuning.
+    report_json = {
+        "timeline": [{"t_ns": 1, "label": "boot", "cross_view": False}],
+        "hypotheses": [
+            {
+                "bug_class": "bad_gain_tuning",
+                "confidence": 0.55,
+                "summary": "Kp too high on LHipPitch",
+                "evidence": [],
+                "patch_hint": "reduce Kp 30%",
+            },
+            {
+                "bug_class": "pid_saturation",
+                "confidence": 0.52,
+                "summary": "Integral wind-up during step initiation",
+                "evidence": [
+                    {
+                        "source": "telemetry",
+                        "topic_or_file": "/cmd_vel",
+                        "t_ns": 12000,
+                        "snippet": "max u for 3s",
+                    }
+                ],
+                "patch_hint": "clamp output to +/-1.0",
+            },
+        ],
+        "root_cause_idx": 0,
+        "patch_proposal": "clamp in control_loop.py",
+    }
+    events = _FakeEvents()
+    events._listed = [
+        _make_event(
+            "agent.message",
+            id="m1",
+            content=[_make_text_block(f"```json\n{json.dumps(report_json)}\n```")],
+        )
+    ]
+    client = _FakeClient(events)
+    session = ForensicSession(
+        session_id="session_123",
+        case_key="c1_faceplant",
+        _client=client,
+        _memory=mem,
+        _advisor=PolicyAdvisor(
+            mem,
+            platform="nao6",
+            tie_delta=0.1,
+            regression_threshold=0.6,
+            regression_min_samples=3,
+        ),
+    )
+    monkeypatch.setattr(ma, "_costs_file", lambda: tmp_path / "costs.jsonl")
+
+    payload = session.finalize()
+
+    # Tie-break flipped the winner.
+    assert payload["advisor_tie_break_applied"] is True
+    assert payload["root_cause_idx"] == 0
+    assert payload["hypotheses"][0]["bug_class"] == "pid_saturation"
+    assert payload["hypotheses"][1]["bug_class"] == "bad_gain_tuning"
+
+    # L4 regression alarm surfaced in the finalize payload.
+    alarms = payload.get("regression_alarms") or []
+    bug_classes = {a["bug_class"] for a in alarms}
+    assert "sensor_timeout" in bug_classes
+    st = next(a for a in alarms if a["bug_class"] == "sensor_timeout")
+    assert st["n_samples"] == 4
+    assert st["accuracy"] == pytest.approx(0.25)
+    assert st["threshold"] == 0.6
+
+    # L1 persisted the tie-broken ordering (root cause was rewritten before write).
+    case_rows = mem.case.for_case("c1_faceplant")
+    assert len(case_rows) == 1
+    assert case_rows[0].payload["hypotheses"][0]["bug_class"] == "pid_saturation"
+
+
+def test_finalize_without_advisor_leaves_payload_alone(tmp_path: Path, monkeypatch):
+    """No advisor bound -> payload matches the parsed report verbatim."""
+    report_json = {
+        "timeline": [],
+        "hypotheses": [
+            {
+                "bug_class": "bad_gain_tuning",
+                "confidence": 0.55,
+                "summary": "x",
+                "evidence": [],
+                "patch_hint": "",
+            },
+            {
+                "bug_class": "pid_saturation",
+                "confidence": 0.52,
+                "summary": "y",
+                "evidence": [],
+                "patch_hint": "",
+            },
+        ],
+        "root_cause_idx": 0,
+        "patch_proposal": "",
+    }
+    events = _FakeEvents()
+    events._listed = [
+        _make_event(
+            "agent.message",
+            id="m1",
+            content=[_make_text_block(json.dumps(report_json))],
+        )
+    ]
+    client = _FakeClient(events)
+    session = ForensicSession(
+        session_id="s", case_key="c", _client=client, _advisor=None
+    )
+    monkeypatch.setattr(ma, "_costs_file", lambda: tmp_path / "costs.jsonl")
+
+    payload = session.finalize()
+
+    assert payload["hypotheses"][0]["bug_class"] == "bad_gain_tuning"  # untouched
+    assert "advisor_tie_break_applied" not in payload
+    assert "regression_alarms" not in payload
+
+
 def test_rate_limiter_sleeps_after_burst():
     limiter = _RateLimiter(max_per_window=60, window_seconds=60.0)
     # Pre-fill 60 slots in the limiter's deque at monotonic() time.

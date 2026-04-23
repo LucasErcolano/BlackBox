@@ -33,7 +33,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable, Iterator, Literal
+from typing import Any, Iterable, Iterator, Literal
 
 from anthropic import Anthropic
 from pydantic import ValidationError
@@ -301,10 +301,18 @@ class ForensicAgent:
         config: ForensicAgentConfig | None = None,
         client: Anthropic | None = None,
         memory: MemoryStack | None = None,
+        platform: str | None = None,
     ) -> None:
         self.config = config or ForensicAgentConfig()
         self._client: Anthropic = client or Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
         self._memory = memory
+        self._platform = platform
+        # Lazily build the advisor so agents constructed without memory stay
+        # zero-overhead. Advisor is safe to build once per agent because it
+        # only reads from the memory stack.
+        from .policy import PolicyAdvisor
+
+        self._advisor = PolicyAdvisor(memory, platform=platform) if memory is not None else None
 
     def open_session(self, bag_path: Path, case_key: str) -> "ForensicSession":
         beta = self._client.beta
@@ -379,6 +387,12 @@ class ForensicAgent:
         _CREATE_LIMITER.acquire()
         session = _wrap_call("sessions.create", beta.sessions.create, **session_kwargs)
 
+        priors_block = ""
+        if self._advisor is not None:
+            try:
+                priors_block = self._advisor.prime_prompt_block() or ""
+            except Exception:
+                priors_block = ""
         seed_text = (
             f"Case key: {case_key}\n"
             f"Mode: post_mortem\n"
@@ -389,6 +403,8 @@ class ForensicAgent:
             "validates against the PostMortemReport schema: keys timeline, "
             "hypotheses, root_cause_idx, patch_proposal."
         )
+        if priors_block:
+            seed_text = seed_text + "\n\n" + priors_block
         _CREATE_LIMITER.acquire()
         _wrap_call(
             "sessions.events.send",
@@ -410,6 +426,7 @@ class ForensicAgent:
             _environment_id=environment.id,
             _started_at=time.monotonic(),
             _memory=self._memory,
+            _advisor=self._advisor,
         )
 
 
@@ -428,6 +445,7 @@ class ForensicSession:
     _started_at: float = field(default_factory=time.monotonic)
     _final_text: str | None = field(default=None, repr=False)
     _memory: MemoryStack | None = field(default=None, repr=False)
+    _advisor: Any = field(default=None, repr=False)
 
     # -- event stream --------------------------------------------------------
     def stream(self) -> Iterator[dict]:
@@ -577,7 +595,44 @@ class ForensicSession:
                 f"assistant JSON did not match PostMortemReport: {exc}"
             ) from exc
         payload = report.model_dump()
+        payload = self._apply_advisor(payload)
         self._record_memory(payload)
+        return payload
+
+    def _apply_advisor(self, payload: dict) -> dict:
+        """Fold L3 tie-break into hypotheses and L4 regression alarms into the payload.
+
+        No-op when no advisor is bound. Runs before memory writes so the
+        tie-broken ordering is what persists in L1 and drives L3 counts.
+        """
+        if self._advisor is None:
+            return payload
+        try:
+            hyps = payload.get("hypotheses") or []
+            if hyps:
+                reordered = self._advisor.apply_tie_break(hyps)
+                if reordered and reordered[0] is not hyps[0]:
+                    # Tie-break changed the winner — rewrite root_cause_idx
+                    # to point at the new top-ranked hypothesis.
+                    payload["hypotheses"] = reordered
+                    payload["root_cause_idx"] = 0
+                    payload["advisor_tie_break_applied"] = True
+                else:
+                    payload["hypotheses"] = reordered
+            alarms = self._advisor.regression_alarms()
+            if alarms:
+                payload["regression_alarms"] = [
+                    {
+                        "bug_class": a.bug_class,
+                        "accuracy": a.accuracy,
+                        "n_samples": a.n_samples,
+                        "threshold": a.threshold,
+                    }
+                    for a in alarms
+                ]
+        except Exception:
+            # Advisor must never take down finalize. Silent by design.
+            pass
         return payload
 
     def _record_memory(self, report: dict) -> None:
