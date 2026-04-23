@@ -66,6 +66,9 @@ from black_box.reporting import build_report  # noqa: E402
 # ---------------------------------------------------------------------------
 
 
+BIG_BAG_BYTES = 10 * 1024**3  # 10 GB — avoid opening this bag in stage 2
+
+
 def stage_discover_and_manifest(path: Path, user_prompt: str | None,
                                 out_dir: Path) -> tuple[SessionAssets, Manifest]:
     print(f"[1] discover: {path}", flush=True)
@@ -82,10 +85,31 @@ def stage_discover_and_manifest(path: Path, user_prompt: str | None,
           f"audio={len(assets.audio)} video={len(assets.video)} "
           f"logs={len(assets.logs)}", flush=True)
 
-    print(f"[2] manifest: building (may index bag headers) ...", flush=True)
+    # Split bags: small (for manifest + telemetry scan) vs. big (deferred to
+    # stage 4 frame extraction). Opening a 364 GB ROS1 bag takes ~45 min —
+    # we do it at most once per run, inside the frame-extraction pass.
+    small_bags = [b for b in assets.bags
+                  if b.exists() and b.stat().st_size < BIG_BAG_BYTES]
+    big_bags = [b for b in assets.bags
+                if b.exists() and b.stat().st_size >= BIG_BAG_BYTES]
+    if big_bags:
+        print(f"    deferring {len(big_bags)} big bag(s) to stage 4: "
+              f"{[b.name for b in big_bags]}", flush=True)
+
+    manifest_assets = SessionAssets(
+        root=assets.root, session_key=assets.session_key,
+        bags=small_bags or assets.bags,  # fallback if everything is big
+        audio=assets.audio, video=assets.video, logs=assets.logs,
+        chrony=assets.chrony, ros_logs=assets.ros_logs, other=assets.other,
+        mtime_window=assets.mtime_window,
+    )
+    print(f"[2] manifest: scanning {len(manifest_assets.bags)} small bag(s) ...",
+          flush=True)
     t0 = time.time()
-    manifest = build_manifest(assets, user_prompt=user_prompt,
+    manifest = build_manifest(manifest_assets, user_prompt=user_prompt,
                               count_messages=True)
+    # Patch bag list so downstream knows about the deferred big bags.
+    manifest.bags = list(assets.bags)
     print(f"    manifest built in {time.time()-t0:.1f}s", flush=True)
     (out_dir / "manifest.json").write_text(json.dumps({
         "root": str(manifest.root),
@@ -346,19 +370,13 @@ def stage_windows(manifest: Manifest, assets: SessionAssets,
     # Use the bags that actually carry GNSS / cams.
     bags = [Path(b) for b in assets.bags]
     wins: list[Window] = []
-    if gnss_topics or cam_topics:
-        # Split bags: scan GNSS-bearing bags with telemetry pass, and camera
-        # bags for gap detection. We naively pass all bags — AnyReader
-        # indexes only once but the 364 GB camera bag is expensive. Prefer
-        # telemetry-only bags first, then camera gaps from cam bag.
-        # Heuristic: the biggest bag holds cameras.
-        bags_sorted = sorted(bags, key=lambda p: p.stat().st_size if p.exists() else 0)
-        telemetry_bags = bags_sorted[:-1] if len(bags_sorted) > 1 else bags_sorted
-        camera_bag = [bags_sorted[-1]] if bags_sorted else []
-        if gnss_topics and telemetry_bags:
-            wins.extend(_scan_gnss_and_gaps(telemetry_bags, gnss_topics, []))
-        # Skip scanning the 364GB bag just to get camera-gap windows — too slow.
-        # If no GNSS-derived windows fire, fall back to uniform below.
+    if gnss_topics:
+        # Scan only small bags (we never want to open the 45 min camera bag
+        # for window detection). Cam gaps are not detected here.
+        small_bags = [b for b in bags
+                      if b.exists() and b.stat().st_size < BIG_BAG_BYTES]
+        if small_bags:
+            wins.extend(_scan_gnss_and_gaps(small_bags, gnss_topics, []))
     if not wins:
         if manifest.t_start_ns and manifest.t_end_ns:
             wins = _uniform_fallback(manifest.t_start_ns, manifest.t_end_ns)
@@ -392,36 +410,59 @@ def stage_frames(manifest: Manifest, assets: SessionAssets, windows: list[Window
 
     import cv2
 
-    cam_topics = [t.topic for t in manifest.cameras]
-    if not cam_topics or not windows:
-        print(f"[4] frames: no cameras or windows — skip", flush=True)
+    if not windows:
+        print(f"[4] frames: no windows — skip", flush=True)
         index_path.write_text("{}")
         return {}
 
-    print(f"[4] frames: extracting {len(cam_topics)} cams × "
-          f"{len(windows)} windows ...", flush=True)
-    frames_dir.mkdir(parents=True, exist_ok=True)
-
-    # Heuristic: the largest bag carries cameras.
+    # The largest bag typically carries cameras. Open it ONCE: enumerate
+    # image connections (stage 2 skipped this bag), then extract.
     bags = sorted([Path(b) for b in assets.bags],
                   key=lambda p: p.stat().st_size if p.exists() else 0,
                   reverse=True)
     if not bags:
         return {}
+    big_bag = bags[0]
+    print(f"[4] frames: opening {big_bag.name} "
+          f"({big_bag.stat().st_size / 1e9:.1f} GB; "
+          f"may take ~45 min for first open) ...", flush=True)
 
-    index: dict = {"windows": {}, "cam_topics": cam_topics}
-    # Target times per (topic, window) at ~1 fps (up to 10 frames/window)
+    import cv2
+    frames_dir.mkdir(parents=True, exist_ok=True)
     dense_stride_s = 2.0
     t0 = time.time()
-    with AnyReader(bags[:1]) as reader:
+
+    _IMG_MSGTYPES = {"sensor_msgs/msg/CompressedImage",
+                     "sensor_msgs/CompressedImage",
+                     "sensor_msgs/msg/Image", "sensor_msgs/Image"}
+
+    with AnyReader([big_bag]) as reader:
+        open_s = time.time() - t0
+        print(f"    opened in {open_s:.1f}s", flush=True)
         start_ns = int(reader.start_time)
+        end_ns = int(reader.end_time)
+        # Discover camera topics FROM this bag. Augment manifest.
+        img_conns = [c for c in reader.connections if c.msgtype in _IMG_MSGTYPES]
+        discovered = sorted({c.topic for c in img_conns})
+        print(f"    discovered {len(discovered)} image topics: "
+              f"{discovered}", flush=True)
+        known_cam_topics = {t.topic for t in manifest.cameras}
+        for c in img_conns:
+            if c.topic not in known_cam_topics:
+                manifest.cameras.append(TopicInfo(
+                    topic=c.topic, msgtype=c.msgtype, count=0, kind="camera"))
+                known_cam_topics.add(c.topic)
+        cam_topics = sorted(known_cam_topics)
         conns = [c for c in reader.connections if c.topic in cam_topics]
         if not conns:
-            print(f"    cam topics not in biggest bag; trying all bags ...",
+            print(f"    no cam connections found — nothing to extract",
                   flush=True)
-        else:
-            print(f"    {len(conns)} cam connections, bag_start_ns={start_ns}",
-                  flush=True)
+            index_path.write_text("{}")
+            return {"windows": {}, "cam_topics": []}
+        print(f"    {len(conns)} cam connections, bag_start_ns={start_ns}",
+              flush=True)
+
+        index: dict = {"windows": {}, "cam_topics": cam_topics}
         # Build per-window target lists.
         for wi, w in enumerate(windows):
             win_name = f"w{wi:02d}"
@@ -484,6 +525,23 @@ def stage_frames(manifest: Manifest, assets: SessionAssets, windows: list[Window
             print(f"    {win_name}: {n_saved} frames across {len(cam_topics)} cams "
                   f"[{w.label[:60]}]", flush=True)
     index_path.write_text(json.dumps(index, indent=2, default=str))
+    # Re-persist manifest.json so reuse-from can hydrate cam topics
+    # discovered during this extraction pass.
+    (out_dir / "manifest.json").write_text(json.dumps({
+        "root": str(manifest.root),
+        "session_key": manifest.session_key,
+        "duration_s": manifest.duration_s,
+        "t_start_ns": manifest.t_start_ns,
+        "t_end_ns": manifest.t_end_ns,
+        "autonomy": manifest.autonomy_signal(),
+        "user_prompt": manifest.user_prompt,
+        "cameras": [asdict(t) for t in manifest.cameras],
+        "gnss": [asdict(t) for t in manifest.gnss],
+        "imus": [asdict(t) for t in manifest.imus],
+        "cmd": [asdict(t) for t in manifest.cmd],
+        "odom": [asdict(t) for t in manifest.odom],
+        "lidars": [asdict(t) for t in manifest.lidars],
+    }, indent=2, default=str))
     print(f"    frames done in {time.time()-t0:.1f}s", flush=True)
     return index
 
