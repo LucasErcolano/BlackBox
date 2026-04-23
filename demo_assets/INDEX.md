@@ -13,6 +13,7 @@ Benchmark fixtures live in the sibling repo `black-box-bench` (see bottom).
 | 1:10 | NTSB-style PDF reveal — sanfer | `pdfs/sanfer_tunnel.pdf` + `pdfs/sanfer_tunnel/page-*.png` | — |
 | 1:25 | timeline + top hypothesis bullet | `analyses/TOP_FINDINGS.md` (sanfer row) | `analyses/sanfer_tunnel.json` |
 | 1:40 | **grounding gate** — refuses operator narrative | `grounding_gate/README.md` | `analyses/sanfer_tunnel.json` (hyp idx 2, conf 0.10) |
+| 1:45 | **grounding gate** — ships "nothing anomalous" on clean run | `grounding_gate/clean_recording/README.md` | `grounding_gate/clean_recording/gated_report.json` |
 | 1:55 | proposed fix — side-by-side diff | `diff_viewer/moving_base_rover.png` | `diff_viewer/moving_base_rover_2x.png` (zoom), `diff_viewer/moving_base_rover.html` (live) |
 | 2:15 | breadth — boat_lidar (Tier-2) + car_1 (Tier-2) | `pdfs/boat_lidar.pdf` + `pdfs/car_1.pdf` | `analyses/boat_lidar.json`, `analyses/car_1.json` |
 | 2:35 | benchmark — `black-box-bench` public repo | ../bench/ (in-repo; cases.yaml + fixtures/) | `bench_repo.txt`, `streams/` jsonl fixtures |
@@ -47,7 +48,12 @@ demo_assets/
 │   ├── car_1.json
 │   └── TOP_FINDINGS.md               (table: case | t_ns | bug_class | conf | evidence | patch)
 ├── grounding_gate/
-│   └── README.md                     (beat 1:40 proof — sanfer hyp #3 refutes operator)
+│   ├── README.md                     (beat 1:40 — refutation exit; sanfer hyp #3)
+│   └── clean_recording/              (beat 1:45 — silence exit on clean recording)
+│       ├── README.md                 (before/after gate table + rule reference)
+│       ├── raw_hypotheses.json       (4 plausible-but-under-evidenced hyps)
+│       ├── gated_report.json         (hypotheses=[], NO_ANOMALY_PATCH)
+│       └── drop_reasons.json         (per-hypothesis rejection reason)
 └── memory_snapshot/
     ├── L1_case.jsonl
     ├── L3_taxonomy.jsonl
