@@ -29,6 +29,14 @@ Four evaluation cases in an open benchmark: three synthetic with injected bugs a
 
 Six days, one builder on the hot path, real data, shipped artifact.
 
+## Market & impact
+
+AV programs generate **1–8 TB per vehicle per day** (Waymo disclosed ~2 TB/car/day; Mobileye ~11 PB/year across the fleet). A 50-car test fleet at the low end is ~50 TB/day — roughly 500 ROS sessions daily, each one a candidate post-mortem. Current state: a senior robotics engineer burns 4–8 hours chasing one bag to root cause, at a loaded cost of ~$150–$250/hr. That's **$600–$2000 per investigated incident**, and most incidents are never investigated at all — they sit in cold storage.
+
+Black Box runs a full forensic pass for **$0.22 per session** at Opus 4.7 list price (measured, not modeled — see `data/costs.jsonl`). Three orders of magnitude cheaper than the human baseline, which inverts the economics: every session can be triaged, not just the ones that make it to a weekly review meeting. Addressable use cases beyond the hackathon demo: QA regression gating on CI, training-data hygiene (reject corrupted labels before they poison a model), post-incident review in AV/drone/humanoid programs, and fleet-wide drift detection.
+
+Anchor user archetype: a robotics program manager at a Series B–C AV/drone startup with a 20–100 engineer team, 10+ test vehicles, and petabytes of archived bags that nobody has the budget to audit.
+
 ## Positioning one-liners (for the video)
 
 - **ROSA** (NASA-JPL) is *air traffic control* — operational, live.

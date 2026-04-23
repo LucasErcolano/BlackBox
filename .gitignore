@@ -16,7 +16,7 @@ data/synthetic/*
 !data/synthetic/.gitkeep
 data/reports/*
 !data/reports/.gitkeep
-data/costs.jsonl
+# data/costs.jsonl  — tracked as evidence of token discipline (see SUBMISSION.md)
 data/jobs/
 *.bag
 *.db3
@@ -25,6 +25,9 @@ data/jobs/
 .DS_Store
 .idea/
 .vscode/
+.claude/scheduled_tasks.lock
+.claude/
+.codex
 data/uploads_raw/
 data/uploads_review/
 data/uploads_safe/

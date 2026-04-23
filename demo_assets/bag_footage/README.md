@@ -42,7 +42,16 @@ Why this matters: uniform-stride 29-frame sampling (`extract_sanfer_cam.py`, ret
 
 ## boat_lidar/  — LIDAR only
 
-USV bag carries `/lidar_points` (PointCloud2, 4168 msgs) and a silent `/lidar_imu`. No camera. A future asset could be a Velodyne-style BEV render of the point cloud, but it is not implemented here.
+USV bag carries `/lidar_points` (PointCloud2, 4168 msgs) and a silent `/lidar_imu`. No camera.
+
+The raw `rosbag2_2025_09_17-14_01_14_0.db3` is corrupt — sqlite3 integrity check fails and `rosbags` cannot open it. A 27 GB `recovered.sql` dump exists but has not been re-imported. Since the bug *is* the absence of IMU traffic, a BEV point-cloud render would hide the finding (the LIDAR itself is nominal). Instead we reconstruct directly from `metadata.yaml`.
+
+| file | what |
+|------|------|
+| `topic_traffic.png` | Two-lane strip plot: `/lidar_points` dense 10 Hz ticks vs `/lidar_imu` flat silent band over the 416.76 s session |
+| `topic_traffic_sweep.mp4` | 30-frame playhead sweep of the same plot — time advances, IMU stays empty |
+
+Built by `scripts/build_boat_traffic_plot.py`.
 
 ## Reproduce
 
