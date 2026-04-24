@@ -204,6 +204,11 @@ def _gate_footer_html(job_id: str, decision: dict) -> str:
 
 
 def _write_status(job_id: str, payload: dict) -> None:
+    """Write job status, stamping ``created_at`` once and preserving it."""
+    payload = dict(payload)
+    if "created_at" not in payload:
+        prev = _read_status(job_id) or {}
+        payload["created_at"] = prev.get("created_at") or time.time()
     _job_path(job_id).write_text(json.dumps(payload, indent=2))
 
 
@@ -215,6 +220,77 @@ def _read_status(job_id: str) -> dict | None:
         return json.loads(p.read_text())
     except json.JSONDecodeError:
         return None
+
+
+# ---- stage pills + cost counter --------------------------------------------
+# Internal STAGES ('ingesting', 'analyzing', 'synthesizing', 'reporting',
+# 'done') collapse into three user-facing phases. 'synthesizing' sits inside
+# analysis; 'done' highlights the final pill so the UI stays readable once the
+# job completes.
+_STAGE_PILL_MAP: dict[str, str] = {
+    "queued": "ingest",
+    "ingesting": "ingest",
+    "analyzing": "analyze",
+    "synthesizing": "analyze",
+    "reporting": "report",
+    "done": "report",
+    "failed": "report",
+}
+PILLS = ("ingest", "analyze", "report")
+
+
+def _pill_for(stage: str) -> str:
+    return _STAGE_PILL_MAP.get(stage, "analyze")
+
+
+def _case_name(status: dict) -> str:
+    """Derive the user-visible case label from whatever the job recorded."""
+    for key in ("case_name", "upload", "job_id"):
+        val = status.get(key)
+        if val:
+            return str(val)
+    return "—"
+
+
+def _elapsed_seconds(status: dict) -> int:
+    created = status.get("created_at")
+    if not created:
+        return 0
+    return max(0, int(time.time() - float(created)))
+
+
+def _fmt_elapsed(seconds: int) -> str:
+    m, s = divmod(int(seconds), 60)
+    return f"{m:02d}:{s:02d}"
+
+
+def _cost_summary(job_id: str) -> dict:
+    """Sum ``data/costs.jsonl`` into {'usd', 'source'} for the progress pill.
+
+    Falls back to 'empty' when the ledger is missing / unparseable so the UI
+    can render a zero-dollar value with a data-source attribute for tests.
+    """
+    path = DATA_DIR / "costs.jsonl"
+    if not path.exists():
+        return {"usd": 0.0, "source": "empty"}
+    total = 0.0
+    count = 0
+    try:
+        for line in path.read_text().splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            total += float(entry.get("usd_cost", 0.0) or 0.0)
+            count += 1
+    except OSError:
+        return {"usd": 0.0, "source": "empty"}
+    if count == 0:
+        return {"usd": 0.0, "source": "empty"}
+    return {"usd": round(total, 2), "source": "session"}
 
 
 # ---- real stream replay -----------------------------------------------------
@@ -536,6 +612,7 @@ async def analyze_replay(
             "progress": 0.0,
             "mode": "post_mortem",
             "upload": f"replay:{replay}",
+            "case_name": replay,
             "reasoning_buffer": [f"Replaying recorded session: {replay}"],
             "has_diff": False,
         },
@@ -545,7 +622,7 @@ async def analyze_replay(
     # Render the full shell with the progress card already injected so the
     # demo link `?replay=...` loads a styled page, not a bare HTMX fragment.
     progress_html = templates.get_template("progress.html").render(
-        request=request, job_id=job_id, status=_read_status(job_id) or {}
+        request=request, **_progress_context(job_id, _read_status(job_id) or {})
     )
     return templates.TemplateResponse(
         request,
@@ -579,6 +656,7 @@ async def analyze(
             "progress": 0.0,
             "mode": mode,
             "upload": upload_path.name,
+            "case_name": file.filename or upload_path.name,
             "reasoning_buffer": ["Waiting for worker..."],
             "has_diff": False,
         },
@@ -589,7 +667,7 @@ async def analyze(
     return templates.TemplateResponse(
         request,
         "progress.html",
-        {"job_id": job_id, "status": _read_status(job_id) or {}},
+        _progress_context(job_id, _read_status(job_id) or {}),
     )
 
 
@@ -601,8 +679,26 @@ async def status(request: Request, job_id: str) -> HTMLResponse:
     return templates.TemplateResponse(
         request,
         "progress.html",
-        {"job_id": job_id, "status": data},
+        _progress_context(job_id, data),
     )
+
+
+def _progress_context(job_id: str, status_data: dict) -> dict:
+    stage = status_data.get("stage", "queued")
+    active_pill = _pill_for(stage)
+    elapsed = _elapsed_seconds(status_data)
+    cost = _cost_summary(job_id)
+    return {
+        "job_id": job_id,
+        "status": status_data,
+        "pills": PILLS,
+        "active_pill": active_pill,
+        "case_name": _case_name(status_data),
+        "elapsed_seconds": elapsed,
+        "elapsed_fmt": _fmt_elapsed(elapsed),
+        "cost_usd": cost["usd"],
+        "cost_source": cost["source"],
+    }
 
 
 @app.get("/report/{job_id}")

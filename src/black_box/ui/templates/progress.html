@@ -11,6 +11,32 @@
   hx-swap="outerHTML"
   {% endif %}
 >
+  <div class="sticky-header" data-case="{{ case_name }}">
+    <div class="sticky-left">
+      <span class="case-label">case</span>
+      <span class="case-name">{{ case_name }}</span>
+    </div>
+    <div class="sticky-right">
+      <span class="elapsed" data-elapsed-seconds="{{ elapsed_seconds }}">
+        <span class="meta-label">elapsed</span>
+        <span class="meta-value">{{ elapsed_fmt }}</span>
+      </span>
+      <span class="cost" data-source="{{ cost_source }}" data-usd="{{ '%.2f' | format(cost_usd) }}">
+        <span class="meta-label">spend</span>
+        <span class="meta-value">${{ '%.2f' | format(cost_usd) }}</span>
+      </span>
+    </div>
+  </div>
+
+  <ol class="stage-pills" aria-label="pipeline stages">
+    {% for pill in pills %}
+    <li class="pill {% if pill == active_pill %}active{% endif %}" data-pill="{{ pill }}">
+      <span class="pill-index">{{ loop.index }}</span>
+      <span class="pill-name">{{ pill }}</span>
+    </li>
+    {% endfor %}
+  </ol>
+
   <div class="progress-head">
     <span class="stage-label">{{ status.get('label', stage) }}</span>
     <span class="stage-pct">{{ pct }}%</span>

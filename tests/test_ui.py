@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import io
 import json
+import re
+import time
 
 from fastapi.testclient import TestClient
 
@@ -190,6 +192,98 @@ def test_analyze_routes_to_stub_by_default(monkeypatch, tmp_path):
     assert r.status_code == 200
     assert len(scheduled) == 1
     assert scheduled[0][0] == "_run_pipeline_stub"
+
+
+# ---------------------------------------------------------------------------
+# P2 progress page — sticky header, stage pills, live $ counter (issue #27)
+# ---------------------------------------------------------------------------
+def test_status_sticky_header_has_case_and_elapsed(tmp_path, monkeypatch):
+    """Sticky header must render the case name + an elapsed-time readout."""
+    monkeypatch.setattr(ui_app, "JOBS_DIR", tmp_path)
+    job_id = "hdrjob"
+    (tmp_path / f"{job_id}.json").write_text(json.dumps({
+        "job_id": job_id,
+        "stage": "analyzing",
+        "label": "Claude is reviewing evidence",
+        "progress": 0.4,
+        "mode": "post_mortem",
+        "upload": "nao_fall.bag",
+        "case_name": "nao_fall.bag",
+        "created_at": time.time() - 73,  # 1m13s ago
+        "reasoning_buffer": ["[analyzing] working..."],
+        "has_diff": False,
+    }))
+    client = TestClient(app)
+    r = client.get(f"/status/{job_id}")
+    assert r.status_code == 200
+    assert "sticky-header" in r.text
+    assert "nao_fall.bag" in r.text
+    # Elapsed renders as mm:ss and carries the numeric seconds in a data attr.
+    assert re.search(r'data-elapsed-seconds="\d+"', r.text)
+    assert re.search(r"\d{2}:\d{2}", r.text)
+
+
+def test_status_stage_pills_render_exactly_one_active(tmp_path, monkeypatch):
+    """Three pills (ingest / analyze / report); exactly one is active."""
+    monkeypatch.setattr(ui_app, "JOBS_DIR", tmp_path)
+    job_id = "pilljob"
+    (tmp_path / f"{job_id}.json").write_text(json.dumps({
+        "job_id": job_id,
+        "stage": "analyzing",
+        "label": "Claude is reviewing evidence",
+        "progress": 0.4,
+        "mode": "post_mortem",
+        "upload": "case.bag",
+        "case_name": "case.bag",
+        "reasoning_buffer": ["[analyzing] ..."],
+        "has_diff": False,
+    }))
+    client = TestClient(app)
+    r = client.get(f"/status/{job_id}")
+    assert r.status_code == 200
+    # All three pill names render.
+    for name in ("ingest", "analyze", "report"):
+        assert f'data-pill="{name}"' in r.text
+    # Exactly one `pill active` badge — not zero, not two.
+    active_count = len(re.findall(r'class="pill active"', r.text))
+    assert active_count == 1, f"expected 1 active pill, got {active_count}"
+    # ...and it's the 'analyze' one for stage='analyzing'.
+    assert re.search(r'class="pill active" data-pill="analyze"', r.text)
+
+
+def test_status_cost_counter_renders_dollar_amount(tmp_path, monkeypatch):
+    """Cost counter must render a $ number, with data-source marking empty ledgers."""
+    monkeypatch.setattr(ui_app, "JOBS_DIR", tmp_path)
+    # Point the cost ledger at an empty tmp dir so the stub render path is covered.
+    monkeypatch.setattr(ui_app, "DATA_DIR", tmp_path)
+    job_id = "costjob"
+    (tmp_path / f"{job_id}.json").write_text(json.dumps({
+        "job_id": job_id,
+        "stage": "analyzing",
+        "label": "Claude is reviewing evidence",
+        "progress": 0.4,
+        "mode": "post_mortem",
+        "upload": "case.bag",
+        "case_name": "case.bag",
+        "reasoning_buffer": ["[analyzing] ..."],
+        "has_diff": False,
+    }))
+    client = TestClient(app)
+    r = client.get(f"/status/{job_id}")
+    assert r.status_code == 200
+    # Empty ledger → $0.00 with data-source="empty".
+    assert 'data-source="empty"' in r.text
+    assert "$0.00" in r.text
+
+    # Populate the ledger and reassert — the number must update and source flips.
+    (tmp_path / "costs.jsonl").write_text(
+        json.dumps({"usd_cost": 1.23, "prompt_kind": "x"}) + "\n"
+        + json.dumps({"usd_cost": 0.77, "prompt_kind": "y"}) + "\n"
+    )
+    r2 = client.get(f"/status/{job_id}")
+    assert r2.status_code == 200
+    assert 'data-source="session"' in r2.text
+    assert "$2.00" in r2.text
 
 
 def test_analyze_routes_to_real_pipeline_when_enabled(monkeypatch, tmp_path):
