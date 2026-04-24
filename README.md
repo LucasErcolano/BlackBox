@@ -328,6 +328,27 @@ The benchmark lives in a sibling repo (`black-box-bench/`). Seven cases are pres
 
 The published reference run in `black-box-bench/runs/sample/` is a hand-written reference (`sample`), not model output.
 
+## UI
+
+Three states of the FastAPI + HTMX front-end running against synthetic fixtures. NTSB aesthetic — no gradients, monospace reasoning stream, explicit job IDs.
+
+<p>
+  <img src="docs/assets/ui_upload.png" alt="Upload panel" width="800" /><br />
+  <em>Upload — pick a recording, pick a mode, hand off to the worker.</em>
+</p>
+
+<p>
+  <img src="docs/assets/ui_progress.png" alt="Progress panel" width="800" /><br />
+  <em>Progress — staged reasoning stream (ingesting / analyzing / synthesizing / reporting), HTMX polls <code>/status/{job_id}</code> once per second.</em>
+</p>
+
+<p>
+  <img src="docs/assets/ui_report.png" alt="Report panel" width="800" /><br />
+  <em>Report — complete state with root cause, download link, and the "View proposed fix" side-by-side diff.</em>
+</p>
+
+Reproduce: `python scripts/capture_screenshots.py` (requires `playwright` + `playwright install chromium`).
+
 ## UI status
 
 `src/black_box/ui/` ships the upload → streaming-reasoning → side-by-side-diff UX. Behind the UI, the pipeline worker is currently the streaming **stub** (`_run_pipeline_stub` in `ui/app.py`) that walks through realistic stage chunks and emits a canned patch artifact for the diff viewer (tag: `replay`). The demo video uses this path.
