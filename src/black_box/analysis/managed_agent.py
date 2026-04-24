@@ -27,7 +27,6 @@ Usage::
 from __future__ import annotations
 
 import json
-import os
 import threading
 import time
 from collections import deque
@@ -39,6 +38,7 @@ from typing import Any, Iterable, Iterator, Literal
 from anthropic import Anthropic
 from pydantic import ValidationError
 
+from .client import build_client
 from .schemas import PostMortemReport
 from ..memory import CaseRecord, MemoryStack, TaxonomyCount
 
@@ -305,7 +305,7 @@ class ForensicAgent:
         platform: str | None = None,
     ) -> None:
         self.config = config or ForensicAgentConfig()
-        self._client: Anthropic = client or Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        self._client: Anthropic = client or build_client()
         self._memory = memory
         self._platform = platform
         # Lazily build the advisor so agents constructed without memory stay
