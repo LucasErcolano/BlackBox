@@ -897,6 +897,79 @@ def stage_telemetry_analysis(client: ClaudeClient, manifest: Manifest,
 # ---------------------------------------------------------------------------
 
 
+def _classify_moment(label: str, evidence: list[dict]) -> tuple[str, str]:
+    """Map moment label + evidence → (bug_class, actionable patch_hint).
+
+    Closed-set bug taxonomy (CLAUDE.md). No new classes; map unknown to the
+    nearest fit. patch_hint is specific to the observed failure mode, not
+    generic "review manually".
+    """
+    lab = label.lower()
+    snippets = " ".join(str(e.get("snippet", "")).lower() for e in evidence)
+    blob = lab + " " + snippets
+    topics = [str(e.get("channel", "") or e.get("topic_or_file", "")) for e in evidence]
+    topic_str = " ".join(topics).lower()
+
+    if "silent" in blob or "0 messages" in blob or "never emitted" in blob:
+        driver_hint = ""
+        if "imu" in topic_str:
+            driver_hint = (
+                " For Ouster/Velodyne IMU streams, check driver launch params "
+                "(e.g. `imu_port`, `imu_publish:=true`) and confirm the sensor "
+                "hardware IMU is wired and not disabled in firmware."
+            )
+        elif "gnss" in topic_str or "nav" in topic_str or "fix" in topic_str:
+            driver_hint = (
+                " For GNSS/RTK, verify ublox driver started, antenna connection, "
+                "and that the RTCM correction stream is being injected."
+            )
+        return "sensor_timeout", (
+            "Topic declared in bag metadata but publisher emitted zero "
+            "messages — this is a silent driver failure, not a QoS mismatch. "
+            "Inspect driver process logs (rosout, dmesg) for init errors; "
+            "verify publisher launch config enables this stream; confirm "
+            "sensor hardware connectivity." + driver_hint
+        )
+    if "stale" in blob or "stuck" in blob or "frozen" in blob:
+        return "sensor_timeout", (
+            "Consumer must reject samples whose header.stamp has not advanced "
+            "for N * expected_period. Add a freshness check at the fusion "
+            "node boundary and raise a diagnostic_msgs/DiagnosticStatus on "
+            "timeout so oncall paging fires instead of silent bad data."
+        )
+    if "gap" in blob or "dropout" in blob or "no messages for" in blob:
+        return "sensor_timeout", (
+            "Publisher dropped out mid-session. Add watchdog (2 * nominal "
+            "period) that restarts the driver node or surfaces a health-"
+            "check failure; on the consumer side reject stale data rather "
+            "than extrapolating last-known."
+        )
+    if "rate" in blob and ("drop" in blob or "low" in blob or "below" in blob):
+        return "latency_spike", (
+            "Rate drop indicates CPU/IO backpressure or thread starvation. "
+            "Profile publisher node CPU + the serialization path; raise QoS "
+            "history depth only if the drop is burst-shaped, otherwise fix "
+            "the upstream bottleneck (it is not a buffering issue)."
+        )
+    if "calibration" in blob or "drift" in blob or "carr" in blob or "rtk" in blob:
+        return "calibration_drift", (
+            "Cross-sensor alignment or RTK fix quality degraded. Re-run the "
+            "calibration routine; for RTK verify base-station LOS, RTCM age, "
+            "and NAV-RELPOSNED carrSoln field before trusting heading."
+        )
+    if "latency" in blob or "sync" in blob or "clock" in blob or "skew" in blob:
+        return "latency_spike", (
+            "Clock skew between sensor streams. Pin all nodes to the same "
+            "time source (chrony / PTP), and on the consumer side use "
+            "message_filters::ApproximateTime with a bounded slop rather "
+            "than ExactTime."
+        )
+    return "sensor_timeout", (
+        "Review the flagged window against upstream driver logs and sensor "
+        "health metrics; confirm whether the anomaly is reproducible."
+    )
+
+
 def stage_report(manifest: Manifest, vision: dict, frames_index: dict,
                  out_dir: Path, case_key: str) -> Path:
     print(f"[6] report: building ...", flush=True)
@@ -907,28 +980,34 @@ def stage_report(manifest: Manifest, vision: dict, frames_index: dict,
             "label": f"[{m['window']}] {m['label']}",
             "cross_view": len(m.get("cameras", {}).get("shows", [])) >= 2,
         })
-    if vision.get("all_moments"):
-        top = max(vision["all_moments"], key=lambda m: m.get("confidence", 0.0))
-        hyps = [{
-            "bug_class": "other",
-            "confidence": float(top.get("confidence", 0.5)),
-            "summary": (f"{len(vision['all_moments'])} visual moments of interest "
-                        f"flagged across windows."),
-            "evidence": [
+    moments = vision.get("all_moments", [])
+    if moments:
+        moments_sorted = sorted(
+            moments, key=lambda m: m.get("confidence", 0.0), reverse=True
+        )[:5]
+        hyps = []
+        for mm in moments_sorted:
+            ev = [
                 {"source": e.get("source", "camera"),
                  "topic_or_file": e.get("channel", "?"),
                  "t_ns": e.get("t_ns"),
                  "snippet": str(e.get("snippet", ""))[:200]}
-                for m in vision["all_moments"] for e in m.get("evidence", [])
-            ][:30],
-            "patch_hint": "Review flagged moments manually; confirm against source data.",
-        }]
+                for e in mm.get("evidence", [])
+            ][:10]
+            bug_class, patch_hint = _classify_moment(mm.get("label", ""), ev)
+            hyps.append({
+                "bug_class": bug_class,
+                "confidence": float(mm.get("confidence", 0.5)),
+                "summary": f"[{mm.get('window','?')}] {mm.get('label','')}",
+                "evidence": ev,
+                "patch_hint": patch_hint,
+            })
     else:
         hyps = [{
-            "bug_class": "other", "confidence": 0.0,
+            "bug_class": "sensor_timeout", "confidence": 0.0,
             "summary": "No anomalies detected.",
             "evidence": [],
-            "patch_hint": "Nominal operation.",
+            "patch_hint": "Nominal operation — no action required.",
         }]
 
     patch_lines = []

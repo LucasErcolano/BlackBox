@@ -491,6 +491,28 @@ def _run_pipeline_real(job_id: str, upload_path: Path, mode: Mode) -> None:
         _push("ingesting", "Decoding bag and extracting frames", 0.08)
 
         case_key = f"ui_{job_id}"
+
+        # Preflight: build a manifest. If the session has NO cameras, bypass
+        # the cloud ForensicAgent (which is tuned for vision post-mortem) and
+        # route through the local run_session pipeline, which has a
+        # telemetry-only branch. Keeps no-camera bags from producing empty UI.
+        try:
+            from black_box.ingestion.manifest import build_manifest as _bm
+            pre_manifest = _bm(upload_path, count_messages=False)
+            no_cams = not pre_manifest.has_cameras()
+        except Exception as pe:
+            buffer.append(f"[preflight] manifest probe skipped: {pe!r}")
+            no_cams = False
+
+        if no_cams:
+            buffer.append("[preflight] no camera topics detected — "
+                          "routing to telemetry-only pipeline")
+            _push("analyzing", "Telemetry-only pipeline", 0.25)
+            _run_pipeline_telemetry_only(
+                job_id, upload_path, mode, case_key, buffer, _push
+            )
+            return
+
         buffer.append(f"[agent] Opening ForensicAgent session for {case_key}")
         _push("ingesting", "Decoding bag and extracting frames", 0.15)
 
@@ -550,6 +572,78 @@ def _run_pipeline_real(job_id: str, upload_path: Path, mode: Mode) -> None:
         buffer.append("[fallback] Falling back to stub pipeline so the UI stays responsive.")
         _push("analyzing", "Live pipeline failed — replaying stub", 0.3)
         _run_pipeline_stub(job_id, upload_path, mode)
+
+
+def _run_pipeline_telemetry_only(
+    job_id: str,
+    upload_path: Path,
+    mode: Mode,
+    case_key: str,
+    buffer: list[str],
+    _push,
+) -> None:
+    """Run run_session.run() locally for bags with no camera topics.
+
+    Output report.md is copied into REPORTS_DIR/<job_id>.md so the existing
+    /report route keeps working. Only telemetry/lidar evidence — no vision.
+    """
+    import sys as _sys
+    scripts_dir = REPO_ROOT / "scripts"
+    if str(scripts_dir) not in _sys.path:
+        _sys.path.insert(0, str(scripts_dir))
+    import run_session as _rs  # type: ignore
+
+    out_dir = DATA_DIR / "runs" / f"ui_{job_id}"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    buffer.append(f"[pipeline] out_dir={out_dir}")
+    _push("analyzing", "Scanning telemetry + lidar", 0.35)
+
+    _rs.run(
+        path=upload_path,
+        out_dir=out_dir,
+        user_prompt=None,
+        reuse_frames=False,
+        force_deep=False,
+    )
+
+    _push("synthesizing", "Cross-checking hypotheses", 0.82)
+    report_src = out_dir / "report.md"
+    report_dst = REPORTS_DIR / f"{job_id}.md"
+    if report_src.exists():
+        report_dst.write_text(report_src.read_text())
+        buffer.append(f"[report] Wrote {report_dst.name} "
+                      f"({report_dst.stat().st_size} bytes)")
+    else:
+        buffer.append("[report] ERROR: run_session produced no report.md")
+
+    # Build a minimal payload so /report?format=pdf still works.
+    vision = {}
+    vj = out_dir / "vision.json"
+    if vj.exists():
+        try:
+            vision = json.loads(vj.read_text())
+        except Exception:
+            vision = {}
+    top_label = ""
+    moments = vision.get("all_moments") or []
+    if moments:
+        top_label = str(moments[0].get("label", ""))[:120]
+    payload = {
+        "timeline": [],
+        "hypotheses": [{
+            "bug_class": "sensor_timeout",
+            "confidence": float(moments[0].get("confidence", 0.0)) if moments else 0.0,
+            "summary": top_label or "No anomalies detected.",
+            "evidence": [],
+            "patch_hint": "See report.md for actionable recommendations.",
+        }],
+        "root_cause_idx": 0,
+        "patch_proposal": "",
+    }
+    (JOBS_DIR / f"{job_id}_report.json").write_text(json.dumps(payload, indent=2))
+    _patch_path(job_id).write_text(json.dumps(_STUB_PATCH, indent=2))
+    _push("done", "Complete", 1.0, done=True)
 
 
 # ---- background stub --------------------------------------------------------
