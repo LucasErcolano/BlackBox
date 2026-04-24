@@ -818,6 +818,7 @@ def _progress_context(job_id: str, status_data: dict) -> dict:
     cost = _cost_summary(job_id)
     source = status_data.get("source") or "sample"
     src_label, src_tooltip = _SOURCE_LABELS.get(source, _SOURCE_LABELS["sample"])
+    review = _review_banner(job_id, status_data)
     return {
         "job_id": job_id,
         "status": status_data,
@@ -831,7 +832,29 @@ def _progress_context(job_id: str, status_data: dict) -> dict:
         "source": source,
         "source_label": src_label,
         "source_tooltip": src_tooltip,
+        "review": review,
     }
+
+
+_REVIEW_LABELS = {
+    "pending":  ("AWAITING HUMAN REVIEW", "patch staged · not yet applied"),
+    "approved": ("PATCH APPROVED",        "cleared for integration"),
+    "rejected": ("PATCH REJECTED",        "blocked from application"),
+}
+
+
+def _review_banner(job_id: str, status_data: dict) -> dict | None:
+    """Return the review banner dict when a patch artifact exists, else None.
+
+    Surfaces the HITL gate state on the progress card so operators can tell
+    at a glance whether a run still needs a human decision.
+    """
+    if not _patch_path(job_id).exists() and not status_data.get("has_diff"):
+        return None
+    decision = _load_decision(job_id)
+    status = decision.get("status", "pending")
+    label, sub = _REVIEW_LABELS.get(status, _REVIEW_LABELS["pending"])
+    return {"status": status, "label": label, "sub": sub}
 
 
 @app.get("/case/{slug}", response_class=HTMLResponse)
@@ -897,11 +920,69 @@ async def report(
         raise HTTPException(404, "report not ready")
 
     markdown_source = md_path.read_text(encoding="utf-8")
+    hero = _report_hero(markdown_source)
     return templates.TemplateResponse(
         request,
         "report.html",
-        {"job_id": job_id, "markdown_source": markdown_source},
+        {"job_id": job_id, "markdown_source": markdown_source, "hero": hero},
     )
+
+
+_HERO_KEYS = {
+    "Case": "case",
+    "Mode": "mode",
+    "Duration": "duration",
+    "Generated": "generated",
+    "Model": "model",
+}
+
+
+def _report_hero(md: str) -> dict | None:
+    """Extract the first-fold lockup from a NTSB-style report.md.
+
+    Pulls the `Case / Mode / Duration / Model / Generated` metadata row and
+    the first blockquote (used as the root-cause verdict). Returns None when
+    the markdown does not match the expected shape so legacy reports still
+    render.
+    """
+    case = mode = duration = generated = model = None
+    verdict = None
+    for raw in md.splitlines()[:40]:
+        line = raw.strip()
+        if line.startswith(">") and verdict is None:
+            verdict = line.lstrip("> ").strip()
+        if "**" in line and ":**" in line:
+            # **Case:** `foo` · **Mode:** `bar`
+            for chunk in line.replace("&nbsp;", " ").split("·"):
+                chunk = chunk.strip()
+                for key, attr in _HERO_KEYS.items():
+                    token = f"**{key}:**"
+                    if chunk.startswith(token):
+                        val = chunk[len(token):].strip()
+                        if "`" in val:
+                            parts = val.split("`")
+                            val = parts[1] if len(parts) >= 2 else val.strip("`")
+                        val = val.strip()
+                        if attr == "case" and case is None:
+                            case = val
+                        elif attr == "mode" and mode is None:
+                            mode = val
+                        elif attr == "duration" and duration is None:
+                            duration = val
+                        elif attr == "generated" and generated is None:
+                            generated = val
+                        elif attr == "model" and model is None:
+                            model = val
+    if not case:
+        return None
+    return {
+        "case": case,
+        "mode": mode or "—",
+        "duration": duration,
+        "generated": generated,
+        "model": model,
+        "verdict": verdict,
+    }
 
 
 @app.get("/diff/{job_id}", response_class=HTMLResponse)

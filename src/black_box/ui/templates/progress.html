@@ -62,6 +62,17 @@
 {% endif %}{% endfor %}{% if not done and buffer %}<span class="cursor">▍</span>{% endif %}</pre>
   </div>
 
+  {% if review %}
+  <div class="review-state rs-{{ review.status }}" data-review-status="{{ review.status }}">
+    <span class="rs-dot" aria-hidden="true"></span>
+    <span class="rs-label">{{ review.label }}</span>
+    <span class="rs-sub">{{ review.sub }}</span>
+    {% if review.status == 'pending' %}
+    <a class="rs-link" href="/diff/{{ job_id }}" target="_blank" rel="noopener">Review patch →</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
   <div class="meta">
     <span>job <code>{{ job_id }}</code></span>
     <span>mode {{ status.get('mode', '—') }}</span>

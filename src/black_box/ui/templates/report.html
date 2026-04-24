@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;})();</script>
   <title>Black Box — Report {{ job_id }}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +24,19 @@
         <a class="btn btn-secondary" href="/report/{{ job_id }}?format=pdf">Download PDF</a>
       </nav>
     </header>
+
+    {% if hero %}
+    <section class="report-hero" data-case="{{ hero.case }}">
+      <p class="rh-eyebrow">forensic verdict · {{ hero.mode }}</p>
+      <p class="rh-case">{{ hero.case }}</p>
+      {% if hero.verdict %}<p class="rh-verdict">{{ hero.verdict }}</p>{% endif %}
+      <div class="rh-meta">
+        {% if hero.duration %}<span>duration <strong>{{ hero.duration }}</strong></span>{% endif %}
+        {% if hero.model %}<span>model <strong>{{ hero.model }}</strong></span>{% endif %}
+        {% if hero.generated %}<span>generated <strong>{{ hero.generated }}</strong></span>{% endif %}
+      </div>
+    </section>
+    {% endif %}
 
     <article
       id="report-body"
