@@ -29,10 +29,43 @@ Design:
 from __future__ import annotations
 
 import re
+import sys
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable, Sequence
+
+
+# --- RTK wrapper -------------------------------------------------------------
+# Token-Killer subprocess wrapper. Defined here so that any shell-out this
+# module grows later automatically logs stdout-byte savings to
+# data/costs.jsonl. See scripts/rtk.py for the full implementation.
+_RTK_MODULE: Any = None
+
+
+def _load_rtk() -> Any:
+    """Lazy-import scripts/rtk.py (outside the `src/` package tree)."""
+    global _RTK_MODULE
+    if _RTK_MODULE is not None:
+        return _RTK_MODULE
+    repo_root = Path(__file__).resolve().parents[3]
+    scripts_dir = repo_root / "scripts"
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+    import rtk as _rtk  # type: ignore[import-not-found]
+    _RTK_MODULE = _rtk
+    return _rtk
+
+
+def rtk_run(cmd: Sequence[str] | str, *, apply_filter: bool = True, **kwargs: Any):
+    """Shell-out helper used by ingestion code paths. Filters + logs stdout.
+
+    Thin proxy over `scripts.rtk.run` so call sites in this module (and its
+    users) do not have to reach into the scripts/ dir directly. Pass
+    `apply_filter=False` for the `--no-rtk` debug path.
+    """
+    rtk = _load_rtk()
+    return rtk.run(cmd, apply_filter=apply_filter, **kwargs)
 
 
 _PREFIX_RE = re.compile(r"^(?P<prefix>\d+)_")
