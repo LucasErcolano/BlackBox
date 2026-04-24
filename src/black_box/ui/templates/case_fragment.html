@@ -1,0 +1,62 @@
+<article
+  class="case-body"
+  id="case-body-{{ slug }}"
+  data-markdown="{{ markdown_source }}"
+  aria-live="polite"
+>
+  <header class="case-body-head">
+    <span class="case-body-eyebrow">case file</span>
+    <h2 class="case-body-title">{{ slug }}</h2>
+    <nav class="case-body-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        hx-get="/"
+        hx-target="#result"
+        hx-swap="innerHTML"
+      >Close</button>
+    </nav>
+  </header>
+  <noscript><pre>{{ markdown_source }}</pre></noscript>
+</article>
+<script>
+  (function () {
+    var el = document.getElementById('case-body-{{ slug }}');
+    if (!el) { return; }
+    var src = el.getAttribute('data-markdown') || '';
+    function render() {
+      window.marked.setOptions({ gfm: true, breaks: false, headerIds: true });
+      var header = el.querySelector('.case-body-head');
+      el.innerHTML = '';
+      if (header) { el.appendChild(header); }
+      var body = document.createElement('div');
+      body.className = 'case-body-md';
+      var rawHtml = window.marked.parse(src);
+      if (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
+        body.innerHTML = window.DOMPurify.sanitize(rawHtml);
+      } else {
+        var pre = document.createElement('pre');
+        pre.textContent = src;
+        body.appendChild(pre);
+      }
+      el.appendChild(body);
+    }
+    function ensureDeps(cb) {
+      function haveMarked() { return window.marked && typeof window.marked.parse === 'function'; }
+      function havePurify() { return window.DOMPurify && typeof window.DOMPurify.sanitize === 'function'; }
+      function loadScript(src, done) {
+        var s = document.createElement('script');
+        s.src = src;
+        s.onload = done;
+        document.head.appendChild(s);
+      }
+      function step2() {
+        if (havePurify()) { cb(); }
+        else { loadScript('https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js', cb); }
+      }
+      if (haveMarked()) { step2(); }
+      else { loadScript('https://cdn.jsdelivr.net/npm/marked/marked.min.js', step2); }
+    }
+    ensureDeps(render);
+  })();
+</script>

@@ -61,7 +61,7 @@
     <span>job <code>{{ job_id }}</code></span>
     <span>mode {{ status.get('mode', '—') }}</span>
     {% if status.get('has_diff') %}
-      <a class="link-diff" href="/diff/{{ job_id }}" target="_blank" rel="noopener">View proposed fix →</a>
+      <a class="link-diff" href="/diff/{{ job_id }}" target="_blank" rel="noopener">View proposed fix</a>
     {% endif %}
     {% if stage == 'done' %}
       <a class="link-report" href="/report/{{ job_id }}" target="_blank" rel="noopener">View report →</a>

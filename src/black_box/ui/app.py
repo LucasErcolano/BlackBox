@@ -32,6 +32,15 @@ JOBS_DIR = DATA_DIR / "jobs"
 REPORTS_DIR = DATA_DIR / "reports"
 UPLOADS_DIR = DATA_DIR / "uploads"
 PATCHES_DIR = DATA_DIR / "patches"
+CASES_DIR = REPO_ROOT / "demo_assets" / "pdfs"
+
+# Whitelist of hero cases surfaced on the landing page. Keeps the /case route
+# from doubling as an arbitrary-file-read primitive.
+HERO_CASES: dict[str, str] = {
+    "sanfer_tunnel": "sanfer_tunnel.md",
+    "car_1": "car_1.md",
+    "boat_lidar": "boat_lidar.md",
+}
 for d in (JOBS_DIR, REPORTS_DIR, UPLOADS_DIR, PATCHES_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
@@ -703,6 +712,22 @@ def _progress_context(job_id: str, status_data: dict) -> dict:
         "cost_usd": cost["usd"],
         "cost_source": cost["source"],
     }
+
+
+@app.get("/case/{slug}", response_class=HTMLResponse)
+async def case_fragment(request: Request, slug: str) -> HTMLResponse:
+    filename = HERO_CASES.get(slug)
+    if filename is None:
+        raise HTTPException(404, f"unknown case: {slug}")
+    md_path = CASES_DIR / filename
+    if not md_path.exists():
+        raise HTTPException(404, f"case markdown missing: {filename}")
+    markdown_source = md_path.read_text(encoding="utf-8")
+    return templates.TemplateResponse(
+        request,
+        "case_fragment.html",
+        {"slug": slug, "markdown_source": markdown_source},
+    )
 
 
 def _build_pdf_on_demand(job_id: str) -> Path | None:
