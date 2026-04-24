@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """End-to-end smoke: synthetic Tier 3 case -> Claude Opus 4.7 -> PDF report.
 
 One real API call. Logs cost to data/costs.jsonl.

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """``blackbox`` command-line entry point.
 
 Subcommands:

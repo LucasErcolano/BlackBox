@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """NTSB-inspired PDF report builder for Black Box forensic reports."""
 from __future__ import annotations
 

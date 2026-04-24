@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Extract a time window of frames from 5 cameras in a ROS1 bag.
 
 Streams once through [start_ns, stop_ns), samples N frames per camera evenly spaced,

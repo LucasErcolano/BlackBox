@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Run scenario mining over an extracted bag window.
 
 Reads frames_manifest.json + PNG thumbnails from cache, builds Claude prompt,

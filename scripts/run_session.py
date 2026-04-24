@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """THE Black Box pipeline. Input: (path, optional prompt). Output: report.
 
 Handles file or folder. Auto-discovers session assets, builds a platform-

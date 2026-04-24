@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """DEPRECATED: platform-specific boat/USV prompts.
 
 Superseded by `black_box.analysis.prompts_generic`, which constructs a

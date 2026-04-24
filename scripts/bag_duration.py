@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Quick bag duration probe via connection index (no message scan)."""
 import sys
 from pathlib import Path

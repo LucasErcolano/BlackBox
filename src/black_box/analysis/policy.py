@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Self-improving policy advisor backed by the 4-layer memory stack.
 
 The memory substrate (L1..L4) has been shipped for a while; this module is

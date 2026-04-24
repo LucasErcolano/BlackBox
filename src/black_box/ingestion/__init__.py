@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Ingestion layer: bag -> typed data -> renderable payloads."""
 
 from .rosbag_reader import (

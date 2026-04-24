@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """v2 extractor: 3 windows (start/middle/end) × 20s × ~1 fps per cam → 20 frames/cam/window."""
 from __future__ import annotations
 import json

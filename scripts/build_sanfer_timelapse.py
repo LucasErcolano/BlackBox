@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Annotated timelapse from real sanfer_tunnel cam1 frames."""
 from __future__ import annotations
 

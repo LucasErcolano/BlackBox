@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """DEPRECATED: AV-specific vision-only prompts.
 
 Kept for back-compat with older callers and the mocked grounding-gate

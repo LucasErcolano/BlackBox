@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """NAO6 (SoftBank Aldebaran) ingestion adapter + humanoid-specific taxonomy."""
 
 from .adapter import NAO6Adapter

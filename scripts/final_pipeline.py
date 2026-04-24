@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Final forensic pipeline — runs all 5 demo bags end-to-end.
 
 Per bag: extract minimal artifacts -> managed-agents session -> stream events

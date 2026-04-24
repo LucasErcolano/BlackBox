@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Synthetic forensic cases for Black Box."""
 
 from .cases import SyntheticCase, build_all_cases, materialize_case

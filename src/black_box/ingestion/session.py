@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Session discovery across a messy field-capture folder.
 
 Operators rarely hand over a single file. They hand over a folder like:

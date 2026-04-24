@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Typed record schemas for the 4 memory layers. Pydantic v2."""
 
 from __future__ import annotations

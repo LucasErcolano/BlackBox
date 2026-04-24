@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """LIDAR ingestion — PointCloud2 + LaserScan decoders and top-down rendering.
 
 Uses `rosbags` deserialized messages. No ROS runtime. Outputs numpy arrays

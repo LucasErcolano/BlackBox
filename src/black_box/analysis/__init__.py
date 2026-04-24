@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Black Box analysis module: Claude-powered forensic diagnostics."""
 
 from .claude_client import ClaudeClient, CostLog

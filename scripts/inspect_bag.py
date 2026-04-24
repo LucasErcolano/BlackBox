@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Inspect a ROS1 bag: topics, types, counts, duration. Emit manifest JSON."""
 from __future__ import annotations
 import json

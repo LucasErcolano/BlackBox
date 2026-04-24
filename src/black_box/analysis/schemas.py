@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Pydantic v2 schemas for Black Box forensic analysis."""
 
 from typing import Literal

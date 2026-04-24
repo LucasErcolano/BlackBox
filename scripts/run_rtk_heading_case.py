@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """One-shot forensic pass on rtk_heading_break_01.
 
 Loads the telemetry.npz for the case, builds a text-only bag summary of

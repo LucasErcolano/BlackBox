@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Record /analyze?replay=sanfer_tunnel to mp4 via playwright + imageio_ffmpeg."""
 from __future__ import annotations
 

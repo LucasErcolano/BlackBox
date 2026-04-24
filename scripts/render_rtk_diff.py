@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Render the sanfer RTK fix as a 3-panel NTSB-style side-by-side diff.
 
 Matches hypothesis-0 patch proposal verbatim:

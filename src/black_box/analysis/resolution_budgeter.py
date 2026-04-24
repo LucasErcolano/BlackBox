@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Adaptive resolution budgeter.
 
 Picks the right image resolution tier per Claude call instead of using a

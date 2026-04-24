@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Markdown forensic report builder.
 
 Drop-in replacement for the reportlab PDF path. Output is GitHub-flavored

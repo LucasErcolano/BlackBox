@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Telemetry-drop forensic prompt.
 
 Use case: a sensor subsystem died mid-bag. Some topics keep publishing, some

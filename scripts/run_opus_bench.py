@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Budgeted Opus 4.7 bench pass over black-box-bench/cases/.
 
 Runs post_mortem_prompt (not synthetic_qa, which leaks ground truth) over

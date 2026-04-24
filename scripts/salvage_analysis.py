@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Recover assistant JSON from stream_events.jsonl when ForensicSession.finalize
 raised schema-validation errors.
 

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Freeze a copy of the NAO6 controllers at fall-trigger time.
 
 Writes controller sources verbatim into an output directory along with a

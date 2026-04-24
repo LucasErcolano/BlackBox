@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Render a unified diff as a PNG screenshot (GitHub-style colors).
 
 Usage:

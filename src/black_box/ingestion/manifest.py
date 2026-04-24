@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Platform-agnostic session manifest.
 
 Input: path (file or folder) + optional operator prompt.

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """NAO6-specific bug taxonomy.
 
 Presentation-layer vocabulary for the NAO6 humanoid platform. Each entry

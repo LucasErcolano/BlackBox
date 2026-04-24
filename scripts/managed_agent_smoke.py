@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Real-API smoke test for Managed Agents wiring (PR #7).
 
 Phase 1 — beta-access probe (<$0.02): create+delete a minimal agent.

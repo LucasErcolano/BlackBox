@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Build a 2x3 multi-image composite demonstrating single-prompt cross-view.
 
 SUBMISSION.md asks for a screenshot of the 5-camera grid that goes into one

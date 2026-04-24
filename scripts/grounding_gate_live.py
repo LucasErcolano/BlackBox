@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Live grounding-gate regression — opt-in, hits real API.
 
 Runs window_summary_v2 + visual_mining_v2 on a known-clean fixture window and
