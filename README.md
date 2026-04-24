@@ -45,6 +45,7 @@ python scripts/run_rtk_heading_case.py   # tag: live, requires ANTHROPIC_API_KEY
 
 ## Docs
 - [Build journal & strategy](https://gist.github.com/LucasErcolano/851c5e976c6aa364f69c9e6875544061) — narrative, novelty positioning, findings.
+- [Memory stack composition + cost-delta proof](docs/MEMORY_STACK.md) — L1-L4 stack, verification_note, grounding gate, caching math.
 - [Team onboarding](docs/ONBOARDING.md) — scope, cadence, conventions.
 - [Pitch](docs/PITCH.md) — one-liner, elevator, positioning one-liners.
 - [Demo script](docs/DEMO_SCRIPT.md) — 3-min video beat sheet.
