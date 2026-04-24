@@ -52,33 +52,28 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 Mode = Literal["post_mortem", "scenario_mining", "synthetic_qa"]
 
-# Per-stage reasoning chunks — visible during the stream so the demo reads
-# as a thought process, not a progress bar. Stub only; real pipeline streams
-# from Claude's managed-agent session events.
+# Sample-mode chunks. Shown only on the scripted path (no API key / real
+# pipeline disabled). Every line is prefixed [sample] so the UI can never be
+# mistaken for live agent reasoning. Live runs stream ForensicSession events;
+# replay runs stream recorded events from data/final_runs/<name>/.
 _STAGE_CHUNKS: dict[str, list[str]] = {
     "ingesting": [
-        "Opening recording and enumerating topics...",
-        "Found /imu (100 Hz), /cam_{front,left,right,back,top} (10 Hz), /joint_states.",
-        "Decoded 3.2 s of telemetry; sampling frames at 10 fps across 5 cameras.",
+        "[sample] SAMPLE MODE — no bag was analyzed; scripted walkthrough of pipeline stages.",
+        "[sample] For a live run: set ANTHROPIC_API_KEY and BLACKBOX_REAL_PIPELINE=1.",
+        "[sample] For a recorded run: open /analyze?replay=sanfer_tunnel.",
     ],
     "analyzing": [
-        "Pulled 5-camera composite at t=1.8s (telemetry delta flagged this window).",
-        "Claude call 1: cross-view reasoning over 5 thumbnails + IMU window.",
-        "IMU pitch slope = -0.42 rad/s; /joint/LHipPitch command at +2.5 while joint saturates.",
-        "Working theory: PID integral wind-up on hip pitch during step initiation.",
+        "[sample] Live mode would open a ForensicAgent managed-agent session here.",
+        "[sample] Live mode would stream reasoning + tool_call + tool_result events.",
     ],
     "synthesizing": [
-        "Grounding gate: 3/3 hypotheses meet min_evidence=2 (telemetry + camera).",
-        "Cross-source corroboration: cameras {front, left} + /imu + pid_controller.cpp.",
-        "Dropping 1 low-confidence info moment; keeping 2 anomalous.",
+        "[sample] Live mode would run the grounding gate (min_evidence=2) on hypotheses.",
     ],
     "reporting": [
-        "Rendering annotated frames with bbox overlays on hip joint...",
-        "Generating unified diff against pid_controller.cpp...",
-        "Writing NTSB-style Markdown to data/reports/{job}.md.",
+        "[sample] Live mode would render NTSB-style Markdown + unified diff artifact.",
     ],
     "done": [
-        "Done. Root cause: pid_saturation (confidence 0.82). Patch: clamp integral ±1.0.",
+        "[sample] Sample walkthrough complete. Use a real bag or /analyze?replay=... to see live output.",
     ],
 }
 
@@ -371,6 +366,8 @@ def _run_pipeline_replay(job_id: str, replay_name: str) -> None:
                     "label": label,
                     "progress": progress,
                     "mode": "post_mortem",
+                    "source": "replay",
+                    "replay_name": replay_name,
                     "upload": f"replay:{replay_name}",
                     "reasoning_buffer": list(buffer[-200:]),
                     "has_diff": stage == "done",
@@ -392,6 +389,8 @@ def _run_pipeline_replay(job_id: str, replay_name: str) -> None:
                 "label": "Complete",
                 "progress": 1.0,
                 "mode": "post_mortem",
+                "source": "replay",
+                "replay_name": replay_name,
                 "upload": f"replay:{replay_name}",
                 "reasoning_buffer": list(buffer[-200:]),
                 "has_diff": True,
@@ -407,6 +406,8 @@ def _run_pipeline_replay(job_id: str, replay_name: str) -> None:
                 "label": "Replay error",
                 "progress": 0.0,
                 "mode": "post_mortem",
+                "source": "replay",
+                "replay_name": replay_name,
                 "reasoning_buffer": list(buffer),
                 "has_diff": False,
             },
@@ -480,6 +481,7 @@ def _run_pipeline_real(job_id: str, upload_path: Path, mode: Mode) -> None:
                 "label": label,
                 "progress": progress,
                 "mode": mode,
+                "source": "live",
                 "upload": upload_path.name,
                 "reasoning_buffer": list(buffer[-200:]),
                 "has_diff": done,
@@ -665,9 +667,10 @@ def _run_pipeline_stub(job_id: str, upload_path: Path, mode: Mode) -> None:
                     {
                         "job_id": job_id,
                         "stage": stage,
-                        "label": label,
+                        "label": f"{label} (sample)",
                         "progress": inner_progress,
                         "mode": mode,
+                        "source": "sample",
                         "upload": str(upload_path.name),
                         "reasoning_buffer": list(buffer),
                         "has_diff": stage == "done",
@@ -687,6 +690,7 @@ def _run_pipeline_stub(job_id: str, upload_path: Path, mode: Mode) -> None:
                 "label": "Pipeline error",
                 "progress": 0.0,
                 "mode": mode,
+                "source": "sample",
                 "reasoning_buffer": list(buffer),
                 "has_diff": False,
             },
@@ -718,6 +722,8 @@ async def analyze_replay(
             "label": f"Queued replay: {replay}",
             "progress": 0.0,
             "mode": "post_mortem",
+            "source": "replay",
+            "replay_name": replay,
             "upload": f"replay:{replay}",
             "case_name": replay,
             "reasoning_buffer": [f"Replaying recorded session: {replay}"],
@@ -768,7 +774,15 @@ async def analyze(
             "has_diff": False,
         },
     )
-    worker = _run_pipeline_real if _real_pipeline_enabled() else _run_pipeline_stub
+    live = _real_pipeline_enabled()
+    worker = _run_pipeline_real if live else _run_pipeline_stub
+    # Re-stamp with correct source before the worker starts so the progress
+    # card's first render already shows the right badge.
+    queued = _read_status(job_id) or {}
+    queued["source"] = "live" if live else "sample"
+    if not live:
+        queued["label"] = "Queued (sample)"
+    _write_status(job_id, queued)
     background.add_task(worker, job_id, upload_path, mode)  # type: ignore[arg-type]
 
     return templates.TemplateResponse(
@@ -790,11 +804,20 @@ async def status(request: Request, job_id: str) -> HTMLResponse:
     )
 
 
+_SOURCE_LABELS = {
+    "live":   ("LIVE",   "Real Managed-Agents session, streaming events now."),
+    "replay": ("REPLAY", "Pre-recorded ForensicSession event stream played back."),
+    "sample": ("SAMPLE", "Scripted walkthrough — no bag analyzed, no model called."),
+}
+
+
 def _progress_context(job_id: str, status_data: dict) -> dict:
     stage = status_data.get("stage", "queued")
     active_pill = _pill_for(stage)
     elapsed = _elapsed_seconds(status_data)
     cost = _cost_summary(job_id)
+    source = status_data.get("source") or "sample"
+    src_label, src_tooltip = _SOURCE_LABELS.get(source, _SOURCE_LABELS["sample"])
     return {
         "job_id": job_id,
         "status": status_data,
@@ -805,6 +828,9 @@ def _progress_context(job_id: str, status_data: dict) -> dict:
         "elapsed_fmt": _fmt_elapsed(elapsed),
         "cost_usd": cost["usd"],
         "cost_source": cost["source"],
+        "source": source,
+        "source_label": src_label,
+        "source_tooltip": src_tooltip,
     }
 
 

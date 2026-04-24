@@ -15,6 +15,11 @@
     <div class="sticky-left">
       <span class="case-label">case</span>
       <span class="case-name">{{ case_name }}</span>
+      <span
+        class="source-badge source-{{ source }}"
+        data-source="{{ source }}"
+        title="{{ source_tooltip }}"
+      >{{ source_label }}</span>
     </div>
     <div class="sticky-right">
       <span class="elapsed" data-elapsed-seconds="{{ elapsed_seconds }}">

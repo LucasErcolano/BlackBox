@@ -247,6 +247,53 @@ button:hover { background: #000; }
 }
 .cost[data-source="empty"] .meta-value { color: var(--muted); }
 
+.source-badge {
+  margin-left: 0.7rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  cursor: help;
+}
+.source-badge.source-live {
+  background: #c9efd6;
+  color: #1a5a34;
+  border: 1px solid #6fbf8e;
+}
+.source-badge.source-live::before {
+  content: "●";
+  color: #2f855a;
+  margin-right: 0.35rem;
+  animation: live-pulse 1.4s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.source-badge.source-replay {
+  background: #f4efe1;
+  color: #5f5a45;
+  border: 1px solid #c9bf9e;
+}
+.source-badge.source-replay::before {
+  content: "▶";
+  margin-right: 0.35rem;
+  color: #8a7f5c;
+}
+.source-badge.source-sample {
+  background: #faf8f2;
+  color: #8a8a86;
+  border: 1px dashed #b8b4a8;
+}
+.source-badge.source-sample::before {
+  content: "◌";
+  margin-right: 0.35rem;
+}
+
 .stage-pills {
   list-style: none;
   padding: 0;

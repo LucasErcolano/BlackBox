@@ -303,6 +303,37 @@ def test_status_stage_pills_render_exactly_one_active(tmp_path, monkeypatch):
     assert re.search(r'class="pill active" data-pill="analyze"', r.text)
 
 
+def test_status_source_badge_renders_per_source(tmp_path, monkeypatch):
+    """Each job status must surface its provenance (live / replay / sample)
+    as a badge — so jury and users can't mistake a sample walkthrough for a
+    real Managed-Agents run."""
+    monkeypatch.setattr(ui_app, "JOBS_DIR", tmp_path)
+    client = TestClient(app)
+    for source, expected_label in (
+        ("live",   "LIVE"),
+        ("replay", "REPLAY"),
+        ("sample", "SAMPLE"),
+    ):
+        job_id = f"srcjob_{source}"
+        (tmp_path / f"{job_id}.json").write_text(json.dumps({
+            "job_id": job_id,
+            "stage": "analyzing",
+            "label": "Claude is reviewing evidence",
+            "progress": 0.4,
+            "mode": "post_mortem",
+            "upload": "case.bag",
+            "case_name": "case.bag",
+            "source": source,
+            "reasoning_buffer": ["[analyzing] ..."],
+            "has_diff": False,
+        }))
+        r = client.get(f"/status/{job_id}")
+        assert r.status_code == 200
+        assert f'data-source="{source}"' in r.text
+        assert f'source-{source}' in r.text
+        assert f">{expected_label}<" in r.text
+
+
 def test_status_cost_counter_renders_dollar_amount(tmp_path, monkeypatch):
     """Cost counter must render a $ number, with data-source marking empty ledgers."""
     monkeypatch.setattr(ui_app, "JOBS_DIR", tmp_path)
