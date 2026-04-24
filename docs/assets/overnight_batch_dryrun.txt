@@ -1,0 +1,48 @@
+$ PYTHONPATH=src python scripts/overnight_batch.py --dry-run --out-dir data/bench_runs/batch_2026-04-23_dryrun
+=== overnight batch ===
+mode      : dry-run
+cases     : 7 from /.../black-box-bench/cases
+budget    : $50.00 (cumulative data/costs.jsonl = $30.560)
+output    : data/bench_runs/batch_2026-04-23_dryrun
+batch id  : batch_2026-04-23_dryrun
+
+[1/7] bad_gain_01 ...
+  -> OK   predicted=bad_gain_tuning truth=bad_gain_tuning conf=0.77 cost=$0.000 wall=0.0s
+     notes: dry-run: stub predictor echoed ground truth
+[2/7] boat_lidar_01 ...
+  -> SKEL predicted=unknown truth=unknown conf=0.00 cost=$0.000 wall=0.0s
+     notes: skeleton_awaiting_bag
+[3/7] pid_saturation_01 ...
+  -> OK   predicted=pid_saturation truth=pid_saturation conf=0.77 cost=$0.000 wall=0.0s
+     notes: dry-run: stub predictor echoed ground truth
+[4/7] reflect_public_01 ...
+  -> SKEL predicted=unknown truth=unknown conf=0.00 cost=$0.000 wall=0.0s
+     notes: skeleton_awaiting_bag
+[5/7] rtk_heading_break_01 ...
+  -> OK   predicted=sensor_timeout truth=sensor_timeout conf=0.77 cost=$0.000 wall=0.0s
+     notes: dry-run: stub predictor echoed ground truth
+[6/7] sensor_drop_cameras_01 ...
+  -> SKEL predicted=unknown truth=sensor_timeout conf=0.00 cost=$0.000 wall=0.0s
+     notes: skeleton_awaiting_bag
+[7/7] sensor_timeout_01 ...
+  -> OK   predicted=sensor_timeout truth=sensor_timeout conf=0.77 cost=$0.000 wall=0.0s
+     notes: dry-run: stub predictor echoed ground truth
+
+case                   | wall-s | $     | bug_class_match | top-hyp confidence
+-----------------------+--------+-------+-----------------+-------------------
+bad_gain_01            | 0.0    | 0.000 | OK              | 0.77
+boat_lidar_01          | 0.0    | 0.000 | SKIP            | 0.00
+pid_saturation_01      | 0.0    | 0.000 | OK              | 0.77
+reflect_public_01      | 0.0    | 0.000 | SKIP            | 0.00
+rtk_heading_break_01   | 0.0    | 0.000 | OK              | 0.77
+sensor_drop_cameras_01 | 0.0    | 0.000 | SKIP            | 0.00
+sensor_timeout_01      | 0.0    | 0.000 | OK              | 0.77
+
+cases       : 7
+matches     : 4
+spent       : $0.000 / $50.00
+manifest    : data/bench_runs/batch_2026-04-23_dryrun/manifest.json
+table (txt) : data/bench_runs/batch_2026-04-23_dryrun/table.txt
+table (md)  : data/bench_runs/batch_2026-04-23_dryrun/table.md
+$
+$ # dry-run only — live asciinema cast is a followup (see PR body)

@@ -1,0 +1,9 @@
+case                   | wall-s | $     | bug_class_match | top-hyp confidence
+-----------------------+--------+-------+-----------------+-------------------
+bad_gain_01            | 0.0    | 0.000 | OK              | 0.77              
+boat_lidar_01          | 0.0    | 0.000 | SKIP            | 0.00              
+pid_saturation_01      | 0.0    | 0.000 | OK              | 0.77              
+reflect_public_01      | 0.0    | 0.000 | SKIP            | 0.00              
+rtk_heading_break_01   | 0.0    | 0.000 | OK              | 0.77              
+sensor_drop_cameras_01 | 0.0    | 0.000 | SKIP            | 0.00              
+sensor_timeout_01      | 0.0    | 0.000 | OK              | 0.77              

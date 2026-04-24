@@ -1,0 +1,12 @@
+{
+  "case_key": "boat_lidar_01",
+  "ground_truth_bug": "unknown",
+  "predicted_bug": "unknown",
+  "bug_class_match": false,
+  "confidence": 0.0,
+  "cost_usd": 0.0,
+  "wall_time_s": 0.0,
+  "status": "skeleton",
+  "source": "stub",
+  "notes": "skeleton_awaiting_bag"
+}

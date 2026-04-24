@@ -1,0 +1,12 @@
+{
+  "case_key": "sensor_drop_cameras_01",
+  "ground_truth_bug": "sensor_timeout",
+  "predicted_bug": "unknown",
+  "bug_class_match": false,
+  "confidence": 0.0,
+  "cost_usd": 0.0,
+  "wall_time_s": 0.0,
+  "status": "skeleton",
+  "source": "stub",
+  "notes": "skeleton_awaiting_bag"
+}
