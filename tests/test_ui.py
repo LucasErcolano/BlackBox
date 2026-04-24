@@ -219,3 +219,75 @@ def test_analyze_routes_to_real_pipeline_when_enabled(monkeypatch, tmp_path):
     assert r.status_code == 200
     assert len(scheduled) == 1
     assert scheduled[0][0] == "_run_pipeline_real"
+
+
+# ---- HITL approve/reject gate (#23) ----------------------------------------
+
+def _seed_patch(tmp_path, monkeypatch, job_id="gatejob"):
+    monkeypatch.setattr(ui_app, "PATCHES_DIR", tmp_path)
+    (tmp_path / f"{job_id}.json").write_text(json.dumps({
+        "file_path": "src/pid.cpp",
+        "old": "integral += error;\n",
+        "new": "integral += error;\nintegral = clamp(integral, -1, 1);\n",
+    }))
+    return job_id
+
+
+def test_diff_pending_shows_approve_and_reject_buttons(tmp_path, monkeypatch):
+    job_id = _seed_patch(tmp_path, monkeypatch)
+    client = TestClient(app)
+    r = client.get(f"/diff/{job_id}")
+    assert r.status_code == 200
+    assert 'data-status="pending"' in r.text
+    assert "HUMAN APPROVAL REQUIRED" in r.text
+    assert f'action="/decide/{job_id}"' in r.text
+    assert 'value="approve"' in r.text
+    assert 'value="reject"' in r.text
+
+
+def test_decide_approve_writes_decision_and_renders_banner(tmp_path, monkeypatch):
+    job_id = _seed_patch(tmp_path, monkeypatch)
+    client = TestClient(app)
+    r = client.post(f"/decide/{job_id}", data={"decision": "approve", "note": "looks safe"})
+    assert r.status_code == 200
+    assert "PATCH APPROVED" in r.text
+    assert "looks safe" in r.text
+    saved = json.loads((tmp_path / f"{job_id}.decision.json").read_text())
+    assert saved["status"] == "approved"
+    assert saved["note"] == "looks safe"
+    # Subsequent GET /diff reflects the locked state and drops the form.
+    r2 = client.get(f"/diff/{job_id}")
+    assert 'data-status="approved"' in r2.text
+    assert 'action="/decide/' not in r2.text
+
+
+def test_decide_reject_blocks_and_banners(tmp_path, monkeypatch):
+    job_id = _seed_patch(tmp_path, monkeypatch)
+    client = TestClient(app)
+    r = client.post(f"/decide/{job_id}", data={"decision": "reject", "note": "scope too broad"})
+    assert r.status_code == 200
+    assert "PATCH REJECTED" in r.text
+    saved = json.loads((tmp_path / f"{job_id}.decision.json").read_text())
+    assert saved["status"] == "rejected"
+
+
+def test_decide_is_one_shot_and_409s_on_redecision(tmp_path, monkeypatch):
+    job_id = _seed_patch(tmp_path, monkeypatch)
+    client = TestClient(app)
+    client.post(f"/decide/{job_id}", data={"decision": "approve"})
+    r = client.post(f"/decide/{job_id}", data={"decision": "reject"})
+    assert r.status_code == 409
+
+
+def test_decide_rejects_invalid_decision_value(tmp_path, monkeypatch):
+    job_id = _seed_patch(tmp_path, monkeypatch)
+    client = TestClient(app)
+    r = client.post(f"/decide/{job_id}", data={"decision": "maybe"})
+    assert r.status_code == 400
+
+
+def test_decide_404s_when_patch_missing(tmp_path, monkeypatch):
+    monkeypatch.setattr(ui_app, "PATCHES_DIR", tmp_path)
+    client = TestClient(app)
+    r = client.post("/decide/no-such-job", data={"decision": "approve"})
+    assert r.status_code == 404

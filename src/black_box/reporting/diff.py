@@ -184,6 +184,7 @@ def demo_side_by_side_html(
     file_path: str = "patch",
     case_key: str = "",
     title: str = "Proposed Fix",
+    footer_html: str = "",
 ) -> str:
     """Large-font side-by-side diff designed for the 2:00–2:20 demo beat.
 
@@ -323,6 +324,7 @@ def demo_side_by_side_html(
     <span class="pill" style="background:{added_bg};color:{added_marker};">+ added</span>
     &middot; {case_tag}
   </div>
+  {footer_html}
 </main>
 </body>
 </html>
