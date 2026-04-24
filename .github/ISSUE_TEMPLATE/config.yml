@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussions
+    url: https://github.com/LucasErcolano/BlackBox/discussions
+    about: Ask questions, share ideas, or talk about the project with the community.
+  - name: Project rules (CLAUDE.md)
+    url: https://github.com/LucasErcolano/BlackBox/blob/master/CLAUDE.md
+    about: Read the hackathon hard rules and project shape before filing an issue.
