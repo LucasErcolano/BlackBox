@@ -44,7 +44,7 @@ class TestClaudePayloadNoThinkingKey:
     """The real payload constructed by ClaudeClient.analyze must omit `thinking`."""
 
     def test_messages_create_kwargs_omit_thinking_and_budget(self):
-        with patch("black_box.analysis.claude_client.Anthropic") as mock_anthropic:
+        with patch("black_box.analysis.client.Anthropic") as mock_anthropic:
             with tempfile.TemporaryDirectory() as tmpdir:
                 mock_client = MagicMock()
                 mock_anthropic.return_value = mock_client
@@ -85,7 +85,7 @@ class TestClaudePayloadNoThinkingKey:
 
     def test_model_is_opus_4_7(self):
         """Defense in depth: make sure we are actually targeting Opus 4.7."""
-        with patch("black_box.analysis.claude_client.Anthropic"):
+        with patch("black_box.analysis.client.Anthropic"):
             with tempfile.TemporaryDirectory() as tmpdir:
                 with patch.object(
                     ClaudeClient, "_find_repo_root", return_value=Path(tmpdir)

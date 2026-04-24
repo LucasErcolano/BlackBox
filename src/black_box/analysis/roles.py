@@ -37,13 +37,14 @@ not mutate them here — we just add the role layer on top.
 from __future__ import annotations
 
 import json
-import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
 from anthropic import Anthropic
 from pydantic import ValidationError
+
+from .client import build_client
 
 from .schemas import (
     AnalysisVerdict,
@@ -285,9 +286,7 @@ class CollectorAgent:
         client: Anthropic | None = None,
     ) -> None:
         self.config = config or CollectorAgentConfig()
-        self._client: Anthropic = client or Anthropic(
-            api_key=os.getenv("ANTHROPIC_API_KEY")
-        )
+        self._client: Anthropic = client or build_client()
 
     # -- fast path (no model call) ------------------------------------------
     def collect_local(
@@ -397,9 +396,7 @@ class AnalystAgent:
         client: Anthropic | None = None,
     ) -> None:
         self.config = config or AnalystAgentConfig()
-        self._client: Anthropic = client or Anthropic(
-            api_key=os.getenv("ANTHROPIC_API_KEY")
-        )
+        self._client: Anthropic = client or build_client()
 
     # -- agent wiring -------------------------------------------------------
     def build_agent_kwargs(self, case_key: str) -> dict:
