@@ -125,7 +125,7 @@ class TestCostCalculation:
 
     def test_cost_calculation_no_cache(self):
         """Test cost math: 1M input, 0 cache, 1K output."""
-        with patch("black_box.analysis.claude_client.Anthropic") as mock_anthropic:
+        with patch("black_box.analysis.client.Anthropic") as mock_anthropic:
             with tempfile.TemporaryDirectory() as tmpdir:
                 # Mock the client and response
                 mock_client = MagicMock()
@@ -175,7 +175,7 @@ class TestCostCalculation:
 
     def test_cost_calculation_with_cache(self):
         """Test cost math with cache reads and writes."""
-        with patch("black_box.analysis.claude_client.Anthropic") as mock_anthropic:
+        with patch("black_box.analysis.client.Anthropic") as mock_anthropic:
             with tempfile.TemporaryDirectory() as tmpdir:
                 mock_client = MagicMock()
                 mock_anthropic.return_value = mock_client
@@ -230,7 +230,7 @@ class TestJsonRetryOnValidationError:
 
     def test_retry_on_invalid_json_first_attempt(self):
         """First call returns invalid JSON; second returns valid."""
-        with patch("black_box.analysis.claude_client.Anthropic") as mock_anthropic:
+        with patch("black_box.analysis.client.Anthropic") as mock_anthropic:
             with tempfile.TemporaryDirectory() as tmpdir:
                 mock_client = MagicMock()
                 mock_anthropic.return_value = mock_client
@@ -300,7 +300,7 @@ class TestImageHandling:
         # Create a 2000x1000 test image
         img = Image.new("RGB", (2000, 1000), color="red")
 
-        with patch("black_box.analysis.claude_client.Anthropic"):
+        with patch("black_box.analysis.client.Anthropic"):
             with tempfile.TemporaryDirectory() as tmpdir:
                 with patch.object(
                     ClaudeClient,
@@ -317,7 +317,7 @@ class TestImageHandling:
         """Hires resolution resizes to 1920px max."""
         img = Image.new("RGB", (4000, 2000), color="blue")
 
-        with patch("black_box.analysis.claude_client.Anthropic"):
+        with patch("black_box.analysis.client.Anthropic"):
             with tempfile.TemporaryDirectory() as tmpdir:
                 with patch.object(
                     ClaudeClient,
@@ -336,7 +336,7 @@ class TestCostsFile:
 
     def test_costs_jsonl_append_and_read(self):
         """CostLogs are appended and total_spent_usd() sums correctly."""
-        with patch("black_box.analysis.claude_client.Anthropic"):
+        with patch("black_box.analysis.client.Anthropic"):
             with tempfile.TemporaryDirectory() as tmpdir:
                 with patch.object(
                     ClaudeClient,
@@ -376,7 +376,7 @@ class TestCostsFile:
 
     def test_total_spent_usd_empty_file(self):
         """Empty costs.jsonl returns 0."""
-        with patch("black_box.analysis.claude_client.Anthropic"):
+        with patch("black_box.analysis.client.Anthropic"):
             with tempfile.TemporaryDirectory() as tmpdir:
                 with patch.object(
                     ClaudeClient,

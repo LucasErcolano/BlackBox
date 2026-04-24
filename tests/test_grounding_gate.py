@@ -65,7 +65,7 @@ class TestClaudeClientGroundingGate:
     def test_claude_client_does_not_fabricate_on_empty_response(self):
         from black_box.analysis import ClaudeClient
 
-        with patch("black_box.analysis.claude_client.Anthropic") as MockAnthropic:
+        with patch("black_box.analysis.client.Anthropic") as MockAnthropic:
             mock_client = MagicMock()
             MockAnthropic.return_value = mock_client
             mock_client.messages.create.return_value = _mock_response(
@@ -96,7 +96,7 @@ class TestClaudeClientGroundingGate:
     def test_window_summary_gate_propagates_not_interesting(self):
         from black_box.analysis import ClaudeClient
 
-        with patch("black_box.analysis.claude_client.Anthropic") as MockAnthropic:
+        with patch("black_box.analysis.client.Anthropic") as MockAnthropic:
             mock_client = MagicMock()
             MockAnthropic.return_value = mock_client
             mock_client.messages.create.return_value = _mock_response(

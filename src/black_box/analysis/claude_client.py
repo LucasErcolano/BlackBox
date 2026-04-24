@@ -9,10 +9,10 @@ from typing import Any, Literal
 from base64 import b64encode
 
 from PIL import Image
-from anthropic import Anthropic
 from pydantic import BaseModel, ValidationError
 from dotenv import load_dotenv
 
+from .client import build_client
 from .grounding import ground_post_mortem, ground_scenario_mining
 from .schemas import PostMortemReport, ScenarioMiningReport
 
@@ -34,7 +34,7 @@ class CostLog:
 
 
 class ClaudeClient:
-    """Wraps anthropic.Anthropic() with caching, image handling, and cost tracking."""
+    """Wraps the Anthropic SDK with caching, image handling, and cost tracking."""
 
     # Opus 4.7 pricing (can be overridden via OPUS_PRICING_JSON env var)
     DEFAULT_PRICING = {
@@ -45,7 +45,7 @@ class ClaudeClient:
     }
 
     def __init__(self):
-        self.client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+        self.client = build_client()
         self.model = "claude-opus-4-7"
         self.pricing = self._load_pricing()
         self._ensure_costs_file()
