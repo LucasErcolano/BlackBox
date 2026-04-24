@@ -8,6 +8,41 @@ Forensic copilot for robots. Feed it a robot recording, get back a root-cause hy
 
 Built with **Claude Opus 4.7** (vision + reasoning) + **Managed Agents** (long-horizon session replay).
 
+## Hero case
+
+The one finding the demo is built around: **`sanfer_sanisidro` RTK-heading break.** Real operator recording. Operator tagged the bag "tunnel caused the anomaly." Black Box's grounding gate promoted a ranked **refutation**: RTK `carr_soln=none` was already present 43 min pre-tunnel, DBW never engaged, so the tunnel could not have caused the reported behavior change. Proof: [`demo_assets/grounding_gate/README.md`](demo_assets/grounding_gate/README.md) (tag: `replay`). Scope boundaries: [`SCOPE_FREEZE.md`](SCOPE_FREEZE.md).
+
+## What is live vs replay
+
+Every asset mentioned in this README and in the demo script carries one of three tags. Judges should treat them as different trust levels.
+
+- **`live`** — regenerated every run from committed code against committed inputs. No pre-baked outputs. Example: `scripts/run_opus_bench.py` producing a fresh `data/bench_runs/*.json`.
+- **`replay`** — pre-computed artifact committed in-tree so the demo video is deterministic and cheap. Regeneration path is committed and documented alongside the asset. Example: the sanfer PDF and streaming mp4.
+- **`sample`** — static reference material authored by hand (not model output). Labeled as such wherever it appears. Example: `black-box-bench/runs/sample/`.
+
+One E2E command that works from a clean checkout (installs + runs the budgeted bench pass that produced the committed numbers below):
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -e .
+export ANTHROPIC_API_KEY=...
+python scripts/run_opus_bench.py --budget-usd 20
+```
+
+This writes a fresh `data/bench_runs/opus47_<UTC>.json`. The reference run is [`data/bench_runs/opus47_20260423T140758Z.json`](data/bench_runs/opus47_20260423T140758Z.json) (tag: `live` — regenerable; committed for audit): **2 of 3 non-skeleton cases match on Opus 4.7 at $0.46 total**, no skeleton-case padding. Every benchmark number in this README traces back to that file.
+
+Offline plumbing check that does not call the model:
+
+```bash
+python -m black_box.eval.runner --case-dir black-box-bench/cases   # tag: live
+```
+
+Hero-case telemetry-only one-shot (no frames, no vision):
+
+```bash
+python scripts/run_rtk_heading_case.py   # tag: live, requires ANTHROPIC_API_KEY
+```
+
 ## Docs
 - [Build journal & strategy](https://gist.github.com/LucasErcolano/851c5e976c6aa364f69c9e6875544061) — narrative, novelty positioning, findings.
 - [Team onboarding](docs/ONBOARDING.md) — scope, cadence, conventions.
@@ -99,8 +134,8 @@ flowchart LR
     G -->|telemetry refutes operator| REF[ship refutation<br/>as ranked hypothesis]
 ```
 
-- **Refutation exit** — [`demo_assets/grounding_gate/README.md`](demo_assets/grounding_gate/README.md) — sanfer_tunnel: operator said "tunnel caused the anomaly," telemetry said RTK was already degraded 43 min pre-tunnel. The gate promoted the refutation to a ranked hypothesis with its own confidence and patch_hint.
-- **Silence exit** — [`demo_assets/grounding_gate/clean_recording/README.md`](demo_assets/grounding_gate/clean_recording/README.md) — clean recording fed in, model produced four plausible-but-under-evidenced hypotheses, gate dropped all four (one per rule) and shipped `"No anomaly detected with sufficient evidence to support a scoped fix."`
+- **Refutation exit** (`replay`) — [`demo_assets/grounding_gate/README.md`](demo_assets/grounding_gate/README.md) — sanfer_tunnel: operator said "tunnel caused the anomaly," telemetry said RTK was already degraded 43 min pre-tunnel. The gate promoted the refutation to a ranked hypothesis with its own confidence and patch_hint. Regenerate via `scripts/run_rtk_heading_case.py` (`live`).
+- **Silence exit** (`replay`) — [`demo_assets/grounding_gate/clean_recording/README.md`](demo_assets/grounding_gate/clean_recording/README.md) — clean recording fed in, model produced four plausible-but-under-evidenced hypotheses, gate dropped all four (one per rule) and shipped `"No anomaly detected with sufficient evidence to support a scoped fix."` Regenerate via `python scripts/build_grounding_gate_demo.py` (`live`).
 
 Rules live in `src/black_box/analysis/grounding.py :: GroundingThresholds`. Regenerate the silence-exit fixture with `python scripts/build_grounding_gate_demo.py`.
 
@@ -268,37 +303,69 @@ Default tier is a thumbnail grid across the selected views in one cross-view pro
 
 The benchmark lives in a sibling repo (`black-box-bench/`). Seven cases are present. Scoring requires exact match on `bug_class`.
 
+**Reference run (committed, `live`-regenerable):** [`data/bench_runs/opus47_20260423T140758Z.json`](data/bench_runs/opus47_20260423T140758Z.json). Claude Opus 4.7, budget cap $20, actual spend **$0.46**, **2 of 3** non-skeleton cases match (`bad_gain_01` ✓, `pid_saturation_01` ✓, `sensor_timeout_01` ✗ — predicted `bad_gain_tuning`). Regenerate with `scripts/run_opus_bench.py`.
+
 | Path | Cases | Offline stub | Real Opus 4.7 | Notes |
 |---|---|---|---|---|
-| `run_tier3(use_claude=False)` | 7 | runs | — | deterministic plumbing check; does not call the model |
-| `run_tier3(use_claude=True)` | 7 | — | one case confirmed (`pid_saturation_01` via smoke script) | others pending a budgeted bench pass |
+| `run_tier3(use_claude=False)` | 7 | runs (`live`) | — | deterministic plumbing check; does not call the model |
+| `scripts/run_opus_bench.py` | 3 non-skeleton | — | **2/3 match · $0.46** (`live`) | see reference run above |
 | Tier-1 forensic batch runner | — | skeleton | skeleton | single-case path works end-to-end; batch CLI not yet wired |
 | Tier-2 scenario-mining batch runner | — | skeleton | skeleton | agent loop exists; bench integration pending |
 | Public-data path (`eval.public_data`) | — | stub | — | downloader + adapter mapping stubbed |
 
-The published sample run in `black-box-bench/runs/sample/` is a hand-written reference, not model output.
+The published reference run in `black-box-bench/runs/sample/` is a hand-written reference (`sample`), not model output.
 
 ## UI status
 
-`src/black_box/ui/` ships the upload → streaming-reasoning → side-by-side-diff UX. Behind the UI, the pipeline worker is currently the streaming **stub** (`_run_pipeline_stub` in `ui/app.py`) that walks through realistic stage chunks and emits a canned patch artifact for the diff viewer. The demo video uses this path.
+`src/black_box/ui/` ships the upload → streaming-reasoning → side-by-side-diff UX. Behind the UI, the pipeline worker is currently the streaming **stub** (`_run_pipeline_stub` in `ui/app.py`) that walks through realistic stage chunks and emits a canned patch artifact for the diff viewer (tag: `replay`). The demo video uses this path.
 
-The real worker (ingestion → `ForensicAgent` session → PDF render) runs today via `scripts/managed_agent_smoke.py`; wiring that into the UI background task is the next worker-level change.
+The real worker (ingestion → `ForensicAgent` session → PDF render) runs today via `scripts/managed_agent_smoke.py` (tag: `live`, gated on `BLACKBOX_REAL_PIPELINE=1`); wiring that into the UI background task is deferred — see [`SCOPE_FREEZE.md`](SCOPE_FREEZE.md).
+
+## Demo asset catalog
+
+Primary mapping: [`demo_assets/INDEX.md`](demo_assets/INDEX.md). Tags per beat:
+
+- `demo_assets/streaming/replay_sanfer_tunnel.mp4` — `replay` (pre-recorded UI walkthrough; regen via `scripts/record_replay.py` + `scripts/record_replay_raw.py`)
+- `demo_assets/pdfs/sanfer_tunnel.pdf` + `pdfs/sanfer_tunnel/page-*.png` — `replay` (regen via `scripts/run_session.py` → `scripts/regen_reports_md.py`)
+- `demo_assets/pdfs/boat_lidar.pdf`, `demo_assets/pdfs/car_1.pdf` — `replay`
+- `demo_assets/analyses/sanfer_tunnel.json`, `boat_lidar.json`, `car_1.json` — `replay` (committed model output; hero-case regen via `scripts/run_rtk_heading_case.py` which is `live`)
+- `demo_assets/analyses/TOP_FINDINGS.md` — `sample` (hand-written overview table)
+- `demo_assets/grounding_gate/README.md` — `replay` (refutation narrative; underlying analysis is `replay`, regenerable `live`)
+- `demo_assets/grounding_gate/clean_recording/` — `replay` (fixture; regen via `scripts/build_grounding_gate_demo.py` is `live`)
+- `demo_assets/diff_viewer/moving_base_rover.{html,png}` — `replay` (regen via `scripts/render_rtk_diff.py`)
+- `demo_assets/memory_snapshot/L{1,3}*` — `replay` (captured from a real run; store is `live`-appended by every `ForensicAgent.finalize`)
+- `demo_assets/streams/*.jsonl` — `replay` (telemetry event streams captured from real ingestion)
+- `demo_assets/bag_footage/` — `replay` (camera frames extracted from real bags; scripts under `scripts/extract_*`)
+- `bench/cases.yaml` + `bench/fixtures/` — `sample` (hand-authored fixtures for the offline plumbing path)
+- `black-box-bench/cases/` — `live` (real telemetry inputs used by the budgeted Opus 4.7 pass)
+- `black-box-bench/runs/sample/` — `sample` (hand-written reference run, explicitly labeled)
 
 ## Implementation notes (current adapters)
 
 - **Ingestion** — `rosbags` for ROS1+ROS2 bag files (pure Python, no ROS runtime). Other adapters plug in under `platforms/`.
-- **First platform** — NAO6 (SoftBank Aldebaran) humanoid. `platforms/nao6/` includes an adapter, a synthetic fall fixture, and a platform-specific taxonomy that maps to the global bug-class set.
 - **Synthesis** — emits telemetry + buggy controllers + text video prompts. Video generation (Wan 2.2 / Nano Banana Pro) is operator-driven on your own GPU; nothing is auto-installed.
 
 ## Architecture (modules)
 - `ingestion/` — recording parser, frame sync, plot rendering.
 - `analysis/` — Claude client with aggressive prompt caching, three prompt templates, pydantic schemas, `ForensicAgent` over Managed Agents SDK.
 - `memory/` — 4-layer append-only JSONL stack (case / platform / taxonomy / eval).
-- `platforms/` — robot-specific adapters + taxonomies.
+- `platforms/` — robot-specific adapters + taxonomies (see **Bonus** below).
 - `synthesis/` — injected-bug recordings + text video prompts.
 - `reporting/` — reportlab PDF (NTSB-style), unified diff + HTML side-by-side.
-- `ui/` — FastAPI + HTMX progress polling (stub worker today; real wiring in progress).
+- `ui/` — FastAPI + HTMX progress polling (stub worker today; real wiring deferred per `SCOPE_FREEZE.md`).
 - `eval/` — tier-3 runner + offline stub path; tier-1/tier-2 batch runners pending.
+
+## Bonus — NAO6 humanoid adapter (not on the demo critical path)
+
+> **Scope note.** The primary pitch above and the demo hero case are rover / marine. NAO6 is shipped as a bonus adapter to prove the platform-adapter shape generalizes. It is **not** part of the judged demo beat. See [`SCOPE_FREEZE.md`](SCOPE_FREEZE.md).
+
+`platforms/nao6/` includes:
+- an ingestion adapter for NAO6 (SoftBank Aldebaran) humanoid recordings,
+- a synthetic fall fixture (`sample`) for end-to-end smoke testing,
+- a platform-specific taxonomy that maps onto the global closed-set `BugClass`,
+- controller snapshots for Tier-3 injected-bug reproduction.
+
+Regeneration and capture helpers live under `scripts/capture_nao6.py` and `scripts/NAO6_CAPTURE_GUIDE.md`.
 
 ## License
 MIT.
