@@ -1,0 +1,57 @@
+{
+  "block_id": "block_04_analysis_live_v2",
+  "replaces": "video_assets/block_04_analysis_live/clip.mp4",
+  "duration_target": "20-22s",
+  "duration_actual": 21.0,
+  "resolution": "1920x1080",
+  "fps": 30,
+  "deliverable_mode": "FINAL_NOW",
+  "capture_method": "Playwright Chromium (headless, 1920x1080, dark theme) recording the shipped FastAPI UI at /analyze?replay=sanfer_tunnel&theme=dark. No PIL compositing.",
+  "capture_adjustments": [
+    "DOM: remove site header, intro copy, upload form, hero-cases grid, and footer so the real progress card dominates the 1920x1080 frame. Everything inside #progress-card is untouched.",
+    "CSS: widen <main> to 1400 px (overrides the narrow reading width used on the full landing page) so the progress card reads at film scale.",
+    "CSS: reasoning panel max-height bumped from 320 px to 600 px with font-size 1.02rem so more of the real streamed reasoning is visible on camera. The lines themselves are untouched, still formatted by _fmt_replay_event."
+  ],
+  "narration": "Black Box fuses heterogeneous artifacts in one loop: telemetry, video, and controller context. It scans the full session, surfaces moments worth review, cross-checks signals against each other, and ranks only the hypotheses that survive the evidence.",
+  "source_mode_on_camera": "replay",
+  "source_badge_visible": true,
+  "source_badge_label": "REPLAY",
+  "route_used": "/analyze?replay=sanfer_tunnel&theme=dark",
+  "visual_language": {
+    "shared_with_blocks": [
+      "block_01_hook",
+      "block_02_problem",
+      "block_03_setup",
+      "block_05_first_moment",
+      "block_06_second_moment",
+      "block_07_grounding",
+      "block_08_money_shot",
+      "block_09_punchline",
+      "block_10_outro"
+    ],
+    "palette_source": "src/black_box/ui/static/style.css [data-theme=\"dark\"]",
+    "type_system": "IBM Plex Sans / Serif / Mono (as loaded by the real UI)"
+  },
+  "source_assets_used": [
+    "src/black_box/ui/app.py (FastAPI app)",
+    "src/black_box/ui/templates/index.html (dark theme boot)",
+    "src/black_box/ui/templates/progress.html (progress card)",
+    "src/black_box/ui/static/style.css (dark theme)",
+    "data/final_runs/sanfer_tunnel/stream_events.jsonl (replay source)",
+    "data/final_runs/sanfer_tunnel/analysis.json (case metadata surfaced via replay worker)"
+  ],
+  "text_overlays_used": [],
+  "honesty": {
+    "real_ui": true,
+    "real_event_stream": true,
+    "real_source_badge": true,
+    "fabricated_logs": false,
+    "fabricated_confidence_values": false,
+    "stage_never_reaches_report": "progress bar advances naturally with the real replay; clip is trimmed before the 'done' pill flips so the block hands off to blocks_05/_06 without spoiling payoff"
+  },
+  "render_script": "scripts/render_block_04_analysis_live_v2.py",
+  "outputs": {
+    "clip": "video_assets/block_04_analysis_live_v2/clip.mp4",
+    "preview": "video_assets/block_04_analysis_live_v2/preview.png"
+  }
+}
