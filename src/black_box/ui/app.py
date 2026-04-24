@@ -12,6 +12,7 @@ import json
 import os
 import time
 import uuid
+from html import escape as html_escape
 from pathlib import Path
 from typing import Literal
 
@@ -109,6 +110,97 @@ def _job_path(job_id: str) -> Path:
 
 def _patch_path(job_id: str) -> Path:
     return PATCHES_DIR / f"{job_id}.json"
+
+
+def _decision_path(job_id: str) -> Path:
+    return PATCHES_DIR / f"{job_id}.decision.json"
+
+
+def _load_decision(job_id: str) -> dict:
+    p = _decision_path(job_id)
+    if not p.exists():
+        return {"status": "pending"}
+    try:
+        return json.loads(p.read_text())
+    except json.JSONDecodeError:
+        return {"status": "pending"}
+
+
+def _save_decision(job_id: str, status: str, note: str = "") -> dict:
+    from datetime import datetime, timezone
+    decision = {
+        "status": status,
+        "decided_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "note": note,
+    }
+    _decision_path(job_id).write_text(json.dumps(decision, indent=2))
+    return decision
+
+
+_GATE_STYLE = """<style>
+.gate { margin-top: 1.5rem; padding: 1.1rem 1.25rem; border: 1px solid #d9d6cc;
+  border-radius: 4px; background: #fffdf8; font-family: "IBM Plex Sans", sans-serif; }
+.gate-headline { font-family: "IBM Plex Serif", Georgia, serif; font-weight: 600;
+  font-size: 1.05rem; letter-spacing: 0.03em; margin-bottom: 0.25rem; }
+.gate-sub, .gate-meta, .gate-note { font-family: ui-monospace, monospace;
+  font-size: 0.82rem; color: #6b6b66; }
+.gate-form { margin-top: 0.9rem; display: flex; flex-direction: column; gap: 0.7rem; }
+.gate-input { padding: 0.45rem 0.6rem; border: 1px solid #d9d6cc; border-radius: 3px;
+  font-family: ui-monospace, monospace; font-size: 0.85rem; background: #faf8f2; }
+.gate-actions { display: flex; gap: 0.6rem; }
+.gate-btn { padding: 0.55rem 1rem; border: 1px solid #1c1c1a; border-radius: 3px;
+  background: #1c1c1a; color: #fffdf8; font-family: ui-monospace, monospace;
+  font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; }
+.gate-approve { background: #2f855a; border-color: #2f855a; }
+.gate-reject  { background: #b33; border-color: #b33; }
+.gate-approved { border-left: 4px solid #2f855a; }
+.gate-rejected { border-left: 4px solid #b33; }
+.gate-approved .gate-headline { color: #2f855a; }
+.gate-rejected .gate-headline { color: #b33; }
+</style>"""
+
+
+def _gate_footer_html(job_id: str, decision: dict) -> str:
+    """Approve/reject buttons (pending) or locked-decision banner (decided)."""
+    status = decision.get("status", "pending")
+    if status == "approved":
+        decided = html_escape(decision.get("decided_at", ""))
+        note = html_escape(decision.get("note", ""))
+        note_line = f'<div class="gate-note">{note}</div>' if note else ""
+        return (
+            f'{_GATE_STYLE}'
+            '<section class="gate gate-approved" data-status="approved">'
+            '<div class="gate-headline">PATCH APPROVED — CLEARED FOR INTEGRATION</div>'
+            f'<div class="gate-meta">decided {decided}</div>'
+            f'{note_line}'
+            '</section>'
+        )
+    if status == "rejected":
+        decided = html_escape(decision.get("decided_at", ""))
+        note = html_escape(decision.get("note", ""))
+        note_line = f'<div class="gate-note">{note}</div>' if note else ""
+        return (
+            f'{_GATE_STYLE}'
+            '<section class="gate gate-rejected" data-status="rejected">'
+            '<div class="gate-headline">PATCH REJECTED — BLOCKED FROM APPLICATION</div>'
+            f'<div class="gate-meta">decided {decided}</div>'
+            f'{note_line}'
+            '</section>'
+        )
+    return (
+        f'{_GATE_STYLE}'
+        '<section class="gate gate-pending" data-status="pending">'
+        '<div class="gate-headline">HUMAN APPROVAL REQUIRED</div>'
+        '<div class="gate-sub">Patch will NOT be applied until an engineer decides below.</div>'
+        f'<form method="post" action="/decide/{html_escape(job_id)}" class="gate-form">'
+        '<input type="text" name="note" placeholder="optional note (why)" class="gate-input" />'
+        '<div class="gate-actions">'
+        '<button type="submit" name="decision" value="approve" class="gate-btn gate-approve">Approve patch</button>'
+        '<button type="submit" name="decision" value="reject" class="gate-btn gate-reject">Reject patch</button>'
+        '</div>'
+        '</form>'
+        '</section>'
+    )
 
 
 def _write_status(job_id: str, payload: dict) -> None:
@@ -542,11 +634,37 @@ async def diff_view(job_id: str) -> HTMLResponse:
         proposal = rep.get("patch_proposal", "")
         file_path, old, new = parse_patch_proposal(proposal)
 
-    html = demo_side_by_side_html(
+    decision = _load_decision(job_id)
+    footer = _gate_footer_html(job_id, decision)
+    page = demo_side_by_side_html(
         old=old,
         new=new,
         file_path=file_path,
         case_key=job_id,
         title="Proposed Fix",
+        footer_html=footer,
     )
-    return HTMLResponse(html)
+    return HTMLResponse(page)
+
+
+@app.post("/decide/{job_id}", response_class=HTMLResponse)
+async def decide_patch(
+    job_id: str,
+    decision: str = Form(...),
+    note: str = Form(""),
+) -> HTMLResponse:
+    """Human-in-the-loop gate: record approve/reject before any patch applies.
+
+    Idempotent only on the first write — re-posting to a decided job 409s so
+    the decision log stays truthful.
+    """
+    if decision not in ("approve", "reject"):
+        raise HTTPException(400, "decision must be approve or reject")
+    if not _patch_path(job_id).exists():
+        raise HTTPException(404, "no patch artifact for job")
+    existing = _load_decision(job_id)
+    if existing.get("status") in ("approved", "rejected"):
+        raise HTTPException(409, f"already {existing['status']}")
+    status = "approved" if decision == "approve" else "rejected"
+    saved = _save_decision(job_id, status=status, note=note.strip())
+    return HTMLResponse(_gate_footer_html(job_id, saved))
