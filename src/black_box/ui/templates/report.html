@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Black Box — Report {{ job_id }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+</head>
+<body>
+  <main>
+    <header class="report-head">
+      <div>
+        <h1>Black Box</h1>
+        <p class="sub">Forensic report · <code>{{ job_id }}</code></p>
+      </div>
+      <nav class="report-actions">
+        <a class="btn btn-primary" href="/">← New analysis</a>
+        <a class="btn btn-secondary" href="/report/{{ job_id }}?format=pdf">Download PDF</a>
+      </nav>
+    </header>
+
+    <article
+      id="report-body"
+      class="report-body"
+      aria-live="polite"
+      data-markdown="{{ markdown_source }}"
+    >
+      <noscript><pre>{{ markdown_source }}</pre></noscript>
+    </article>
+
+    <footer>
+      <small>Opus 4.7 · Managed Agents · hackathon build</small>
+    </footer>
+  </main>
+  <script>
+    (function () {
+      var target = document.getElementById('report-body');
+      var src = target.getAttribute('data-markdown') || '';
+      if (window.marked && typeof window.marked.parse === 'function') {
+        window.marked.setOptions({ gfm: true, breaks: false, headerIds: true });
+        var rawHtml = window.marked.parse(src);
+        if (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
+          target.innerHTML = window.DOMPurify.sanitize(rawHtml);
+        } else {
+          var pre = document.createElement('pre');
+          pre.textContent = src;
+          target.innerHTML = '';
+          target.appendChild(pre);
+        }
+      } else {
+        var pre = document.createElement('pre');
+        pre.textContent = src;
+        target.innerHTML = '';
+        target.appendChild(pre);
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -295,3 +295,126 @@ footer {
   main { padding: 2.5rem 1rem 4rem; }
   header h1 { font-size: 1.8rem; }
 }
+
+/* ---- Report view (rendered markdown) ---- */
+.report-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1rem;
+}
+.report-head h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 1.8rem;
+  margin: 0 0 0.2rem;
+}
+.report-head .sub { color: var(--muted); margin: 0; font-size: 0.92rem; }
+.report-head .sub code { font-size: 0.88rem; color: var(--ink); }
+
+.report-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.btn {
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.95rem;
+  border-radius: 3px;
+  text-decoration: none;
+  border: 1px solid var(--ink);
+  display: inline-block;
+  line-height: 1.2;
+}
+.btn-primary { background: var(--ink); color: var(--surface); }
+.btn-primary:hover { background: #000; }
+.btn-secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.btn-secondary:hover { border-color: var(--ink); }
+
+.report-body {
+  font-family: var(--serif);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+}
+.report-body h1, .report-body h2, .report-body h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  margin: 2rem 0 0.6rem;
+}
+.report-body h1 { font-size: 1.7rem; border-bottom: 1px solid var(--line); padding-bottom: 0.4rem; }
+.report-body h2 { font-size: 1.3rem; }
+.report-body h3 { font-size: 1.08rem; }
+.report-body p { margin: 0.65rem 0; }
+.report-body blockquote {
+  border-left: 3px solid var(--ink);
+  margin: 1rem 0;
+  padding: 0.3rem 1rem;
+  background: var(--surface);
+  color: #2a2a27;
+}
+.report-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-family: var(--sans);
+  font-size: 0.92rem;
+}
+.report-body th, .report-body td {
+  border: 1px solid var(--line);
+  padding: 0.5rem 0.7rem;
+  text-align: left;
+  vertical-align: top;
+}
+.report-body th {
+  background: var(--surface);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.report-body code {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.88em;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 0.05rem 0.3rem;
+}
+.report-body pre {
+  background: #141412;
+  color: #e7e4db;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0.9rem 1rem;
+  overflow: auto;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+.report-body pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+.report-body img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  margin: 0.75rem 0;
+}
+.report-body hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 2rem 0;
+}
+.report-body ul, .report-body ol { padding-left: 1.4rem; }
+.report-body li { margin: 0.25rem 0; }

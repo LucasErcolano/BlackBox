@@ -113,6 +113,58 @@ def test_report_missing_404s():
 
 
 # ---------------------------------------------------------------------------
+# /report/{job_id} — rendered markdown page + PDF variant (issue #28)
+# ---------------------------------------------------------------------------
+def test_report_renders_markdown_html(tmp_path, monkeypatch):
+    """Default GET serves an HTML shell that renders the MD via marked.js."""
+    monkeypatch.setattr(ui_app, "REPORTS_DIR", tmp_path)
+    job_id = "renderjob"
+    md_body = (
+        "# Black Box — Forensic Report\n\n"
+        "**Case:** `ui_renderjob`\n\n"
+        "> pid_saturation detected at t=1.82s\n"
+    )
+    (tmp_path / f"{job_id}.md").write_text(md_body)
+
+    client = TestClient(app)
+    r = client.get(f"/report/{job_id}")
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("text/html")
+    # marked.js is wired into the page
+    assert "marked" in r.text
+    # The raw markdown is embedded for client-side rendering
+    assert "pid_saturation detected" in r.text
+    # Secondary PDF download button is present
+    assert f"/report/{job_id}?format=pdf" in r.text
+    assert "Download PDF" in r.text
+
+
+def test_report_pdf_variant_returns_pdf_bytes(tmp_path, monkeypatch):
+    """?format=pdf serves pre-built PDF with application/pdf content-type."""
+    monkeypatch.setattr(ui_app, "REPORTS_DIR", tmp_path)
+    job_id = "pdfjob"
+    # Minimal valid PDF header — enough for the route to echo the bytes.
+    pdf_bytes = b"%PDF-1.4\n%EOF\n"
+    (tmp_path / f"{job_id}.pdf").write_bytes(pdf_bytes)
+
+    client = TestClient(app)
+    r = client.get(f"/report/{job_id}?format=pdf")
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "application/pdf"
+    assert r.content.startswith(b"%PDF-")
+
+
+def test_report_pdf_variant_missing_404s(tmp_path, monkeypatch):
+    """?format=pdf with no pre-built PDF and no JSON payload -> 404."""
+    monkeypatch.setattr(ui_app, "REPORTS_DIR", tmp_path)
+    monkeypatch.setattr(ui_app, "JOBS_DIR", tmp_path)
+
+    client = TestClient(app)
+    r = client.get("/report/nope-not-here?format=pdf")
+    assert r.status_code == 404
+
+
+# ---------------------------------------------------------------------------
 # Real-pipeline dispatch
 # ---------------------------------------------------------------------------
 def test_real_pipeline_disabled_by_default(monkeypatch):

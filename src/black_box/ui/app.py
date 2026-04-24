@@ -521,6 +521,9 @@ def _run_pipeline_real(job_id: str, upload_path: Path, mode: Mode) -> None:
                 "duration_s": 0.0,
             },
         )
+        # Persist the raw JSON payload so /report/{id}?format=pdf can build
+        # a PDF on demand without re-running the pipeline.
+        (JOBS_DIR / f"{job_id}_report.json").write_text(json.dumps(payload, indent=2))
         buffer.append(f"[report] Wrote {out_pdf.name} ({out_pdf.stat().st_size} bytes)")
 
         # Patch artifact for the /diff route. If the model emitted a unified
@@ -702,12 +705,58 @@ def _progress_context(job_id: str, status_data: dict) -> dict:
     }
 
 
-@app.get("/report/{job_id}")
-async def report(job_id: str) -> FileResponse:
-    md = REPORTS_DIR / f"{job_id}.md"
-    if not md.exists():
+def _build_pdf_on_demand(job_id: str) -> Path | None:
+    """Render PDF from saved JSON payload. Fallback when no pre-built PDF on disk."""
+    payload_path = JOBS_DIR / f"{job_id}_report.json"
+    if not payload_path.exists():
+        return None
+    try:
+        payload = json.loads(payload_path.read_text())
+    except json.JSONDecodeError:
+        return None
+    from black_box.reporting import build_pdf_report
+
+    out_pdf = REPORTS_DIR / f"{job_id}.pdf"
+    build_pdf_report(
+        report_json=payload,
+        artifacts={},
+        out_pdf=out_pdf,
+        case_meta={"case_key": f"ui_{job_id}", "mode": "post_mortem"},
+    )
+    return out_pdf
+
+
+@app.get("/report/{job_id}", response_class=HTMLResponse)
+async def report(
+    request: Request,
+    job_id: str,
+    format: str | None = Query(None, description="'pdf' to download the PDF, default renders markdown in-browser"),
+):
+    """Render forensic report. Default = HTML+marked.js; ?format=pdf = raw PDF."""
+    md_path = REPORTS_DIR / f"{job_id}.md"
+    pdf_path = REPORTS_DIR / f"{job_id}.pdf"
+
+    if format == "pdf":
+        if not pdf_path.exists():
+            built = _build_pdf_on_demand(job_id)
+            if built is None or not built.exists():
+                raise HTTPException(404, "pdf not available")
+            pdf_path = built
+        return FileResponse(
+            str(pdf_path),
+            media_type="application/pdf",
+            filename=pdf_path.name,
+        )
+
+    if not md_path.exists():
         raise HTTPException(404, "report not ready")
-    return FileResponse(str(md), media_type="text/markdown", filename=md.name)
+
+    markdown_source = md_path.read_text(encoding="utf-8")
+    return templates.TemplateResponse(
+        request,
+        "report.html",
+        {"job_id": job_id, "markdown_source": markdown_source},
+    )
 
 
 @app.get("/diff/{job_id}", response_class=HTMLResponse)
