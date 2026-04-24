@@ -2,14 +2,28 @@
 
 from .claude_client import ClaudeClient, CostLog
 from .schemas import (
+    AnalysisVerdict,
+    AssetDescriptor,
+    CollectorNote,
     Evidence,
+    FrameWindow,
     Hypothesis,
     Moment,
     PostMortemReport,
     ScenarioMiningReport,
     SelfEval,
+    SessionEvidence,
     SyntheticQAReport,
+    TelemetrySignal,
     TimelineEvent,
+)
+from .roles import (
+    AnalystAgent,
+    AnalystAgentConfig,
+    CollectorAgent,
+    CollectorAgentConfig,
+    RoleSidechain,
+    RoleSidechainConfig,
 )
 from .prompts import (
     post_mortem_prompt,
@@ -32,18 +46,30 @@ from .resolution_budgeter import (
 )
 
 __all__ = [
+    "AnalysisVerdict",
+    "AnalystAgent",
+    "AnalystAgentConfig",
+    "AssetDescriptor",
     "ClaudeClient",
+    "CollectorAgent",
+    "CollectorAgentConfig",
+    "CollectorNote",
     "CostLog",
     "Evidence",
+    "FrameWindow",
     "Hypothesis",
     "Moment",
     "PostMortemReport",
     "ResolutionBudgeter",
     "ResolutionDecision",
     "ResolutionTier",
+    "RoleSidechain",
+    "RoleSidechainConfig",
     "ScenarioMiningReport",
     "SelfEval",
+    "SessionEvidence",
     "SyntheticQAReport",
+    "TelemetrySignal",
     "TimelineEvent",
     "ambiguity_from_top_two_confidences",
     "legacy_tier_to_string",
