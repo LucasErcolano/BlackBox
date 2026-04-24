@@ -36,7 +36,10 @@ from rosbags.highlevel import AnyReader
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "scripts"))
 load_dotenv(ROOT / ".env")
+
+import rtk  # noqa: E402  (Rust Token Killer — stdout filter)
 
 from black_box.analysis import ClaudeClient  # noqa: E402
 from black_box.analysis.prompts_generic import (  # noqa: E402
@@ -824,7 +827,12 @@ def main() -> int:
                     help="Reuse existing frames_index.json + frames/ dir")
     ap.add_argument("--reuse-from", type=Path, default=None,
                     help="Hydrate manifest/windows/frames from prior run dir")
+    ap.add_argument("--no-rtk", action="store_true",
+                    help="Disable Rust Token Killer stdout filter (debug).")
     args = ap.parse_args()
+
+    # Publish RTK opt-out to any subprocess-wrapping helper that reads env.
+    os.environ["BB_RTK_DISABLED"] = "1" if args.no_rtk else "0"
 
     user_prompt = args.prompt or os.environ.get("BB_USER_PROMPT")
     out_dir = args.out
