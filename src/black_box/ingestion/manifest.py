@@ -178,7 +178,19 @@ def build_manifest(
     if not bags:
         return m
 
-    with AnyReader(bags) as reader:
+    try:
+        reader_cm = AnyReader(bags)
+        reader_cm.__enter__()
+    except Exception as e:
+        if "type definitions" not in str(e):
+            raise
+        # Bag was recovered from a .sql dump → no type table. Fall back to
+        # the ROS2 Humble typestore so we can still read connection metadata.
+        from rosbags.typesys import Stores, get_typestore
+        reader_cm = AnyReader(bags, default_typestore=get_typestore(Stores.ROS2_HUMBLE))
+        reader_cm.__enter__()
+    try:
+        reader = reader_cm
         m.t_start_ns = int(reader.start_time) if reader.start_time else None
         m.t_end_ns = int(reader.end_time) if reader.end_time else None
         if m.t_start_ns is not None and m.t_end_ns is not None:
@@ -208,6 +220,8 @@ def build_manifest(
         for bucket in (m.cameras, m.lidars, m.imus, m.gnss, m.odom,
                        m.cmd, m.audio, m.other):
             bucket.sort(key=lambda t: t.topic)
+    finally:
+        reader_cm.__exit__(None, None, None)
 
     return m
 

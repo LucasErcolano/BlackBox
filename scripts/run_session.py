@@ -43,6 +43,7 @@ import rtk  # noqa: E402  (Rust Token Killer — stdout filter)
 
 from black_box.analysis import ClaudeClient  # noqa: E402
 from black_box.analysis.prompts_generic import (  # noqa: E402
+    telemetry_mining_prompt,
     visual_mining_prompt,
     window_summary_prompt,
 )
@@ -350,6 +351,151 @@ def _scan_gnss_and_gaps(bags: list[Path], gnss_topics: list[str],
     return wins
 
 
+def _scan_lidar_imu(bags: list[Path], lidar_topics: list[str],
+                    imu_topics: list[str], odom_topics: list[str],
+                    t_start_ns: int | None = None,
+                    t_end_ns: int | None = None) -> tuple[list[Window], list[str]]:
+    """Telemetry anomaly scan for camera-less sessions.
+
+    Computes per-topic timestamp arrays and flags:
+      - total silence (topic in manifest, zero messages)
+      - >=3s gaps between consecutive samples
+      - rate drops: windows where instantaneous rate < 0.5 * median rate
+      - IMU stuck values: angular_velocity or linear_acceleration frozen
+        across consecutive samples for >=2s
+
+    Returns (windows, anomaly_lines).
+    """
+    wanted_topics = set(lidar_topics) | set(imu_topics) | set(odom_topics)
+    if not bags or not wanted_topics:
+        return [], []
+    ts_by: dict[str, list[int]] = {t: [] for t in wanted_topics}
+    imu_stuck: dict[str, list[tuple[int, tuple]]] = {t: [] for t in imu_topics}
+
+    # Fast path for ROS2 sqlite3 bags: read timestamps directly via SQL
+    # (avoids loading every PointCloud2 blob through the bag reader, which
+    # is catastrophic on slow filesystems like fuseblk NTFS).
+    bag_dbs: list[Path] = []
+    for b in bags:
+        if b.is_dir():
+            bag_dbs.extend(sorted(b.glob("*.db3")))
+        elif b.suffix == ".db3":
+            bag_dbs.append(b)
+    if bag_dbs:
+        import sqlite3 as _sq
+        for dbp in bag_dbs:
+            try:
+                con = _sq.connect(f"file:{dbp}?mode=ro", uri=True)
+                cur = con.cursor()
+                cur.execute("SELECT id, name FROM topics")
+                id_to_name = {r[0]: r[1] for r in cur.fetchall()}
+                for tid, tname in id_to_name.items():
+                    if tname not in wanted_topics:
+                        continue
+                    cur.execute(
+                        "SELECT timestamp FROM messages WHERE topic_id=? "
+                        "ORDER BY timestamp", (tid,))
+                    ts_by[tname].extend(r[0] for r in cur.fetchall())
+                con.close()
+            except Exception as e:
+                print(f"    sqlite scan failed on {dbp.name}: {e}", flush=True)
+    else:
+        # Fallback for ROS1 / non-sqlite bags: iterate via AnyReader.
+        with AnyReader(bags) as reader:
+            conns = [c for c in reader.connections if c.topic in wanted_topics]
+            if not conns:
+                return [], []
+            for conn, t_ns, raw in reader.messages(connections=conns):
+                ts_by[conn.topic].append(int(t_ns))
+                if conn.topic in imu_topics:
+                    try:
+                        msg = reader.deserialize(raw, conn.msgtype)
+                        av = msg.angular_velocity
+                        la = msg.linear_acceleration
+                        key = (round(float(av.x), 6), round(float(av.y), 6),
+                               round(float(av.z), 6), round(float(la.x), 6),
+                               round(float(la.y), 6), round(float(la.z), 6))
+                        imu_stuck[conn.topic].append((int(t_ns), key))
+                    except Exception:
+                        pass
+    wins: list[Window] = []
+    lines: list[str] = []
+    for topic in sorted(wanted_topics):
+        ts = sorted(ts_by[topic])
+        if not ts:
+            lines.append(f"- `{topic}`: SILENT (0 messages recorded despite topic being declared).")
+            if t_start_ns and t_end_ns:
+                wins.append(Window(center_ns=(t_start_ns + t_end_ns) // 2,
+                                   span_s=30.0, label=f"{topic} SILENT",
+                                   priority=0.95))
+            continue
+        arr = np.array(ts, dtype=np.int64)
+        dur_s = (arr[-1] - arr[0]) / 1e9
+        rate = len(arr) / max(dur_s, 1e-9)
+        diffs = np.diff(arr) / 1e9
+        med_dt = float(np.median(diffs)) if len(diffs) else 0.0
+        median_rate = (1.0 / med_dt) if med_dt > 0 else rate
+        lines.append(
+            f"- `{topic}`: n={len(arr)} span={dur_s:.1f}s avg_rate={rate:.2f}Hz "
+            f"median_dt={med_dt*1000:.1f}ms")
+        gap_idx = np.where(diffs >= 3.0)[0]
+        for gi in gap_idx[:5]:
+            g0, g1 = int(arr[gi]), int(arr[gi + 1])
+            gap_s = (g1 - g0) / 1e9
+            lines.append(f"    * gap {gap_s:.1f}s from t_ns={g0} to t_ns={g1}")
+            wins.append(Window(center_ns=(g0 + g1) // 2, span_s=max(10.0, gap_s),
+                               label=f"{topic} gap {gap_s:.1f}s",
+                               priority=0.8))
+        if median_rate >= 5.0:
+            bin_s = 2.0
+            n_bins = max(1, int(dur_s / bin_s))
+            edges = np.linspace(arr[0], arr[-1], n_bins + 1)
+            counts, _ = np.histogram(arr, bins=edges)
+            per_bin_rate = counts / bin_s
+            drop = per_bin_rate < (0.5 * median_rate)
+            i = 0
+            hits = 0
+            while i < len(drop) and hits < 3:
+                if not drop[i]:
+                    i += 1; continue
+                j = i
+                while j < len(drop) and drop[j]:
+                    j += 1
+                run_s = (j - i) * bin_s
+                if run_s >= 4.0:
+                    mid = int((edges[i] + edges[j]) // 2)
+                    lines.append(
+                        f"    * rate drop <50% median for {run_s:.0f}s "
+                        f"centered t_ns={mid}")
+                    wins.append(Window(center_ns=mid, span_s=max(20.0, run_s),
+                                       label=f"{topic} rate drop {run_s:.0f}s",
+                                       priority=0.75))
+                    hits += 1
+                i = j
+        if topic in imu_topics and imu_stuck[topic]:
+            vals = imu_stuck[topic]
+            i = 0
+            n = len(vals)
+            stuck_reported = 0
+            while i < n and stuck_reported < 3:
+                j = i + 1
+                while j < n and vals[j][1] == vals[i][1]:
+                    j += 1
+                run = j - i
+                run_s = (vals[j - 1][0] - vals[i][0]) / 1e9
+                if run >= 10 and run_s >= 2.0:
+                    mid = (vals[i][0] + vals[j - 1][0]) // 2
+                    lines.append(
+                        f"    * IMU stuck {run} samples ({run_s:.1f}s) at "
+                        f"t_ns={vals[i][0]} vals={vals[i][1]}")
+                    wins.append(Window(center_ns=int(mid), span_s=max(10.0, run_s),
+                                       label=f"{topic} stuck {run_s:.1f}s",
+                                       priority=0.85))
+                    stuck_reported += 1
+                i = j
+    return wins, lines
+
+
 def _uniform_fallback(t_start_ns: int, t_end_ns: int,
                       span_s: float = 20.0, n: int = 3) -> list[Window]:
     dur = (t_end_ns - t_start_ns) / 1e9
@@ -366,14 +512,17 @@ def _uniform_fallback(t_start_ns: int, t_end_ns: int,
 
 
 def stage_windows(manifest: Manifest, assets: SessionAssets,
-                  out_dir: Path, max_windows: int = 8) -> list[Window]:
+                  out_dir: Path, max_windows: int = 8) -> tuple[list[Window], list[str]]:
     print(f"[3] windows: scanning telemetry + camera gaps ...", flush=True)
     t0 = time.time()
     gnss_topics = [t.topic for t in manifest.gnss]
-    cam_topics = [t.topic for t in manifest.cameras]
+    lidar_topics = [t.topic for t in manifest.lidars]
+    imu_topics = [t.topic for t in manifest.imus]
+    odom_topics = [t.topic for t in manifest.odom]
     # Use the bags that actually carry GNSS / cams.
     bags = [Path(b) for b in assets.bags]
     wins: list[Window] = []
+    telemetry_lines: list[str] = []
     if gnss_topics:
         # Scan only small bags (we never want to open the 45 min camera bag
         # for window detection). Cam gaps are not detected here.
@@ -381,6 +530,20 @@ def stage_windows(manifest: Manifest, assets: SessionAssets,
                       if b.exists() and b.stat().st_size < BIG_BAG_BYTES]
         if small_bags:
             wins.extend(_scan_gnss_and_gaps(small_bags, gnss_topics, []))
+    # Camera-less sessions: scan lidar/imu/odom for rate anomalies.
+    if not manifest.cameras and (lidar_topics or imu_topics or odom_topics):
+        print(f"    no cameras in manifest — running lidar/imu scan ...",
+              flush=True)
+        small_bags = [b for b in bags
+                      if b.exists() and b.stat().st_size < BIG_BAG_BYTES]
+        scan_bags = small_bags or bags
+        if scan_bags:
+            lw, ll = _scan_lidar_imu(scan_bags, lidar_topics, imu_topics,
+                                     odom_topics,
+                                     t_start_ns=manifest.t_start_ns,
+                                     t_end_ns=manifest.t_end_ns)
+            wins.extend(lw)
+            telemetry_lines.extend(ll)
     if not wins:
         if manifest.t_start_ns and manifest.t_end_ns:
             wins = _uniform_fallback(manifest.t_start_ns, manifest.t_end_ns)
@@ -390,12 +553,14 @@ def stage_windows(manifest: Manifest, assets: SessionAssets,
 
     (out_dir / "windows.json").write_text(json.dumps(
         [w.to_dict() for w in wins], indent=2, default=str))
+    if telemetry_lines:
+        (out_dir / "telemetry_summary.txt").write_text("\n".join(telemetry_lines))
     print(f"    selected {len(wins)} windows in {time.time()-t0:.1f}s", flush=True)
     for w in wins:
         rel_s = (w.center_ns - (manifest.t_start_ns or 0)) / 1e9
         print(f"      t_rel={rel_s:7.1f}s  span={w.span_s:.0f}s  "
               f"prio={w.priority:.2f}  {w.label}", flush=True)
-    return wins
+    return wins, telemetry_lines
 
 
 # ---------------------------------------------------------------------------
@@ -668,6 +833,66 @@ def stage_vision(client: ClaudeClient, manifest: Manifest, frames_index: dict,
 
 
 # ---------------------------------------------------------------------------
+# Stage 5b: telemetry-only vision (no cameras)
+# ---------------------------------------------------------------------------
+
+
+def stage_telemetry_analysis(client: ClaudeClient, manifest: Manifest,
+                             windows: list[Window], telemetry_lines: list[str],
+                             out_dir: Path) -> dict:
+    """Text-only forensic call for sessions without any camera topic."""
+    print(f"[5] telemetry-only analysis (no cameras in manifest) ...",
+          flush=True)
+    user_prompt = manifest.user_prompt
+    summary = "\n".join(telemetry_lines) if telemetry_lines else \
+        "(no per-topic anomalies detected during window scan)"
+    if windows:
+        w = max(windows, key=lambda w: w.priority)
+        win_info = (f"center_ns={w.center_ns} span_s={w.span_s:.1f} "
+                    f"label={w.label} priority={w.priority:.2f}")
+    else:
+        win_info = (f"whole session: t_start_ns={manifest.t_start_ns} "
+                    f"t_end_ns={manifest.t_end_ns} "
+                    f"duration_s={manifest.duration_s}")
+    spec = telemetry_mining_prompt(manifest=manifest, user_prompt=user_prompt)
+    total_cost = 0.0
+    try:
+        result_obj, cost = client.analyze(
+            prompt_spec=spec, images=None,
+            user_fields={"window_info": win_info,
+                         "telemetry_summary": summary},
+            resolution="thumb", max_tokens=3000,
+        )
+        result = result_obj.model_dump()
+        total_cost = cost.usd_cost
+    except Exception as e:
+        print(f"    telemetry call FAIL: {e}", flush=True)
+        result = {"moments": [], "rationale": f"failed: {e}",
+                  "operator_hypothesis_verdict": ""}
+    all_moments = result.get("moments", [])
+    for m in all_moments:
+        m["window"] = "telemetry_only"
+    per_window = {
+        "telemetry_only": {
+            "summary": {"per_channel": {}, "overall": summary[:500],
+                        "interesting": bool(all_moments),
+                        "reason": result.get("rationale", "")},
+            "summary_cost": 0.0,
+            "deep": result,
+            "deep_cost": total_cost,
+            "label": "telemetry-only (no cameras)",
+        }
+    }
+    out = {"per_window": per_window, "all_moments": all_moments,
+           "total_cost_usd": total_cost,
+           "mode": "telemetry_only"}
+    (out_dir / "vision.json").write_text(json.dumps(out, indent=2, default=str))
+    print(f"    telemetry stage cost=${total_cost:.4f}  "
+          f"moments={len(all_moments)}", flush=True)
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Stage 6: report
 # ---------------------------------------------------------------------------
 
@@ -796,12 +1021,22 @@ def run(path: Path, out_dir: Path, user_prompt: str | None = None,
         assets = SessionAssets(root=manifest.root,
                                session_key=manifest.session_key,
                                bags=manifest.bags)
+        telemetry_lines = []
+        tl_path = out_dir / "telemetry_summary.txt"
+        if tl_path.exists():
+            telemetry_lines = tl_path.read_text().splitlines()
     else:
         assets, manifest = stage_discover_and_manifest(path, user_prompt, out_dir)
-        windows = stage_windows(manifest, assets, out_dir)
-    frames_index = stage_frames(manifest, assets, windows, out_dir, reuse_frames)
+        windows, telemetry_lines = stage_windows(manifest, assets, out_dir)
     client = ClaudeClient()
-    vision = stage_vision(client, manifest, frames_index, out_dir, force_deep)
+    if not manifest.cameras:
+        frames_index = {"windows": {}, "cam_topics": []}
+        (out_dir / "frames_index.json").write_text(json.dumps(frames_index))
+        vision = stage_telemetry_analysis(client, manifest, windows,
+                                          telemetry_lines, out_dir)
+    else:
+        frames_index = stage_frames(manifest, assets, windows, out_dir, reuse_frames)
+        vision = stage_vision(client, manifest, frames_index, out_dir, force_deep)
     case_key = f"{Path(path).name}" + ("__prompted" if user_prompt else "__no_prompt")
     report = stage_report(manifest, vision, frames_index, out_dir, case_key)
 

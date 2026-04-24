@@ -249,6 +249,77 @@ def visual_mining_prompt(
     }
 
 
+def telemetry_mining_prompt(
+    manifest: "Manifest | None" = None,
+    user_prompt: str | None = None,
+):
+    """Text-only forensic prompt for sessions with no camera topics.
+
+    Used when the manifest has lidar / imu / odom / gnss but no camera
+    data. Evidence must come entirely from telemetry anomaly text.
+    """
+    look_for = (
+        "## What to look for (telemetry-only session — no cameras recorded)\n\n"
+        "1. **Topic rate collapse / gaps**: a sensor that stops publishing or "
+        "drops below its nominal rate for a sustained interval.\n"
+        "2. **Stuck / frozen values**: IMU angular velocity or linear "
+        "acceleration pinned at identical values across many samples = "
+        "hardware fault or driver hang.\n"
+        "3. **Multi-topic simultaneous dropout**: several sensors losing "
+        "data at the same t_ns = shared upstream fault (power, driver, "
+        "time-sync).\n"
+        "4. **Structural silence**: expected fused / command / odom topic "
+        "never publishes despite upstream sensors being present.\n\n"
+        "You will NOT see images. All evidence comes from the telemetry "
+        "anomaly summary in the user message. Every reported moment must "
+        "cite a topic and a t_ns drawn from the summary. If the summary "
+        "is empty or only shows nominal operation, return an empty "
+        "moments array and say so in the rationale.\n\n"
+        "For each moment reported:\n"
+        "- exact t_ns (from the summary, a real bag timestamp)\n"
+        "- label: short phrase\n"
+        "- cameras.shows / cameras.misses: leave both empty (no cameras)\n"
+        "- evidence: source must be 'telemetry' or 'lidar'; channel is the "
+        "topic name; snippet quotes the numeric observation\n"
+        "- why_review, confidence, inferred_ego_motion (empty if not "
+        "inferable), hypothesis_status\n"
+    )
+    cached = _assemble_cached_blocks(
+        manifest, user_prompt,
+        extra=[{"type": "text", "text": look_for, "cache_control": {"type": "ephemeral"}}],
+    )
+    return {
+        "name": "telemetry_mining_generic",
+        "system": SYSTEM_GENERIC,
+        "cached_blocks": cached,
+        "user_template": (
+            "Analyze this recorded session based on the telemetry anomaly "
+            "summary below. No camera frames are available for this session.\n\n"
+            "## Session Window\n{window_info}\n\n"
+            "## Telemetry Anomaly Summary\n{telemetry_summary}\n\n"
+            "Return JSON with EXACTLY this shape:\n"
+            "{{\n"
+            '  "moments": [\n'
+            "    {{\n"
+            '      "t_ns": <int>,\n'
+            '      "label": "<short>",\n'
+            '      "cameras": {{"shows": [], "misses": []}},\n'
+            '      "evidence": [{{"source":"telemetry|lidar","channel":"<topic>","t_ns":<int|null>,"snippet":"<quoted numeric finding>"}}],\n'
+            '      "why_review": "<str>",\n'
+            '      "confidence": <float 0..1>,\n'
+            '      "inferred_ego_motion": "<str>",\n'
+            '      "hypothesis_status": "supports_operator|contradicts_operator|independent|unrelated"\n'
+            "    }}\n"
+            "  ],\n"
+            '  "rationale": "<str>",\n'
+            '  "operator_hypothesis_verdict": "<str, empty if no operator hypothesis was provided>"\n'
+            "}}\n"
+            "No preamble, no markdown fencing."
+        ),
+        "schema": MiningReport,
+    }
+
+
 def window_summary_prompt(
     manifest: "Manifest | None" = None,
     user_prompt: str | None = None,
