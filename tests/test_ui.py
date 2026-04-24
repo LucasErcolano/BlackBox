@@ -338,6 +338,75 @@ def test_status_cost_counter_renders_dollar_amount(tmp_path, monkeypatch):
     assert "$2.00" in r2.text
 
 
+def test_index_has_dropzone_and_hero_cards():
+    """Landing page must expose the drop zone UX and all three hero case cards."""
+    client = TestClient(app)
+    r = client.get("/")
+    assert r.status_code == 200
+    # Drop zone surface
+    assert 'id="dropzone"' in r.text
+    assert 'evidence upload' in r.text
+    # Existing upload wiring preserved
+    assert 'hx-post="/analyze"' in r.text
+    assert 'multipart/form-data' in r.text
+    # Three hero cards (one per case)
+    assert 'hx-get="/case/sanfer_tunnel"' in r.text
+    assert 'hx-get="/case/car_1"' in r.text
+    assert 'hx-get="/case/boat_lidar"' in r.text
+    # marked.js script present for inline markdown render
+    assert 'marked.min.js' in r.text
+
+
+def test_index_has_no_gradients():
+    """NTSB aesthetic discipline: no gradient fills in the landing HTML."""
+    client = TestClient(app)
+    r = client.get("/")
+    assert 'linear-gradient' not in r.text
+    assert 'radial-gradient' not in r.text
+
+
+def test_style_css_has_no_gradients():
+    """Static stylesheet must stay gradient-free (NTSB discipline)."""
+    css = (ui_app.BASE_DIR / "static" / "style.css").read_text()
+    assert 'linear-gradient' not in css
+    assert 'radial-gradient' not in css
+
+
+def test_case_route_sanfer():
+    client = TestClient(app)
+    r = client.get("/case/sanfer_tunnel")
+    assert r.status_code == 200
+    assert 'sanfer_tunnel' in r.text
+    # MD contents pass through as a data attribute for marked.js to parse
+    assert 'data-markdown=' in r.text
+    assert 'RTCM' in r.text or 'carr_soln' in r.text
+
+
+def test_case_route_car_1():
+    client = TestClient(app)
+    r = client.get("/case/car_1")
+    assert r.status_code == 200
+    assert 'car_1' in r.text
+    assert 'data-markdown=' in r.text
+
+
+def test_case_route_boat_lidar():
+    client = TestClient(app)
+    r = client.get("/case/boat_lidar")
+    assert r.status_code == 200
+    assert 'boat_lidar' in r.text
+    assert 'data-markdown=' in r.text
+
+
+def test_case_route_unknown_slug_404s():
+    """Slug whitelist must reject arbitrary paths (no file-read primitive)."""
+    client = TestClient(app)
+    r = client.get("/case/../../../etc/passwd")
+    assert r.status_code in (404, 400)
+    r = client.get("/case/not_a_real_case")
+    assert r.status_code == 404
+
+
 def test_analyze_routes_to_real_pipeline_when_enabled(monkeypatch, tmp_path):
     monkeypatch.setattr(ui_app, "UPLOADS_DIR", tmp_path)
     monkeypatch.setattr(ui_app, "JOBS_DIR", tmp_path)

@@ -6,13 +6,16 @@
   <title>Black Box — forensic copilot for robots</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:wght@400;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css" />
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
 </head>
 <body>
   <main>
     <header>
+      <p class="kicker">NTSB-style forensic report · built on Opus 4.7</p>
       <h1>Black Box</h1>
       <p class="sub">A forensic copilot for robots.</p>
     </header>
@@ -27,33 +30,142 @@
 
     <form
       class="upload"
+      id="upload-form"
       hx-post="/analyze"
       hx-encoding="multipart/form-data"
       hx-target="#result"
       hx-swap="innerHTML"
     >
-      <label class="field">
-        <span>Recording</span>
-        <input type="file" name="file" accept=".bag,.db3,.mcap,.zip" required />
+      <label class="dropzone" id="dropzone" for="upload-input">
+        <span class="dropzone-eyebrow">evidence upload</span>
+        <span class="dropzone-title">Drop a bag folder, MCAP, or zipped run</span>
+        <span class="dropzone-hint">Click or drag a file here. Accepts .bag, .db3, .mcap, .zip.</span>
+        <span class="dropzone-filename" id="dropzone-filename">no file selected</span>
+        <input
+          type="file"
+          id="upload-input"
+          name="file"
+          accept=".bag,.db3,.mcap,.zip"
+          required
+        />
       </label>
 
-      <label class="field">
-        <span>Mode</span>
-        <select name="mode">
-          <option value="post_mortem">Post-mortem</option>
-          <option value="scenario_mining">Scenario mining</option>
-          <option value="synthetic_qa">Synthetic Q&amp;A</option>
-        </select>
-      </label>
-
-      <button type="submit">Analyze</button>
+      <div class="upload-row">
+        <label class="field">
+          <span>Mode</span>
+          <select name="mode">
+            <option value="post_mortem">Post-mortem</option>
+            <option value="scenario_mining">Scenario mining</option>
+            <option value="synthetic_qa">Synthetic Q&amp;A</option>
+          </select>
+        </label>
+        <button type="submit">Analyze</button>
+      </div>
     </form>
+
+    <section class="hero-cases" aria-label="Hero cases">
+      <div class="hero-cases-head">
+        <span class="hero-cases-eyebrow">hero cases</span>
+        <h2 class="hero-cases-title">Pre-analyzed incidents</h2>
+        <p class="hero-cases-sub">
+          Three reports Black Box already produced on real recordings. Open one
+          to read the full forensic write-up inline.
+        </p>
+      </div>
+      <ul class="case-grid">
+        <li>
+          <button
+            type="button"
+            class="case-card"
+            hx-get="/case/sanfer_tunnel"
+            hx-target="#result"
+            hx-swap="innerHTML"
+            hx-push-url="false"
+          >
+            <span class="case-card-slug">sanfer_tunnel</span>
+            <span class="case-card-mode">post_mortem · 3626 s</span>
+            <span class="case-card-headline">RTCM uplink silently dead; carr_soln never leaves 'none'.</span>
+            <span class="case-card-cta">Read case file</span>
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            class="case-card"
+            hx-get="/case/car_1"
+            hx-target="#result"
+            hx-swap="innerHTML"
+            hx-push-url="false"
+          >
+            <span class="case-card-slug">car_1</span>
+            <span class="case-card-mode">scenario_mining · 970 s</span>
+            <span class="case-card-headline">Ego vehicle stuck ~130 s at a parking-lot barrier; suspected state deadlock.</span>
+            <span class="case-card-cta">Read case file</span>
+          </button>
+        </li>
+        <li>
+          <button
+            type="button"
+            class="case-card"
+            hx-get="/case/boat_lidar"
+            hx-target="#result"
+            hx-swap="innerHTML"
+            hx-push-url="false"
+          >
+            <span class="case-card-slug">boat_lidar</span>
+            <span class="case-card-mode">scenario_mining · 416 s</span>
+            <span class="case-card-headline">LIDAR companion IMU declared but silent the entire USV session.</span>
+            <span class="case-card-cta">Read case file</span>
+          </button>
+        </li>
+      </ul>
+    </section>
 
     <div id="result" aria-live="polite">{% if initial_html %}{{ initial_html | safe }}{% endif %}</div>
 
     <footer>
-      <small>Opus 4.7 &middot; Managed Agents &middot; hackathon build</small>
+      <small>Opus 4.7 · Managed Agents · hackathon build</small>
     </footer>
   </main>
+  <script>
+    (function () {
+      var input = document.getElementById('upload-input');
+      var zone = document.getElementById('dropzone');
+      var nameEl = document.getElementById('dropzone-filename');
+      if (!input || !zone || !nameEl) { return; }
+
+      function setName() {
+        if (input.files && input.files.length > 0) {
+          nameEl.textContent = input.files[0].name;
+          zone.classList.add('has-file');
+        } else {
+          nameEl.textContent = 'no file selected';
+          zone.classList.remove('has-file');
+        }
+      }
+      input.addEventListener('change', setName);
+
+      ['dragenter', 'dragover'].forEach(function (evt) {
+        zone.addEventListener(evt, function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          zone.classList.add('is-dragging');
+        });
+      });
+      ['dragleave', 'drop'].forEach(function (evt) {
+        zone.addEventListener(evt, function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          zone.classList.remove('is-dragging');
+        });
+      });
+      zone.addEventListener('drop', function (e) {
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          input.files = e.dataTransfer.files;
+          setName();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
