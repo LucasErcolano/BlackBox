@@ -2,11 +2,11 @@
 
 [![ci](https://github.com/LucasErcolano/BlackBox/actions/workflows/ci.yml/badge.svg)](https://github.com/LucasErcolano/BlackBox/actions/workflows/ci.yml)
 
+**Built with Claude Opus 4.7** — vision + reasoning + Managed Agents (long-horizon session replay). Model ID: `claude-opus-4-7`. No downgrades.
+
 Forensic copilot for robots. Feed it a robot recording, get back a root-cause hypothesis, cross-modal evidence, and a scoped code patch.
 
-> **Pitch placeholder.** When a robot crashes, the flight data recorder tells you *what* happened. Black Box tells you *why* — and hands you the diff.
-
-Built with **Claude Opus 4.7** (vision + reasoning) + **Managed Agents** (long-horizon session replay).
+> When a robot crashes, the flight data recorder tells you *what* happened. Black Box tells you *why*, and hands you the diff.
 
 ## Hero case
 
@@ -73,6 +73,12 @@ pip install -e .
 export ANTHROPIC_API_KEY=...    # or put in .env
 python -m black_box.eval.runner --case-dir black-box-bench/cases
 ```
+
+Verified on this commit (2026-04-23, Python 3.13.9):
+
+- `pytest -q` -> **169 passed** in 20.65s (2 deprecation warnings, no failures).
+- `python scripts/cost_report.py` -> **TOTAL $30.56** across 90 entries (29 real Opus 4.7 calls: $26.97; 61 test fixtures: $3.59).
+- `lychee README.md` -> **11/11 links OK, 0 errors** (enforced in CI via `.github/workflows/link-check.yml`).
 
 ## System overview
 
