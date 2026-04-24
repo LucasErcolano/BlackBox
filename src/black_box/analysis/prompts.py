@@ -1,11 +1,38 @@
 # SPDX-License-Identifier: MIT
 """Prompt templates with aggressive caching for Black Box analysis."""
 
+from typing import Optional
+
+from .context_mode import recall_block
 from .schemas import (
     PostMortemReport,
     ScenarioMiningReport,
     SyntheticQAReport,
 )
+
+
+def _context_mode_block(query: Optional[str], k: int = 3) -> Optional[dict]:
+    """Build a cacheable context block from the Context-Mode sandbox.
+
+    Returns None when the sandbox has nothing useful; callers then skip the
+    block entirely instead of shipping an empty slot through the API.
+    """
+    if not query:
+        return None
+    recalled = recall_block(query, k=k)
+    if not recalled:
+        return None
+    text = (
+        "## Prior Edits (Context-Mode sandbox)\n"
+        "These hunks were recorded from earlier Edit/Write operations in this "
+        "investigation. Prefer them over re-reading the whole file.\n\n"
+        + recalled
+    )
+    return {
+        "type": "text",
+        "text": text,
+        "cache_control": {"type": "ephemeral"},
+    }
 
 
 SYSTEM_PROMPT = """You are a forensic analyst for robotic systems. Your role is to analyze logs, telemetry, video frames, and code snippets to diagnose root causes of failures.
@@ -132,25 +159,32 @@ FEWSHOT_EXAMPLES = """
 """
 
 
-def post_mortem_prompt():
+def post_mortem_prompt(context_query: Optional[str] = None):
     """
     Post-mortem analysis: given bag, synced frames, and code, rank hypotheses and propose patch.
     Returns: dict with system, cached_blocks, user_template, and schema.
+
+    If `context_query` is provided, relevant hunks from the Context-Mode
+    sandbox are appended as an additional cached block (prior-edits recall).
     """
+    cached_blocks = [
+        {
+            "type": "text",
+            "text": BUG_TAXONOMY_DOC,
+            "cache_control": {"type": "ephemeral"},
+        },
+        {
+            "type": "text",
+            "text": FEWSHOT_EXAMPLES,
+            "cache_control": {"type": "ephemeral"},
+        },
+    ]
+    ctx = _context_mode_block(context_query)
+    if ctx is not None:
+        cached_blocks.append(ctx)
     return {
         "system": SYSTEM_PROMPT,
-        "cached_blocks": [
-            {
-                "type": "text",
-                "text": BUG_TAXONOMY_DOC,
-                "cache_control": {"type": "ephemeral"},
-            },
-            {
-                "type": "text",
-                "text": FEWSHOT_EXAMPLES,
-                "cache_control": {"type": "ephemeral"},
-            },
-        ],
+        "cached_blocks": cached_blocks,
         "user_template": (
             "Analyze the following failure scenario and produce a ranked list of hypotheses.\n\n"
             "## Bag Summary\n{bag_summary}\n\n"
@@ -163,25 +197,29 @@ def post_mortem_prompt():
     }
 
 
-def scenario_mining_prompt():
+def scenario_mining_prompt(context_query: Optional[str] = None):
     """
     Scenario mining: detect anomalous moments (0..5 per run).
     Returns: dict with system, cached_blocks, user_template, and schema.
     """
+    cached_blocks = [
+        {
+            "type": "text",
+            "text": BUG_TAXONOMY_DOC,
+            "cache_control": {"type": "ephemeral"},
+        },
+        {
+            "type": "text",
+            "text": FEWSHOT_EXAMPLES,
+            "cache_control": {"type": "ephemeral"},
+        },
+    ]
+    ctx = _context_mode_block(context_query)
+    if ctx is not None:
+        cached_blocks.append(ctx)
     return {
         "system": SYSTEM_PROMPT,
-        "cached_blocks": [
-            {
-                "type": "text",
-                "text": BUG_TAXONOMY_DOC,
-                "cache_control": {"type": "ephemeral"},
-            },
-            {
-                "type": "text",
-                "text": FEWSHOT_EXAMPLES,
-                "cache_control": {"type": "ephemeral"},
-            },
-        ],
+        "cached_blocks": cached_blocks,
         "user_template": (
             "Scan the following telemetry and frames for anomalous moments. "
             "Return 0–5 moments only. If nothing is anomalous, return an empty moments array. "
@@ -195,25 +233,29 @@ def scenario_mining_prompt():
     }
 
 
-def synthetic_qa_prompt():
+def synthetic_qa_prompt(context_query: Optional[str] = None):
     """
     Synthetic QA: model produces hypotheses, then self-evaluates against ground truth.
     Returns: dict with system, cached_blocks, user_template, and schema.
     """
+    cached_blocks = [
+        {
+            "type": "text",
+            "text": BUG_TAXONOMY_DOC,
+            "cache_control": {"type": "ephemeral"},
+        },
+        {
+            "type": "text",
+            "text": FEWSHOT_EXAMPLES,
+            "cache_control": {"type": "ephemeral"},
+        },
+    ]
+    ctx = _context_mode_block(context_query)
+    if ctx is not None:
+        cached_blocks.append(ctx)
     return {
         "system": SYSTEM_PROMPT,
-        "cached_blocks": [
-            {
-                "type": "text",
-                "text": BUG_TAXONOMY_DOC,
-                "cache_control": {"type": "ephemeral"},
-            },
-            {
-                "type": "text",
-                "text": FEWSHOT_EXAMPLES,
-                "cache_control": {"type": "ephemeral"},
-            },
-        ],
+        "cached_blocks": cached_blocks,
         "user_template": (
             "Analyze the following bag and produce your best hypothesis for the root cause. "
             "Then compare your prediction to the ground truth and provide a self-evaluation.\n\n"

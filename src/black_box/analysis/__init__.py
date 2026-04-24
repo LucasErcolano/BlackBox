@@ -2,6 +2,14 @@
 """Black Box analysis module: Claude-powered forensic diagnostics."""
 
 from .claude_client import ClaudeClient, CostLog
+from .context_mode import (
+    Hunk,
+    format_hunks_for_prompt,
+    init_db as init_context_db,
+    recall,
+    recall_block,
+    record_edit,
+)
 from .schemas import (
     Evidence,
     Hypothesis,
@@ -35,6 +43,12 @@ from .resolution_budgeter import (
 __all__ = [
     "ClaudeClient",
     "CostLog",
+    "Hunk",
+    "format_hunks_for_prompt",
+    "init_context_db",
+    "recall",
+    "recall_block",
+    "record_edit",
     "Evidence",
     "Hypothesis",
     "Moment",
