@@ -11,7 +11,7 @@ SYSTEM_PROMPT = """You are a forensic analyst for robotic systems. Your role is 
 
 Always respond with JSON only. No preamble, no markdown fencing.
 
-Bug taxonomy (see detailed documentation below):
+Bug taxonomy (closed set of exactly 7 — no other labels are permitted):
 - pid_saturation: PID controller integral term grows unbounded
 - sensor_timeout: Expected sensor reading never arrives
 - state_machine_deadlock: FSM enters unrecoverable state
@@ -19,7 +19,10 @@ Bug taxonomy (see detailed documentation below):
 - missing_null_check: Null/invalid sensor value crashes or corrupts state
 - calibration_drift: Sensor readings drift over time
 - latency_spike: Unexpected delay in loop execution
-- other: Anomaly not matching above taxonomy
+
+If nothing in the evidence matches one of the 7 labels, emit an empty
+hypothesis list. Never invent a label; never coerce to a catch-all. The
+Pydantic validator downstream will reject any label outside this set.
 
 Reasoning rules:
 1. Cross-reference evidence across camera, telemetry, code, and timeline sources
@@ -68,8 +71,13 @@ BUG_TAXONOMY_DOC = """
 **Video**: Brief stall or delayed response.
 **Code signature**: Unprotected I/O, memory allocation, or GC pause in real-time loop.
 
-### other
-Anomaly that does not fit above categories. Describe it clearly.
+### Closed-set rule
+The taxonomy is frozen at exactly these 7 labels:
+`pid_saturation`, `sensor_timeout`, `state_machine_deadlock`, `bad_gain_tuning`,
+`missing_null_check`, `calibration_drift`, `latency_spike`.
+Any other label is a schema violation — the response will be rejected by
+the Pydantic validator downstream. Return an empty hypothesis list rather
+than a label outside the set.
 """
 
 
@@ -214,7 +222,7 @@ def synthetic_qa_prompt():
             "{{\n"
             '  "hypotheses": [\n'
             "    {{\n"
-            '      "bug_class": "<one of: pid_saturation|sensor_timeout|state_machine_deadlock|bad_gain_tuning|missing_null_check|calibration_drift|latency_spike|other>",\n'
+            '      "bug_class": "<exactly one of: pid_saturation|sensor_timeout|state_machine_deadlock|bad_gain_tuning|missing_null_check|calibration_drift|latency_spike>",\n'
             '      "confidence": <float 0..1>,\n'
             '      "summary": "<short>",\n'
             '      "evidence": [ {{"source": "telemetry|camera|code|timeline", "topic_or_file": "<str>", "t_ns": <int or null>, "snippet": "<str>"}} ],\n'

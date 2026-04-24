@@ -157,14 +157,29 @@ classDiagram
     synthesis ..> ingestion : replays as recording
 ```
 
-## Bug taxonomy — closed-set benchmark, open-world product
+## Bug taxonomy — closed set of 7 (frozen)
 
-The benchmark scorer requires an **exact-match label** from a closed set of seven common failure modes. That closed set exists for *measurement*, not for *expression* — the product surface accepts any label the model produces and routes unknown labels to a neutral `other` bucket that still carries evidence and a scoped patch.
+The taxonomy is **frozen at exactly 7 labels**. Schema enforcement lives in
+`src/black_box/analysis/schemas.py` as a Pydantic `Literal`; anything outside
+the set raises `ValidationError` at parse time — no silent coercion, no
+catch-all bucket. This block is the source of truth; CLAUDE.md, the cached
+prompt block in `src/black_box/analysis/prompts.py`, and the benchmark scorer
+all mirror these exact strings verbatim.
+
+```
+pid_saturation
+sensor_timeout
+state_machine_deadlock
+bad_gain_tuning
+missing_null_check
+calibration_drift
+latency_spike
+```
 
 ```mermaid
 classDiagram
     class BugClass {
-        <<closed benchmark set>>
+        <<closed set, exactly 7>>
         pid_saturation
         sensor_timeout
         state_machine_deadlock
@@ -172,7 +187,6 @@ classDiagram
         missing_null_check
         calibration_drift
         latency_spike
-        other
     }
     class Patch {
         <<scoped fix shape>>
@@ -182,7 +196,7 @@ classDiagram
         gain_adjust
     }
     class Hypothesis {
-        +bug_class: BugClass or str
+        +bug_class: BugClass
         +summary: str
         +evidence_refs: list
         +confidence: 0..1
@@ -191,8 +205,9 @@ classDiagram
     BugClass ..> Patch : shapes the patch kind
 ```
 
-- **For the benchmark:** closed 7-class set. A hypothesis scores iff `predicted == ground_truth`.
-- **For production traffic:** open-world labels allowed. `other` is a first-class bucket — the model still has to justify the claim with telemetry + frames, and the patch shape still has to be one of the scoped primitives (clamp / timeout / null check / gain adjust). New failure modes that recur get promoted into the taxonomy via the memory stack, not by changing the prompt.
+- A hypothesis scores iff `predicted == ground_truth` against one of the 7 labels.
+- Patch shape stays one of the scoped primitives (clamp / timeout / null check / gain adjust).
+- New failure modes get promoted into the taxonomy via a deliberate schema bump (updating this block, the `Literal`, the cached prompt, and the scorer in the same PR), not by the model inventing a label at runtime.
 
 ## Memory stack — substrate today, self-improving loop on the roadmap
 

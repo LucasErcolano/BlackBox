@@ -47,7 +47,7 @@
       "patch_hint": "recalibrate cam2 extrinsics"
     },
     {
-      "bug_class": "other",
+      "bug_class": "bad_gain_tuning",
       "confidence": 0.55,
       "summary": "Ambient vibration signature looks a little noisy",
       "evidence": [
@@ -58,13 +58,13 @@
           "snippet": "accel RMS 0.4 m/s^2"
         },
         {
-          "source": "timeline",
-          "topic_or_file": "derived",
-          "t_ns": 45000000000,
-          "snippet": "no correlated control event"
+          "source": "telemetry",
+          "topic_or_file": "/imu",
+          "t_ns": 46000000000,
+          "snippet": "accel RMS 0.41 m/s^2"
         }
       ],
-      "patch_hint": "add vibration damper"
+      "patch_hint": "retune control gains for vibration band"
     },
     {
       "bug_class": "latency_spike",

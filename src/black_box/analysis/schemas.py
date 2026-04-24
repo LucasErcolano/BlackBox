@@ -12,22 +12,28 @@ class Evidence(BaseModel):
     snippet: str  # short human-readable
 
 
+# Frozen closed-set bug taxonomy. Source of truth: CLAUDE.md + root README.
+# Exactly 7 entries. Do NOT add, remove, or rename without updating
+# CLAUDE.md, README.md, and src/black_box/analysis/prompts.py in the same PR.
+BugClass = Literal[
+    "pid_saturation",
+    "sensor_timeout",
+    "state_machine_deadlock",
+    "bad_gain_tuning",
+    "missing_null_check",
+    "calibration_drift",
+    "latency_spike",
+]
+
+
 class Hypothesis(BaseModel):
-    """Single bug hypothesis with confidence and supporting evidence."""
-    bug_class: Literal[
-        "pid_saturation",
-        "sensor_timeout",
-        "state_machine_deadlock",
-        "bad_gain_tuning",
-        "missing_null_check",
-        "calibration_drift",
-        "latency_spike",
-        "sensor_dropout",
-        "config_error",
-        "degraded_state_estimation",
-        "communication_failure",
-        "other",
-    ]
+    """Single bug hypothesis with confidence and supporting evidence.
+
+    ``bug_class`` is a closed Literal of exactly 7 entries. Any value outside
+    the set raises ``pydantic.ValidationError`` at parse time — no silent
+    coercion, no fallback bucket. See ``BugClass`` above.
+    """
+    bug_class: BugClass
     confidence: float  # 0..1
     summary: str
     evidence: list[Evidence]

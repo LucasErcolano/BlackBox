@@ -18,7 +18,7 @@ nothing than ship a fabrication.
 |--:|-----------|-----:|---------:|--------|
 | 0 | `pid_saturation` | 0.72 | 1 | dropped — only 1 evidence row(s) (need >= 2) |
 | 1 | `calibration_drift` | 0.60 | 2 | dropped — only 1 source (camera) — need >= 2 |
-| 2 | `other` | 0.55 | 2 | dropped — bug_class=other with 2 evidence rows (need >= 3) |
+| 2 | `bad_gain_tuning` | 0.55 | 2 | dropped — only 1 source (telemetry) — need >= 2 |
 | 3 | `latency_spike` | 0.22 | 2 | dropped — confidence 0.22 < 0.4 |
 
 **Gated output** — `patch_proposal`: _No anomaly detected with sufficient evidence to support a scoped fix._
@@ -28,7 +28,6 @@ nothing than ship a fabrication.
 
 - min confidence: `0.4`
 - min evidence rows / hypothesis: `2`
-- min evidence rows for `other`: `3`
 - min distinct evidence sources: `min(2, available_sources)`
 - info-severity moments dropped by default
 
