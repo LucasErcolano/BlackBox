@@ -1,5 +1,7 @@
 # Black Box
 
+[![ci](https://github.com/LucasErcolano/BlackBox/actions/workflows/ci.yml/badge.svg)](https://github.com/LucasErcolano/BlackBox/actions/workflows/ci.yml)
+
 Forensic copilot for robots. Feed it a robot recording, get back a root-cause hypothesis, cross-modal evidence, and a scoped code patch.
 
 > **Pitch placeholder.** When a robot crashes, the flight data recorder tells you *what* happened. Black Box tells you *why* — and hands you the diff.
