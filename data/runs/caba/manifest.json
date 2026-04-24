@@ -1,0 +1,97 @@
+{
+  "root": "/mnt/ssd_boat/caba",
+  "session_key": "0",
+  "duration_s": 11843.986182321,
+  "t_start_ns": 1774275320205478118,
+  "t_end_ns": 1774287164191660439,
+  "autonomy": "unknown (control topics present but could be teleop)",
+  "user_prompt": null,
+  "cameras": [],
+  "gnss": [
+    {
+      "topic": "/ublox_moving_base/fix",
+      "msgtype": "sensor_msgs/msg/NavSatFix",
+      "count": 59218,
+      "kind": "gnss"
+    },
+    {
+      "topic": "/ublox_moving_base/navpvt",
+      "msgtype": "ublox_msgs/msg/NavPVT",
+      "count": 59218,
+      "kind": "gnss"
+    },
+    {
+      "topic": "/ublox_moving_base/rxmrtcm",
+      "msgtype": "ublox_msgs/msg/RxmRTCM",
+      "count": 22286,
+      "kind": "gnss"
+    },
+    {
+      "topic": "/ublox_rover/fix",
+      "msgtype": "sensor_msgs/msg/NavSatFix",
+      "count": 51955,
+      "kind": "gnss"
+    },
+    {
+      "topic": "/ublox_rover/navpvt",
+      "msgtype": "ublox_msgs/msg/NavPVT",
+      "count": 51955,
+      "kind": "gnss"
+    },
+    {
+      "topic": "/ublox_rover/navrelposned",
+      "msgtype": "ublox_msgs/msg/NavRELPOSNED9",
+      "count": 51955,
+      "kind": "gnss"
+    },
+    {
+      "topic": "/vehicle/gps/fix",
+      "msgtype": "sensor_msgs/msg/NavSatFix",
+      "count": 11724,
+      "kind": "gnss"
+    }
+  ],
+  "imus": [
+    {
+      "topic": "/imu/data",
+      "msgtype": "sensor_msgs/msg/Imu",
+      "count": 1184376,
+      "kind": "imu"
+    },
+    {
+      "topic": "/ublox_rover/navheading",
+      "msgtype": "sensor_msgs/msg/Imu",
+      "count": 51955,
+      "kind": "imu"
+    },
+    {
+      "topic": "/vehicle/imu/data_raw",
+      "msgtype": "sensor_msgs/msg/Imu",
+      "count": 1184377,
+      "kind": "imu"
+    }
+  ],
+  "cmd": [
+    {
+      "topic": "/vehicle/gps/vel",
+      "msgtype": "geometry_msgs/msg/TwistStamped",
+      "count": 11724,
+      "kind": "cmd"
+    },
+    {
+      "topic": "/vehicle/twist",
+      "msgtype": "geometry_msgs/msg/TwistStamped",
+      "count": 591182,
+      "kind": "cmd"
+    }
+  ],
+  "odom": [],
+  "lidars": [
+    {
+      "topic": "/vehicle/sonar_cloud",
+      "msgtype": "sensor_msgs/msg/PointCloud2",
+      "count": 59528,
+      "kind": "lidar"
+    }
+  ]
+}

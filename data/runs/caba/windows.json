@@ -1,0 +1,44 @@
+[
+  {
+    "center_ns": 1774275334428405248,
+    "span_s": 51.588947968,
+    "label": "/ublox_moving_base/rxmrtcm flags np.int64(4)->np.int64(2) | /ublox_moving_base/rxmrtcm flags np.int64(2)->np.int64(4) | /ublox_moving_base/rxmrtcm flags np.int64(4)->np.int64(2) | /ublox_moving_base/rxmrtcm flags np.int64(2)->np.int64(4) | ",
+    "priority": 0.9
+  },
+  {
+    "center_ns": 1774275413687392000,
+    "span_s": 30.0,
+    "label": "/ublox_rover/navpvt flags np.int64(67)->np.int64(131) | /ublox_rover/fix fixType np.int64(0)->np.int64(2) | /ublox_rover/navrelposned flags np.int64(303)->np.int64(311)",
+    "priority": 0.85
+  },
+  {
+    "center_ns": 1774275748034750592,
+    "span_s": 94.675643648,
+    "label": "/ublox_rover/navpvt flags np.int64(131)->np.int64(67) | /ublox_rover/fix fixType np.int64(2)->np.int64(0) | /ublox_rover/navrelposned flags np.int64(311)->np.int64(303) | /ublox_rover/navpvt flags np.int64(67)->np.int64(131) | /ublox_rover/",
+    "priority": 0.85
+  },
+  {
+    "center_ns": 1774276822678918656,
+    "span_s": 63.591403008,
+    "label": "/ublox_moving_base/fix fixType np.int64(0)->np.int64(2) | /ublox_moving_base/fix fixType np.int64(2)->np.int64(0)",
+    "priority": 0.85
+  },
+  {
+    "center_ns": 1774277670379282304,
+    "span_s": 48.993551616,
+    "label": "/ublox_moving_base/fix fixType np.int64(0)->np.int64(2) | /ublox_moving_base/fix fixType np.int64(2)->np.int64(0)",
+    "priority": 0.85
+  },
+  {
+    "center_ns": 1774278128318140800,
+    "span_s": 42.487871232,
+    "label": "/ublox_rover/navpvt fixType np.int64(3)->np.int64(2) | /ublox_rover/navpvt fixType np.int64(2)->np.int64(3) | /ublox_rover/navpvt hAcc>5m (20s) | /ublox_moving_base/navpvt hAcc>5m (16s) | /ublox_moving_base/navpvt fixType np.int64(3)->np.in",
+    "priority": 0.85
+  },
+  {
+    "center_ns": 1774281242392008960,
+    "span_s": 11843.432733696,
+    "label": "/vehicle/gps/fix fixType stuck <3 [t=5921s] | /ublox_moving_base/fix fixType stuck <3 [t=5922s] | /ublox_rover/fix fixType stuck <3 [t=5922s] | /ublox_rover/navheading stuck 11843.4s | /vehicle/gps/fix fixType stuck <3 [t=11816s] | /ublox_m",
+    "priority": 0.9
+  }
+]

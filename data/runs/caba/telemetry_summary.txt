@@ -1,0 +1,5 @@
+- `/imu/data`: n=1184376 span=11843.7s avg_rate=100.00Hz median_dt=9.5ms
+- `/ublox_rover/navheading`: n=51955 span=11843.4s avg_rate=4.39Hz median_dt=200.1ms
+    * IMU stuck 51955 samples (11843.4s) at t_ns=1774275320675642167 vals=(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+- `/vehicle/imu/data_raw`: n=1184377 span=11843.6s avg_rate=100.00Hz median_dt=10.0ms
+- `/vehicle/sonar_cloud`: n=59528 span=11843.5s avg_rate=5.03Hz median_dt=201.4ms

@@ -1,0 +1,14 @@
+{
+  "root": "/mnt/ssd_boat/caba",
+  "session_key": "0",
+  "bags": [
+    "/mnt/ssd_boat/caba/0_dataspeed.bag",
+    "/mnt/ssd_boat/caba/0_diagnostics.bag",
+    "/mnt/ssd_boat/caba/0_sensors.bag"
+  ],
+  "audio": [
+    "/mnt/ssd_boat/caba/0_audio.wav"
+  ],
+  "video": [],
+  "logs": []
+}

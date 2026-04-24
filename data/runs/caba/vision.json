@@ -1,0 +1,121 @@
+{
+  "per_window": {
+    "telemetry_only": {
+      "summary": {
+        "per_channel": {},
+        "overall": "- `/imu/data`: n=1184376 span=11843.7s avg_rate=100.00Hz median_dt=9.5ms\n- `/ublox_rover/navheading`: n=51955 span=11843.4s avg_rate=4.39Hz median_dt=200.1ms\n    * IMU stuck 51955 samples (11843.4s) at t_ns=1774275320675642167 vals=(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)\n- `/vehicle/imu/data_raw`: n=1184377 span=11843.6s avg_rate=100.00Hz median_dt=10.0ms\n- `/vehicle/sonar_cloud`: n=59528 span=11843.5s avg_rate=5.03Hz median_dt=201.4ms",
+        "interesting": true,
+        "reason": "Window was flagged for RTCM flag flapping on the moving-base GNSS input. Inspecting the broader telemetry summary shows the related /ublox_rover/navheading topic is structurally dead \u2014 51955 consecutive zero-valued samples across the entire 11843s bag \u2014 while the two IMUs (/imu/data, /vehicle/imu/data_raw) and sonar cloud stream at nominal rates. The RTCM instability around the window center is consistent with, and likely a contributor to, the loss of a valid GNSS-derived heading solution. No cameras are recorded, so visual corroboration is not possible."
+      },
+      "summary_cost": 0.0,
+      "deep": {
+        "moments": [
+          {
+            "t_ns": 1774275320675642167,
+            "label": "ublox_rover navheading frozen at zero for entire session",
+            "cameras": {
+              "shows": [],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "telemetry",
+                "channel": "/ublox_rover/navheading",
+                "t_ns": 1774275320675642167,
+                "snippet": "IMU stuck 51955 samples (11843.4s) vals=(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)"
+              },
+              {
+                "source": "telemetry",
+                "channel": "/ublox_rover/navheading",
+                "t_ns": null,
+                "snippet": "n=51955 span=11843.4s avg_rate=4.39Hz \u2014 publishes at nominal rate but payload is all zeros"
+              }
+            ],
+            "why_review": "The ublox rover heading topic publishes at its expected ~4.4 Hz cadence for the entire 11843s bag but every one of 51955 samples carries identical all-zero orientation/angular/linear fields. This is a driver- or fix-level fault (no moving-baseline heading solution) rather than a transport dropout, and it means any downstream consumer relying on GNSS-derived heading has no usable signal for the whole session.",
+            "confidence": 0.95,
+            "inferred_ego_motion": "",
+            "hypothesis_status": "independent",
+            "window": "telemetry_only"
+          },
+          {
+            "t_ns": 1774275334428405248,
+            "label": "RTCM correction stream flapping between flag states",
+            "cameras": {
+              "shows": [],
+              "misses": []
+            },
+            "evidence": [
+              {
+                "source": "telemetry",
+                "channel": "/ublox_moving_base/rxmrtcm",
+                "t_ns": 1774275334428405248,
+                "snippet": "flags 4->2->4->2->4 transitions within ~51.6s window"
+              }
+            ],
+            "why_review": "Repeated RTCM flag toggling (4<->2) on the moving-base correction input indicates intermittent RTK correction validity. Combined with the all-zero navheading output, this points to a degraded moving-baseline/RTK pipeline: corrections are arriving but acceptance is unstable, which is consistent with the rover failing to produce a valid heading solution. Requires additional telemetry (navpvt carrSoln / flags fields) to fully confirm RTK fix quality across the session.",
+            "confidence": 0.7,
+            "inferred_ego_motion": "",
+            "hypothesis_status": "independent",
+            "window": "telemetry_only"
+          }
+        ],
+        "rationale": "Window was flagged for RTCM flag flapping on the moving-base GNSS input. Inspecting the broader telemetry summary shows the related /ublox_rover/navheading topic is structurally dead \u2014 51955 consecutive zero-valued samples across the entire 11843s bag \u2014 while the two IMUs (/imu/data, /vehicle/imu/data_raw) and sonar cloud stream at nominal rates. The RTCM instability around the window center is consistent with, and likely a contributor to, the loss of a valid GNSS-derived heading solution. No cameras are recorded, so visual corroboration is not possible.",
+        "operator_hypothesis_verdict": ""
+      },
+      "deep_cost": 0.1416375,
+      "label": "telemetry-only (no cameras)"
+    }
+  },
+  "all_moments": [
+    {
+      "t_ns": 1774275320675642167,
+      "label": "ublox_rover navheading frozen at zero for entire session",
+      "cameras": {
+        "shows": [],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "telemetry",
+          "channel": "/ublox_rover/navheading",
+          "t_ns": 1774275320675642167,
+          "snippet": "IMU stuck 51955 samples (11843.4s) vals=(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)"
+        },
+        {
+          "source": "telemetry",
+          "channel": "/ublox_rover/navheading",
+          "t_ns": null,
+          "snippet": "n=51955 span=11843.4s avg_rate=4.39Hz \u2014 publishes at nominal rate but payload is all zeros"
+        }
+      ],
+      "why_review": "The ublox rover heading topic publishes at its expected ~4.4 Hz cadence for the entire 11843s bag but every one of 51955 samples carries identical all-zero orientation/angular/linear fields. This is a driver- or fix-level fault (no moving-baseline heading solution) rather than a transport dropout, and it means any downstream consumer relying on GNSS-derived heading has no usable signal for the whole session.",
+      "confidence": 0.95,
+      "inferred_ego_motion": "",
+      "hypothesis_status": "independent",
+      "window": "telemetry_only"
+    },
+    {
+      "t_ns": 1774275334428405248,
+      "label": "RTCM correction stream flapping between flag states",
+      "cameras": {
+        "shows": [],
+        "misses": []
+      },
+      "evidence": [
+        {
+          "source": "telemetry",
+          "channel": "/ublox_moving_base/rxmrtcm",
+          "t_ns": 1774275334428405248,
+          "snippet": "flags 4->2->4->2->4 transitions within ~51.6s window"
+        }
+      ],
+      "why_review": "Repeated RTCM flag toggling (4<->2) on the moving-base correction input indicates intermittent RTK correction validity. Combined with the all-zero navheading output, this points to a degraded moving-baseline/RTK pipeline: corrections are arriving but acceptance is unstable, which is consistent with the rover failing to produce a valid heading solution. Requires additional telemetry (navpvt carrSoln / flags fields) to fully confirm RTK fix quality across the session.",
+      "confidence": 0.7,
+      "inferred_ego_motion": "",
+      "hypothesis_status": "independent",
+      "window": "telemetry_only"
+    }
+  ],
+  "total_cost_usd": 0.1416375,
+  "mode": "telemetry_only"
+}

@@ -122,3 +122,4 @@
 {"cached_input_tokens": 0, "uncached_input_tokens": 687, "cache_creation_tokens": 2058, "output_tokens": 569, "usd_cost": 0.0915675, "wall_time_s": 8.292959690093994, "model": "claude-opus-4-7", "prompt_kind": "telemetry_mining_generic"}
 {"cached_input_tokens": 0, "uncached_input_tokens": 2000, "cache_creation_tokens": 1500, "output_tokens": 50, "usd_cost": 0.061875, "wall_time_s": 9.083747863769531e-05, "model": "claude-opus-4-7", "prompt_kind": "visual_mining_v2"}
 {"cached_input_tokens": 0, "uncached_input_tokens": 2000, "cache_creation_tokens": 1500, "output_tokens": 50, "usd_cost": 0.061875, "wall_time_s": 8.988380432128906e-05, "model": "claude-opus-4-7", "prompt_kind": "window_summary_v2"}
+{"cached_input_tokens": 0, "uncached_input_tokens": 1475, "cache_creation_tokens": 2058, "output_tokens": 1079, "usd_cost": 0.1416375, "wall_time_s": 17.703272581100464, "model": "claude-opus-4-7", "prompt_kind": "telemetry_mining_generic"}
