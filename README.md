@@ -9,6 +9,7 @@ Forensic copilot for robots. Feed it a robot recording, get back a root-cause hy
 Built with **Claude Opus 4.7** (vision + reasoning) + **Managed Agents** (long-horizon session replay).
 
 ## Docs
+- [Project rules (`CLAUDE.md`)](CLAUDE.md) — hackathon hard rules, project shape, token discipline. Read this first.
 - [Build journal & strategy](https://gist.github.com/LucasErcolano/851c5e976c6aa364f69c9e6875544061) — narrative, novelty positioning, findings.
 - [Team onboarding](docs/ONBOARDING.md) — scope, cadence, conventions.
 - [Pitch](docs/PITCH.md) — one-liner, elevator, positioning one-liners.
