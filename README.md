@@ -17,6 +17,12 @@ Built with **Claude Opus 4.7** (vision + reasoning) + **Managed Agents** (long-h
 - [Flag-plant](docs/FLAG_PLANT.md) — X/LinkedIn thread copy.
 - [Rehearsal](docs/REHEARSAL.md) — pitch timing, breath points, Q&A prep.
 
+## Token discipline
+
+Every Claude call is logged to `data/costs.jsonl` (cached/uncached/creation tokens, USD, wall time, prompt kind). Summarize with `python scripts/cost_report.py`; export CSV with `--csv`; regenerate the cumulative-spend curve with `--chart docs/assets/cost_curve.png`.
+
+![cumulative API spend](docs/assets/cost_curve.png)
+
 ## Modes
 - **Forensic post-mortem** — known-crash recording in, root cause + patch out.
 - **Scenario mining** — clean recording in, 3–5 moments of interest out. Conservative: if nothing is found, the answer is "nothing anomalous detected."
