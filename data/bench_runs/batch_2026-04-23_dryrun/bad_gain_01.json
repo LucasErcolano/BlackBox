@@ -1,0 +1,12 @@
+{
+  "case_key": "bad_gain_01",
+  "ground_truth_bug": "bad_gain_tuning",
+  "predicted_bug": "bad_gain_tuning",
+  "bug_class_match": true,
+  "confidence": 0.77,
+  "cost_usd": 0.0,
+  "wall_time_s": 0.0,
+  "status": "ok",
+  "source": "stub",
+  "notes": "dry-run: stub predictor echoed ground truth"
+}

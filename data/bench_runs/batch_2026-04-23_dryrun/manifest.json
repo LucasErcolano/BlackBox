@@ -1,0 +1,98 @@
+{
+  "batch_id": "batch_2026-04-23_dryrun",
+  "mode": "dry-run",
+  "model": "claude-opus-4-7",
+  "started_utc": "2026-04-24T01:28:17.013870+00:00",
+  "finished_utc": "2026-04-24T01:28:17.014895+00:00",
+  "budget_usd": 50.0,
+  "baseline_cost_usd": 30.560322000000017,
+  "spent_usd": 0.0,
+  "n_cases": 7,
+  "n_match": 4,
+  "rows": [
+    {
+      "case_key": "bad_gain_01",
+      "ground_truth_bug": "bad_gain_tuning",
+      "predicted_bug": "bad_gain_tuning",
+      "bug_class_match": true,
+      "confidence": 0.77,
+      "cost_usd": 0.0,
+      "wall_time_s": 0.0,
+      "status": "ok",
+      "source": "stub",
+      "notes": "dry-run: stub predictor echoed ground truth"
+    },
+    {
+      "case_key": "boat_lidar_01",
+      "ground_truth_bug": "unknown",
+      "predicted_bug": "unknown",
+      "bug_class_match": false,
+      "confidence": 0.0,
+      "cost_usd": 0.0,
+      "wall_time_s": 0.0,
+      "status": "skeleton",
+      "source": "stub",
+      "notes": "skeleton_awaiting_bag"
+    },
+    {
+      "case_key": "pid_saturation_01",
+      "ground_truth_bug": "pid_saturation",
+      "predicted_bug": "pid_saturation",
+      "bug_class_match": true,
+      "confidence": 0.77,
+      "cost_usd": 0.0,
+      "wall_time_s": 0.0,
+      "status": "ok",
+      "source": "stub",
+      "notes": "dry-run: stub predictor echoed ground truth"
+    },
+    {
+      "case_key": "reflect_public_01",
+      "ground_truth_bug": "unknown",
+      "predicted_bug": "unknown",
+      "bug_class_match": false,
+      "confidence": 0.0,
+      "cost_usd": 0.0,
+      "wall_time_s": 0.0,
+      "status": "skeleton",
+      "source": "stub",
+      "notes": "skeleton_awaiting_bag"
+    },
+    {
+      "case_key": "rtk_heading_break_01",
+      "ground_truth_bug": "sensor_timeout",
+      "predicted_bug": "sensor_timeout",
+      "bug_class_match": true,
+      "confidence": 0.77,
+      "cost_usd": 0.0,
+      "wall_time_s": 0.0,
+      "status": "ok",
+      "source": "stub",
+      "notes": "dry-run: stub predictor echoed ground truth"
+    },
+    {
+      "case_key": "sensor_drop_cameras_01",
+      "ground_truth_bug": "sensor_timeout",
+      "predicted_bug": "unknown",
+      "bug_class_match": false,
+      "confidence": 0.0,
+      "cost_usd": 0.0,
+      "wall_time_s": 0.0,
+      "status": "skeleton",
+      "source": "stub",
+      "notes": "skeleton_awaiting_bag"
+    },
+    {
+      "case_key": "sensor_timeout_01",
+      "ground_truth_bug": "sensor_timeout",
+      "predicted_bug": "sensor_timeout",
+      "bug_class_match": true,
+      "confidence": 0.77,
+      "cost_usd": 0.0,
+      "wall_time_s": 0.0,
+      "status": "ok",
+      "source": "stub",
+      "notes": "dry-run: stub predictor echoed ground truth"
+    }
+  ]
+}

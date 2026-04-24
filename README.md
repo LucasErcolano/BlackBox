@@ -54,6 +54,7 @@ python scripts/run_rtk_heading_case.py   # tag: live, requires ANTHROPIC_API_KEY
 - [Testimonial](docs/TESTIMONIAL.md) — quote capture plan.
 - [Flag-plant](docs/FLAG_PLANT.md) — X/LinkedIn thread copy.
 - [Rehearsal](docs/REHEARSAL.md) — pitch timing, breath points, Q&A prep.
+- [Overnight batch](OVERNIGHT_BATCH.md) — unattended bench runner + budget-gated driver for `scripts/overnight_batch.py`. Dry-run log at [`docs/assets/overnight_batch_dryrun.txt`](docs/assets/overnight_batch_dryrun.txt); live asciinema cast is a followup.
 
 ## Token discipline
 

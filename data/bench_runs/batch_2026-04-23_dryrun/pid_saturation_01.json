@@ -1,0 +1,12 @@
+{
+  "case_key": "pid_saturation_01",
+  "ground_truth_bug": "pid_saturation",
+  "predicted_bug": "pid_saturation",
+  "bug_class_match": true,
+  "confidence": 0.77,
+  "cost_usd": 0.0,
+  "wall_time_s": 0.0,
+  "status": "ok",
+  "source": "stub",
+  "notes": "dry-run: stub predictor echoed ground truth"
+}
