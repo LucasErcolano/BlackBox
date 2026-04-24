@@ -52,6 +52,7 @@ python scripts/run_rtk_heading_case.py   # tag: live, requires ANTHROPIC_API_KEY
 - [Demo script](docs/DEMO_SCRIPT.md) — 3-min video beat sheet.
 - [Risks](docs/RISKS.md) — risk register + stop-loss triggers.
 - [Submission](docs/SUBMISSION.md) — deliverables checklist.
+- [Smoke test](docs/SMOKE_TEST.md) — clean-clone reproducibility steps for judges.
 - [Testimonial](docs/TESTIMONIAL.md) — quote capture plan.
 - [Flag-plant](docs/FLAG_PLANT.md) — X/LinkedIn thread copy.
 - [Rehearsal](docs/REHEARSAL.md) — pitch timing, breath points, Q&A prep.
@@ -69,11 +70,14 @@ Every Claude call is logged to `data/costs.jsonl` (cached/uncached/creation toke
 - **Synthetic QA** — injected-bug recording in, hypothesis + self-eval vs ground truth out.
 
 ## Quickstart
+
+Offline smoke (no API key required, runs the 7-case public benchmark through
+the stub predictor so plumbing is exercised with zero spend):
+
 ```bash
-python -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -e .
-export ANTHROPIC_API_KEY=...    # or put in .env
-python -m black_box.eval.runner --case-dir black-box-bench/cases
+python -m black_box.eval.runner --tier 3 --case-dir black-box-bench/cases
 ```
 
 Verified on this commit (2026-04-23, Python 3.13.9):
@@ -81,6 +85,16 @@ Verified on this commit (2026-04-23, Python 3.13.9):
 - `pytest -q` -> **169 passed** in 20.65s (2 deprecation warnings, no failures).
 - `python scripts/cost_report.py` -> **TOTAL $30.56** across 90 entries (29 real Opus 4.7 calls: $26.97; 61 test fixtures: $3.59).
 - `lychee README.md` -> **11/11 links OK, 0 errors** (enforced in CI via `.github/workflows/link-check.yml`).
+
+Live-run (real Opus 4.7):
+
+```bash
+export ANTHROPIC_API_KEY=...    # or put in .env
+python -m black_box.eval.runner --tier 3 --case-dir black-box-bench/cases --use-claude
+```
+
+Full clean-clone reproducibility steps a judge would follow live in
+[`docs/SMOKE_TEST.md`](docs/SMOKE_TEST.md).
 
 ## System overview
 
