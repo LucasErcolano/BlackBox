@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Render helpers: synced camera grid, telemetry plot, thumbnail, b64."""
 
 from __future__ import annotations

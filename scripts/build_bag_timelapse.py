@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Annotated timelapse from real car_1 bag frames.
 
 PIL bakes overlays into PNGs, then imageio-ffmpeg binary (no drawtext)

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Sparse extract /cam1/image_raw/compressed from the 364 GB sanfer 2_cam-lidar.bag.
 
 Filters to the cam1 connection and decodes ~N frames at uniform time stride.

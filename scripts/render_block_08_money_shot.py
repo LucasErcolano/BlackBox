@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Render block_08_money_shot: 14.5s, 1920x1080, 30fps.
 
 Narration: "This is the bug. This is the fix. One scoped diff. Not a

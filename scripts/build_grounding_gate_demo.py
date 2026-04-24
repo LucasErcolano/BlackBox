@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Build the grounding-gate clean-recording demo asset.
 
 Demonstrates the "nothing anomalous detected" branch of the gate: given a

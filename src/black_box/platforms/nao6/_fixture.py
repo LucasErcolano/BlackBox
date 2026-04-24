@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Deterministic synthetic NAO6 fall fixtures.
 
 Writes real MP4 + CSV + .py artifacts to disk so the adapter runs the same

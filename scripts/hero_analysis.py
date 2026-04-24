@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Focused hero analysis for demo: deepest dive into ONE moment using existing frames.
 
 Bag 1 start-window front_left+front_right overexposure (conf 0.95).

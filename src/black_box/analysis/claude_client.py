@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Claude API client for Black Box analysis with prompt caching and cost tracking."""
 
 import json

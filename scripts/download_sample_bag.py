@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Fetch (or synthesize) a small rosbag2 sample for Black Box dev/tests.
 
 Strategy:

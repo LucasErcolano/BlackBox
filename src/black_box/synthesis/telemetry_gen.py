@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Synthetic telemetry generators for forensic-bench cases.
 
 Each generator returns a dict of ``topic -> TimeSeries-like dict`` with keys

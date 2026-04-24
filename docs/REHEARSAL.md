@@ -89,6 +89,18 @@ Pre-answered, 2 sentences each:
 **"What's the business?"**
 > AV labs and humanoid teams process petabytes of bags. Post-incident review is a staffing problem. If this saves one engineer-week per incident, it pays for itself on the first bag.
 
+**"What if the model proposes a patch that breaks the robot?"**
+> The patch is text, not a deployment. It lands next to a unified diff and an evidence trail in a PDF; a human reviews and applies it. Scope is restricted to clamps, timeouts, null checks, and gain adjustments. Architectural rewrites are refused at the prompt level.
+
+**"Where does this fall over?"**
+> Three places. One, bug classes outside the closed taxonomy return `unknown`; we don't guess. Two, extremely noisy real bags without telemetry handles degrade gracefully to scenario mining, not post-mortem. Three, cross-robot coordination failures are out of scope; single-platform only for this submission.
+
+**"What's the top-five anticipated judge question you have not rehearsed?"**
+> "What happens when you point this at your own crash." Honest answer: the pipeline is built on someone else's crash. We ran it dry on our own synthetic bugs and on the rtk_heading_break_01 real bag. The first real crash of a Black Box-instrumented robot is the first real adversarial test.
+
+**"What ships after the hackathon?"**
+> Three things: web UI for drag-drop bag review, humanoid platform adapters beyond NAO6, and the benchmark opened for third-party submissions. The forensic post-mortem core stays single-builder and MIT.
+
 ## Dry-run protocol
 
 - **Day 5 morning**: Record 3 takes of the 90 s pitch on phone. Listen back, mark every filler word, rerun.

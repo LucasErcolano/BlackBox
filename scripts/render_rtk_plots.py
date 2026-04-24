@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Render the three hero plots for the RTK-heading-break finding.
 
 Outputs:

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Black Box reporting module — PDF generation and diff utilities."""
 from .diff import (
     demo_side_by_side_html,

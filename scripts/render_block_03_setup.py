@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Render block_03_setup: 14.5s, 1920x1080, 30fps.
 
 Narration: "I give Black Box one session it has never seen before. No labels.

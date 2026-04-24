@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """NAO6 fall detector.
 
 Trips when body pitch or roll exceeds thresholds for a sustained window. The

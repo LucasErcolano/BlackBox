@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Managed Agents integration for long-horizon bag replay.
 
 Real wiring against ``anthropic>=0.96`` beta ``managed-agents-2026-04-01``:

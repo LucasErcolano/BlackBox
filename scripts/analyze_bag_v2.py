@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """v2 analysis: per-window cheap summary → filter → deep visual mining.
 
 Two-stage:

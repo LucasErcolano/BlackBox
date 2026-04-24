@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Legal pre-upload review (OPTIONAL).
 
 Status: bag owners have cleared frames and short clips from the

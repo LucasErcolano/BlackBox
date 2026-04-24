@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Extract hi-res frames from specific cameras in a specific window (hero material)."""
 from __future__ import annotations
 import json

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Boat-lidar topic-traffic strip plot.
 
 Raw rosbag2 sqlite3 is corrupt; rosbags can't open it. We reconstruct the

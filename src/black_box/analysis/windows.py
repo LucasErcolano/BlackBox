@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Suspicious-window extraction.
 
 Drives the two-pass vision pipeline: cheap telemetry pass first, then the

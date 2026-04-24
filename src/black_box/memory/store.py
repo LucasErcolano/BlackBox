@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Generic JSONL store primitives used by every memory layer."""
 
 from __future__ import annotations

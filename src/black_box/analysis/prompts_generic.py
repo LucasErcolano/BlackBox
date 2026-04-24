@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Platform-agnostic forensic prompts.
 
 Replaces the hardcoded AV / boat prompt split. The system prompt no

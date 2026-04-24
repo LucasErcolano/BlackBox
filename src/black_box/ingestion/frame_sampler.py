@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Window-aware frame sampler.
 
 Given a bag (or multi-bag session) and a list of `Window` objects from

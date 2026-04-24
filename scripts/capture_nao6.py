@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """NAO6 capture helper — records CameraTop + CameraBottom + ALMemory to disk.
 
 Usage::

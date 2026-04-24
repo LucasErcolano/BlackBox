@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Source-code artifacts: buggy vs clean controller templates.
 
 These files are not executed. They exist so the post-mortem agent can emit a

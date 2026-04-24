@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Prompt templates with aggressive caching for Black Box analysis."""
 
 from .schemas import (

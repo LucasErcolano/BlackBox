@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Read ROS1/ROS2 bags with the pure-python `rosbags` library.
 
 Exposes a small typed surface (BagData, Frame, TimeSeries) plus

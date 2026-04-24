@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Hero deep-dive: bag 0 end window, cross-camera indoor-scene anomaly.
 
 Focus: rear/left/right cameras, t=3505-3530s from bag start.

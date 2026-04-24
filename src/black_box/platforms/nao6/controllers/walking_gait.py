@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """NAO6 walking gait controller.
 
 Drives a simple alternating-step cycle via per-joint PID on the six sagittal

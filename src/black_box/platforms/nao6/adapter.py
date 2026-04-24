@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """NAO6 ingestion adapter.
 
 Converts NAO6 onboard artifacts (CameraTop/CameraBottom MP4s, ALMemory CSV,

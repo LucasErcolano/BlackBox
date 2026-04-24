@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Regenerate markdown reports for the 3 hero cases from saved analysis.json.
 
 Reads:  data/final_runs/<case>/analysis.json

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """4-layer memory stack for Black Box.
 
 Layers, each a flat JSONL store under ``data/memory/``:

@@ -4,45 +4,74 @@ Benchmark suite for robot forensic-analysis agents. Feed an agent a ROS bag plus
 
 Companion to [Black Box](../) — the forensic copilot this benchmark was built to stress-test.
 
-## Structure
+## Dataset layout
 
-- `cases/` — one dir per case:
-  - `bag/` — ROS1 or ROS2 bag (or symlink). Skeleton cases ship without a bag until the bundle lands.
-  - `ground_truth.json` — `{ bug_class, window_s, evidence_hints, patch_target: {file, function}, patch_hint }`.
-  - `source/` — controller source with the injected bug (synthetic cases only).
-  - `telemetry.npz` — key topic time-series, already extracted (synthetic cases only, fast to load in CI).
-  - `video_prompts.md` — text prompts to regenerate the visual side on Wan 2.2 / Nano Banana, no bundled MP4 (synthetic cases).
-  - `README.md` — human-readable case summary.
-- `scripts/score.py` — scoring harness.
-- `runs/` — prediction JSON files per case. `runs/sample/` ships reference predictions.
-- `results/` — committed eval tables. See `results/sample_eval_2026-04-22.md`.
+```
+black-box-bench/
+  cases/
+    <case_name>/
+      bag/                 # ROS1 or ROS2 bag (or symlink). Skeleton cases ship without one.
+      source/              # Controller source with the injected bug (synthetic cases only).
+      telemetry.npz        # Pre-extracted key-topic time-series (synthetic cases, fast in CI).
+      video_prompts.md     # Text prompts for Wan 2.2 / Nano Banana. No bundled MP4.
+      ground_truth.json    # See schema below.
+      README.md            # Human-readable case summary.
+  scripts/
+    score.py               # Scoring harness.
+  runs/
+    sample/                # Reference predictions, one JSON per case.
+  results/
+    sample_eval_2026-04-22.md   # Committed eval tables.
+  LICENSE                  # MIT.
+  README.md                # This file.
+```
 
-## Scoring (max 2.0 per case)
+`ground_truth.json` keys:
 
-| Axis | Weight | Rule |
-|------|--------|------|
-| Root cause match | 1.0 | Predicted `bug_class` equals ground-truth key exactly |
-| Temporal window | 0.5 | IoU over `window_s` ≥ 0.5 |
-| Patch target | 0.5 | Predicted `patch.file` (basename) + `patch.function` match ground truth |
-
-Skeleton cases (`status: skeleton_awaiting_bag`) are excluded from totals.
+```json
+{
+  "bug_class": "<taxonomy key>",
+  "window_s": [start_s, end_s],
+  "evidence_hints": ["..."],
+  "patch_target": {"file": "source/buggy/pid.py", "function": "PIDController.step"},
+  "patch_hint": "..."
+}
+```
 
 ## Cases
 
 ### Scoreable (synthetic, ground-truth authoritative)
-- `pid_saturation_01` — PID wind-up → pose divergence.
-- `sensor_timeout_01` — stale lidar frames → phantom obstacle maneuvers.
-- `bad_gain_01` — `Kp` too high → heading limit cycle.
+- `pid_saturation_01` — PID wind-up causes pose divergence.
+- `sensor_timeout_01` — stale lidar frames trigger phantom obstacle maneuvers.
+- `bad_gain_01` — excessive `Kp` drives a heading limit cycle.
 
 ### Scoreable (real bag, ground-truth derived from sensor cross-check)
-- `rtk_heading_break_01` — real ROS 1 car session (~1 h). Rover dual-antenna RTK heading never valid entire bag; moving base healthy. Operator-reported "GPS fails under tunnel" is the anti-hypothesis — pipeline must disagree. Tests grounding + cross-source reasoning on unlabelled real data.
+- `rtk_heading_break_01` — real ROS 1 car session (~1 h). Rover dual-antenna RTK heading never valid across the entire bag; moving base healthy. Operator-reported "GPS fails under tunnel" is the anti-hypothesis the pipeline must reject. Tests grounding plus cross-source reasoning on unlabelled real data.
 
-### Skeletons (awaiting bag ingestion)
+### Skeletons (awaiting bag ingestion, excluded from totals)
 - `boat_lidar_01` — USV (ROS 2) with LiDAR; forensic or scenario-mining TBD on first real bag.
-- `sensor_drop_cameras_01` — multi-camera simultaneous drop on autonomous car.
+- `sensor_drop_cameras_01` — multi-camera simultaneous drop on an autonomous car.
 - `reflect_public_01` — [REFLECT](https://github.com/real-stanford/reflect) public-dataset case for Tier-2 coverage.
 
+## Run a case
+
+```bash
+# Score one case:
+python scripts/score.py --case cases/pid_saturation_01 \
+    --prediction runs/sample/pid_saturation_01.json
+
+# Score every case in cases/ against a predictions dir:
+python scripts/score.py --all --predictions-dir runs/sample
+
+# Machine-readable output:
+python scripts/score.py --all --predictions-dir runs/sample --json
+```
+
+Sample run on 2026-04-22: 6.00 / 6.00 on the 3 scoreable synthetic cases. See `results/sample_eval_2026-04-22.md`.
+
 ## Prediction JSON shape
+
+Produced by the Black Box agent (or any agent under test):
 
 ```json
 {
@@ -52,18 +81,18 @@ Skeleton cases (`status: skeleton_awaiting_bag`) are excluded from totals.
 }
 ```
 
-## Run the harness
+Black Box's own pydantic schemas for the full forensic output live at [`src/black_box/analysis/schemas.py`](../src/black_box/analysis/schemas.py) — `PostMortemReport`, `ScenarioMiningReport`, `SyntheticQAReport`. The bench prediction format is the scoreable projection of those reports.
 
-```bash
-# Score one case:
-python scripts/score.py --case cases/pid_saturation_01 --prediction runs/sample/pid_saturation_01.json
+## Scoring (max 2.0 per case)
 
-# Score every case against a predictions dir:
-python scripts/score.py --all --predictions-dir runs/sample
-```
+| Axis | Weight | Rule |
+|------|--------|------|
+| Root cause match | 1.0 | Predicted `bug_class` equals ground-truth key exactly |
+| Temporal window | 0.5 | IoU over `window_s` >= 0.5 |
+| Patch target | 0.5 | Predicted `patch.file` (basename) + `patch.function` match ground truth |
 
-Sample run on 2026-04-22: 6.00 / 6.00 on the 3 scoreable cases. See `results/sample_eval_2026-04-22.md`.
+Skeleton cases (`status: skeleton_awaiting_bag`) are excluded from totals.
 
 ## License
 
-MIT — see `LICENSE`. Use this to benchmark your own robot-forensic agent.
+MIT. See [`LICENSE`](LICENSE). Use this to benchmark your own robot-forensic agent.

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Raw-footage recorder: keep PNG frames + produce lossless mp4."""
 from __future__ import annotations
 

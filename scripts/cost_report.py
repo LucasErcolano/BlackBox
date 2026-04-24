@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Summarize data/costs.jsonl.
 
 Real vs synthetic split keys on wall_time_s >= 0.1 (fixtures use tiny stubs).

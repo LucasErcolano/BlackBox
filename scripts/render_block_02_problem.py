@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Render block_02_problem: 13.5s, 1920x1080, 30fps.
 
 Narration: "Robotics teams collect more sessions than any human can review

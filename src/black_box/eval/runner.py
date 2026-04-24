@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Tiered eval runner for the Black Box bench.
 
 Three tiers map to the three product modes:

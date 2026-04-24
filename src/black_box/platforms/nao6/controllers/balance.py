@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """NAO6 balance / fall-prevention controller.
 
 Reads body-frame attitude from the onboard IMU (InertialSensor) and blends a

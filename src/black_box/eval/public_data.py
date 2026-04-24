@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Helpers for pulling public robotics / incident datasets.
 
 These are deliberately *stubs*: we want to demonstrate which corpora

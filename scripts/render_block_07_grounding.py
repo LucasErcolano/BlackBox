@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Render block_07_grounding: 16.5s, 1920x1080, 30fps.
 
 Narration: "And if the evidence is weak, Black Box does not force an

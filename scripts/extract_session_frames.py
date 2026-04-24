@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Generic two-pass frame extractor.
 
 Any case with a prior telemetry-only analysis.json can use this:

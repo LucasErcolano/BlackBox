@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Diff utilities for Black Box forensic reports."""
 from __future__ import annotations
 

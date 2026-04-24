@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Deterministic grounding gate for Claude analysis output.
 
 Runs AFTER Claude emits a report, BEFORE rendering. Filters hypotheses /

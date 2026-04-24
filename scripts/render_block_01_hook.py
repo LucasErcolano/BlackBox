@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Render block_01_hook: 11s, 1920x1080, 30fps.
 
 Narration: "When a robot fails, the recorder tells you what happened.

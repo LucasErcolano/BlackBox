@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Textual prompts for image/video generation (Nano Banana Pro + Wan 2.2).
 
 These are artifacts only — no API is called from here. A human operator feeds

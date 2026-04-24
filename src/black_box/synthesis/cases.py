@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Synthetic case registry + materialization to disk."""
 
 from __future__ import annotations

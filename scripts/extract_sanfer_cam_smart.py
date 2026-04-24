@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Telemetry-anchored vision densification for sanfer_sanisidro.
 
 Reads the pre-camera analysis.json timeline, lifts the agent's own

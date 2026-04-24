@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """L1..L4 typed memory layers.
 
 Each layer is a thin wrapper around ``JsonlStore`` that owns its own file

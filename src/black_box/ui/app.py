@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 """Black Box FastAPI + HTMX front-end.
 
 Serves a sober, single-column upload UI for forensic analysis jobs.
