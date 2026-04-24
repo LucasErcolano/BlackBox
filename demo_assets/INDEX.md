@@ -16,7 +16,7 @@ Benchmark fixtures live in the sibling repo `black-box-bench` (see bottom).
 | 1:45 | **grounding gate** — ships "nothing anomalous" on clean run | `grounding_gate/clean_recording/README.md` | `grounding_gate/clean_recording/gated_report.json` |
 | 1:55 | proposed fix — side-by-side diff | `diff_viewer/moving_base_rover.png` | `diff_viewer/moving_base_rover_2x.png` (zoom), `diff_viewer/moving_base_rover.html` (live) |
 | 2:15 | breadth — boat_lidar (Tier-2) + car_1 (Tier-2) | `pdfs/boat_lidar.pdf` + `pdfs/car_1.pdf` | `analyses/boat_lidar.json`, `analyses/car_1.json` |
-| 2:35 | benchmark — `black-box-bench` public repo | ../bench/ (in-repo; cases.yaml + fixtures/) | `bench_repo.txt`, `streams/` jsonl fixtures |
+| 2:35 | benchmark — `black-box-bench` public repo | `../black-box-bench/` (in-repo; `cases/<key>/ground_truth.json` + `fixtures/`) | `bench_repo.txt`, `streams/` jsonl fixtures |
 | 2:50 | memory/taxonomy bonus | `memory_snapshot/L3_counts.txt` | `memory_snapshot/L1_case.jsonl`, `L3_taxonomy.jsonl` |
 
 ## Tree
@@ -72,8 +72,9 @@ Run `du -sh demo_assets/*` for current totals. Expected ballpark ≈ 3-4 MB (no 
 
 ## Benchmark
 
-Consolidated in-repo at `../bench/` (was briefly a separate public repo —
-moved in-tree per "only use BlackBox" directive). See `bench_repo.txt`.
+Canonical tree in-repo at `../black-box-bench/` per CLAUDE.md. The earlier
+parallel `../bench/` directory was consolidated into the canonical tree on
+2026-04-23 (P5-E). See `bench_repo.txt` for the port map.
 
 ## Raw footage
 

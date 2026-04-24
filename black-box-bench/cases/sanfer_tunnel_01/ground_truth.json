@@ -1,0 +1,28 @@
+{
+  "bug_class": "sensor_timeout",
+  "platform": "ground_vehicle_ros1",
+  "tier": 1,
+  "mode": "forensic_post_mortem",
+  "status": "skeleton_awaiting_bag",
+  "bag_duration_s": 3626.8,
+  "operator_narrative": "Tunnel entry caused GNSS/RTK anomaly and behavior degradation.",
+  "refutes_operator": true,
+  "window_s": [null, null],
+  "evidence_hints": [
+    "Dual-antenna moving-base RTK never produces carrier-phase solution",
+    "Rover receiver never ingests MB observation stream (UBX-RXM-RAWX/SFRBX or RTCM3 4072.0/4072.1 + 1077/1087/1097/1127)",
+    "Session-wide failure, 43 min pre-tunnel",
+    "Tunnel caused mild GNSS degradation (num_sv 29 -> 16) but not RTK failure",
+    "DBW never engaged - no autonomy to degrade"
+  ],
+  "patch_hint": "Wire moving-base -> rover UBX observation forwarding; add startup assertion that the rover port receives RXM-SFRBX within N seconds before enabling fusion.",
+  "patch_target": {
+    "file": null,
+    "function": null
+  },
+  "fixtures": {
+    "stream_events": "fixtures/stream_events.jsonl",
+    "analysis": "fixtures/analysis.json"
+  },
+  "notes": "Tier-1 grounding-gate showcase: operator story is wrong. Ported 2026-04-23 from the deprecated bench/cases.yaml (P5-E consolidation). Curated stream replay + analysis JSON under fixtures/ are reference artifacts for the recorded Opus 4.7 trace - use for offline plumbing checks without re-paying for inference."
+}

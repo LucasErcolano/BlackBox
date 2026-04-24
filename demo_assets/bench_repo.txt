@@ -1,14 +1,26 @@
 black-box-bench — LOCATION
 
-Consolidated into THIS repo at ./bench/ per user directive "all should be in same repo".
+Canonical benchmark tree lives at `black-box-bench/` (repo-relative),
+aligned with CLAUDE.md. The earlier parallel `bench/` directory was
+consolidated into the canonical tree on 2026-04-23 (P5-E). Cases ported:
 
-Contents:
-  bench/README.md                                         — Why / cases / scoring rules
-  bench/cases.yaml                                        — index by key, tier, ground-truth root cause, refutes_operator flag
-  bench/fixtures/sanfer_tunnel/{stream_events.jsonl, analysis.json}
   bench/fixtures/boat_lidar/{stream_events.jsonl, analysis.json}
-  bench/fixtures/car_1/{stream_events.jsonl, analysis.json}
+    -> black-box-bench/cases/boat_lidar_01/fixtures/{stream_events.jsonl, analysis.json}
 
-Standalone public repo at github.com/LucasErcolano/black-box-bench still exists as a remote mirror of this seed but should be treated as deprecated.
-  TO REMOVE: `gh auth refresh -h github.com -s delete_repo` then `gh repo delete LucasErcolano/black-box-bench --confirm`.
-  (Current gh token lacks delete_repo scope so this was left for the user to finish.)
+  bench/cases.yaml  (sanfer_tunnel entry) + bench/fixtures/sanfer_tunnel/*
+    -> black-box-bench/cases/sanfer_tunnel_01/{ground_truth.json, README.md, fixtures/*}
+
+  bench/cases.yaml  (car_1 entry)         + bench/fixtures/car_1/*
+    -> black-box-bench/cases/car_1_01/{ground_truth.json, README.md, fixtures/*}
+
+Demo-beat references: the stream JSONL fixtures are still the same bytes
+(diff of the three `demo_assets/streams/<key>.jsonl` vs the ported copies
+is zero). The curated `analysis.json` files live under
+`black-box-bench/cases/<key>/fixtures/analysis.json`; the verbose analyst
+cuts remain at `demo_assets/analyses/<key>.json`.
+
+Standalone public repo at github.com/LucasErcolano/black-box-bench still
+exists as a remote mirror of this seed but is treated as deprecated.
+  TO REMOVE: `gh auth refresh -h github.com -s delete_repo` then
+  `gh repo delete LucasErcolano/black-box-bench --confirm`.
+  (Current gh token lacks delete_repo scope - left for the user to finish.)

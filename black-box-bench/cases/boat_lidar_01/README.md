@@ -36,3 +36,12 @@ A ROS2 bag from an unmanned surface vessel, including LIDAR scans over water. Th
 - Approximate duration of the bag?
 - Topic names for LIDAR and (if present) forward camera / GPS / IMU?
 - Any chart / context we should use to judge what "near shore" or "safe margin" means for this vessel?
+
+## Fixtures
+
+Ported 2026-04-23 from the deprecated `bench/fixtures/boat_lidar/` during the P5-E benchmark-directory consolidation:
+
+- `fixtures/stream_events.jsonl` — recorded Opus 4.7 stream events for a 416.76 s USV clip (`bag_duration_s` from the original `bench/cases.yaml` entry).
+- `fixtures/analysis.json` — curated `PostMortemReport` flagging `/lidar_imu` with `msg_count=0` over the full session (LIDAR-only platform; IMU silence removes the only inertial reference on open water). `bug_class: other`.
+
+Reference artifacts for offline plumbing checks, not the scorable ground truth — the authoritative bag is still pending.
