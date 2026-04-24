@@ -1,0 +1,76 @@
+{
+  "timeline": [
+    {
+      "t_ns": 0,
+      "label": "session_start_3D_fix_acquired_on_both_receivers",
+      "cross_view": false
+    },
+    {
+      "t_ns": 0,
+      "label": "navrelposned_REL_POS_VALID_never_asserted",
+      "cross_view": true
+    },
+    {
+      "t_ns": 0,
+      "label": "rover_carrier_phase_stuck_at_CARR_NONE_100pct",
+      "cross_view": true
+    },
+    {
+      "t_ns": 0,
+      "label": "moving_base_achieves_FLOAT_63pct_FIXED_31pct",
+      "cross_view": true
+    },
+    {
+      "t_ns": 0,
+      "label": "DIFF_SOLN_only_15pct_indicating_RTCM_link_from_base_to_rover_mostly_absent",
+      "cross_view": true
+    },
+    {
+      "t_ns": 3626400000000,
+      "label": "session_end_relPosLength_and_relPosHeading_identically_zero_for_entire_run",
+      "cross_view": false
+    }
+  ],
+  "hypotheses": [
+    {
+      "bug_class": "other",
+      "confidence": 0.9,
+      "summary": "Moving-base RTK link is misconfigured: the moving-base receiver is not streaming RTCM (type 4072 + 1077/1087/etc.) to the rover reliably. The rover therefore never computes a relative position, so REL_POS_VALID is 0% and relPosLength/relPosHeading are identically zero for the whole 1-hour run. This is a receiver configuration / wiring issue, not a sensor outage and not a tunnel.",
+      "evidence": [
+        {
+          "source": "telemetry",
+          "topic_or_file": "/ublox_rover/navrelposned",
+          "t_ns": null,
+          "snippet": "FLAGS_REL_POS_VALID set on 0.0% of 18133 samples; relPosLength min=max=0; relPosHeading min=max=0; accLength min=max=0"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "/ublox_rover/navrelposned",
+          "t_ns": null,
+          "snippet": "FLAGS_DIFF_SOLN set on only 15.0% of samples (rover is receiving RTCM corrections from base only 15% of the time)"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "/ublox_rover/navpvt",
+          "t_ns": null,
+          "snippet": "carrier-phase: CARR_NONE=100.0%, FLOAT=0.0%, FIXED=0.0% — rover never achieves any carrier-phase solution"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "/ublox_moving_base/navpvt",
+          "t_ns": null,
+          "snippet": "moving base reaches FLOAT 63.6% / FIXED 30.7% — the base itself sees usable carrier-phase from a *separate* RTK source, proving sky visibility and antenna are fine; only the base→rover link is broken"
+        },
+        {
+          "source": "telemetry",
+          "topic_or_file": "bag_rates",
+          "t_ns": null,
+          "snippet": "All topics publish at expected rate with no drop-outs — rules out ROS-level timeouts, tunnel blackouts, or sensor_timeout"
+        }
+      ],
+      "patch_hint": "On the node/driver owning the two ublox receivers: (1) Confirm the moving-base F9P is configured in 'moving base' mode (CFG-TMODE3 = 0, and UBX-CFG-VALSET enabling RTCM3 output 4072.0, 4072.1, 1077, 1087, 1097, 1127, 1230 on the UART/USB port wired to the rover). (2) Confirm the rover F9P is in 'rover' mode with that same port configured as RTCM input. (3) Verify the physical serial/UART bridge between the two receivers (baud rate, TX/RX not swapped, common ground). (4) As a runtime check, have the node that subscribes /ublox_rover/navrelposned refuse to publish heading unless FLAGS_REL_POS_VALID && FLAGS_DIFF_SOLN are both set, and log a warning when DIFF_SOLN drops below ~95%, which would have surfaced this on day one."
+    }
+  ],
+  "root_cause_idx": 0,
+  "patch_proposal": "Root cause is a moving-base RTK configuration/wiring failure between the two ZED-F9P receivers, not a GNSS outage. Remediation on the ublox driver node(s) owning /ublox_moving_base and /ublox_rover:\n\n1. Reconfigure the moving-base F9P to output RTCM3 messages 4072.0, 4072.1, 1077, 1087, 1097, 1127, 1230 on the port physically connected to the rover F9P (typical: UART2 ↔ UART2, matched baud e.g. 460800).\n2. Reconfigure the rover F9P to accept RTCM3 on that same port and enable UBX-NAV-RELPOSNED output at the navigation rate.\n3. Verify TX/RX orientation and common ground on the inter-receiver serial link; a swap is consistent with the observed 15% DIFF_SOLN floor (occasional noise-induced byte sync rather than a real stream).\n4. In the consumer of /ublox_rover/navrelposned (the heading-producing node), add a gating check before publishing heading:\n   - require (flags & REL_POS_VALID) && (flags & DIFF_SOLN) && (flags & GNSS_FIX_OK)\n   - additionally require carrSoln == FIXED (or at least FLOAT) from /ublox_rover/navpvt for cm-grade heading\n   - emit a WARN/ERROR if REL_POS_VALID stays false for >2 s, so this class of silent failure is detected immediately instead of after a 1-hour drive."
+}
