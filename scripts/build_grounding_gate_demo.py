@@ -41,7 +41,7 @@ def _raw_report() -> PostMortemReport:
     Each hypothesis is crafted to fail one specific gate rule:
       #0 high-conf but ONLY ONE evidence row            (< 2 evidence)
       #1 two evidence rows but both from same source    (< 2 distinct sources)
-      #2 'other' with low evidence count                (< 3 for 'other')
+      #2 two telemetry-only rows — fails cross-source   (< 2 distinct sources)
       #3 two evidence rows but confidence below floor   (< 0.4 confidence)
 
     No hypothesis passes — gate returns the no-anomaly payload.
@@ -87,7 +87,7 @@ def _raw_report() -> PostMortemReport:
                 patch_hint="recalibrate cam2 extrinsics",
             ),
             Hypothesis(
-                bug_class="other",
+                bug_class="bad_gain_tuning",
                 confidence=0.55,
                 summary="Ambient vibration signature looks a little noisy",
                 evidence=[
@@ -98,13 +98,13 @@ def _raw_report() -> PostMortemReport:
                         snippet="accel RMS 0.4 m/s^2",
                     ),
                     Evidence(
-                        source="timeline",
-                        topic_or_file="derived",
-                        t_ns=45_000_000_000,
-                        snippet="no correlated control event",
+                        source="telemetry",
+                        topic_or_file="/imu",
+                        t_ns=46_000_000_000,
+                        snippet="accel RMS 0.41 m/s^2",
                     ),
                 ],
-                patch_hint="add vibration damper",
+                patch_hint="retune control gains for vibration band",
             ),
             Hypothesis(
                 bug_class="latency_spike",
@@ -137,8 +137,6 @@ def _reason_dropped(h: Hypothesis, t: GroundingThresholds, available_sources: in
         return f"confidence {h.confidence:.2f} < {t.min_confidence}"
     if len(h.evidence) < t.min_evidence_per_hypothesis:
         return f"only {len(h.evidence)} evidence row(s) (need >= {t.min_evidence_per_hypothesis})"
-    if h.bug_class == "other" and len(h.evidence) < t.min_evidence_for_other:
-        return f"bug_class=other with {len(h.evidence)} evidence rows (need >= {t.min_evidence_for_other})"
     required = min(t.min_cross_source_evidence, available_sources)
     distinct = {e.source for e in h.evidence}
     if len(distinct) < required:
@@ -221,7 +219,6 @@ def _render_readme(
         "",
         f"- min confidence: `{t.min_confidence}`",
         f"- min evidence rows / hypothesis: `{t.min_evidence_per_hypothesis}`",
-        f"- min evidence rows for `other`: `{t.min_evidence_for_other}`",
         f"- min distinct evidence sources: "
         f"`min({t.min_cross_source_evidence}, available_sources)`",
         "- info-severity moments dropped by default",
