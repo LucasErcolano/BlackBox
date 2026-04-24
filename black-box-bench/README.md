@@ -49,9 +49,11 @@ black-box-bench/
 - `rtk_heading_break_01` — real ROS 1 car session (~1 h). Rover dual-antenna RTK heading never valid across the entire bag; moving base healthy. Operator-reported "GPS fails under tunnel" is the anti-hypothesis the pipeline must reject. Tests grounding plus cross-source reasoning on unlabelled real data.
 
 ### Skeletons (awaiting bag ingestion, excluded from totals)
-- `boat_lidar_01` — USV (ROS 2) with LiDAR; forensic or scenario-mining TBD on first real bag.
+- `boat_lidar_01` — USV (ROS 2) with LiDAR; forensic or scenario-mining TBD on first real bag. Curated stream-replay fixtures under `fixtures/`.
 - `sensor_drop_cameras_01` — multi-camera simultaneous drop on an autonomous car.
 - `reflect_public_01` — [REFLECT](https://github.com/real-stanford/reflect) public-dataset case for Tier-2 coverage.
+- `sanfer_tunnel_01` — ground-vehicle rover, ~1 h. Operator-reported "tunnel caused RTK anomaly" is the anti-hypothesis; ground truth is `sensor_timeout` 43 min pre-tunnel. Curated stream-replay fixtures under `fixtures/` (Tier-1 grounding-gate showcase; ported 2026-04-23 from the deprecated `bench/` tree).
+- `car_1_01` — ground-vehicle urban clip, ~420 s. Tier-2 scenario-mining reference (90 s dwell at parking-lot egress). Curated stream-replay fixtures under `fixtures/`.
 
 ## Run a case
 

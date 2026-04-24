@@ -1,0 +1,25 @@
+{
+  "bug_class": "other",
+  "platform": "ground_vehicle",
+  "tier": 2,
+  "mode": "scenario_mining",
+  "status": "skeleton_awaiting_bag",
+  "bag_duration_s": 420.0,
+  "operator_narrative": "Scenario mining on urban clip.",
+  "window_s": [null, null],
+  "evidence_hints": [
+    "Ego stationary ~90 s at parking-lot egress",
+    "Pedestrian + cart in lane under raised barrier",
+    "No escalation or progress during the dwell"
+  ],
+  "patch_hint": null,
+  "patch_target": {
+    "file": null,
+    "function": null
+  },
+  "fixtures": {
+    "stream_events": "fixtures/stream_events.jsonl",
+    "analysis": "fixtures/analysis.json"
+  },
+  "notes": "Tier-2 scenario-mining reference. Ported 2026-04-23 from the deprecated bench/cases.yaml (P5-E consolidation). The 90 s dwell at the gate is the moment of interest to surface; nothing to patch."
+}
