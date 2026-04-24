@@ -136,7 +136,7 @@ def main() -> None:
     real.sort(key=lambda r: -(r.get("usd_cost", 0) or 0))
     for r in real[:args.top]:
         print(
-            f"  ${r['usd_cost']:5.2f}  "
+            f"  ${(r.get('usd_cost', 0) or 0):5.2f}  "
             f"cr={r.get('cached_input_tokens',0):>8,} "
             f"cw={r.get('cache_creation_tokens',0):>7,} "
             f"uc={r.get('uncached_input_tokens',0):>5,} "

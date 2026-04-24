@@ -135,16 +135,6 @@ def test_main_splits_real_vs_fixtures_on_wall_time(tmp_path: Path, capsys, monke
     assert "fixture" not in kind_table
 
 
-@pytest.mark.xfail(
-    reason=(
-        "BUG: cost_report.main() top-N formatter uses r['usd_cost'] directly "
-        "and crashes with KeyError when a row omits the field. Aggregation "
-        "tolerates it via r.get(...,0); the top-N print path does not. "
-        "TODO(#34 follow-up): switch to r.get('usd_cost', 0) or 0 in the "
-        "top-entries loop."
-    ),
-    strict=True,
-)
 def test_main_handles_missing_usd_cost_field(tmp_path: Path, capsys, monkeypatch):
     """Missing / None usd_cost should not crash aggregation (treated as 0)."""
     rows = [
