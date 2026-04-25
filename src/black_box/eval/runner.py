@@ -329,17 +329,51 @@ def _format_table(rows: list[dict[str, Any]]) -> str:
         return "\n".join(lines)
 
 
+def _format_markdown_results(summary: dict[str, Any]) -> str:
+    """Markdown results table per #78 acceptance shape."""
+    rows = summary["rows"]
+    lines = [
+        "| Case | Mode | Result | Match / Miss / Error | Error cause | Cost (USD) |",
+        "| ---- | ---- | ------ | -------------------- | ----------- | ---------- |",
+    ]
+    tier_name = {1: "tier-1 forensic", 2: "tier-2 mining", 3: "tier-3 synthetic"}[summary["tier"]]
+    for r in rows:
+        case = r.get("case_key", "?")
+        result = r.get("predicted_bug") or (
+            ", ".join(m.get("kind", "?") for m in (r.get("predicted_moments") or []))
+            or "—"
+        )
+        if r.get("skeleton"):
+            verdict = "Skeleton"
+            cause = "case has placeholder ground_truth"
+        elif r.get("match"):
+            verdict = "Match"
+            cause = ""
+        else:
+            verdict = "Miss"
+            cause = f"predicted={r.get('predicted_bug') or '—'} ≠ truth={r.get('ground_truth_bug', '?')}"
+        cost = f"{float(r.get('cost_usd') or 0.0):.4f}"
+        lines.append(f"| `{case}` | {tier_name} | {result} | {verdict} | {cause} | ${cost} |")
+    return "\n".join(lines)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Black Box tiered eval runner")
     ap.add_argument("--tier", type=int, choices=(1, 2, 3), default=3)
     ap.add_argument("--case-dir", type=Path, default=DEFAULT_CASE_DIR)
     ap.add_argument("--use-claude", action="store_true")
     ap.add_argument("--case", type=str, default=None, help="run only this case key")
+    ap.add_argument("--write-md", type=Path, default=None,
+                    help="append a markdown results table to this file")
     args = ap.parse_args(argv)
 
     summary = run_tier(args.tier, args.case_dir, use_claude=args.use_claude, only=args.case)
     print(_format_table(summary["rows"]))
     print()
+    if args.write_md:
+        args.write_md.parent.mkdir(parents=True, exist_ok=True)
+        args.write_md.write_text(_format_markdown_results(summary), encoding="utf-8")
+        print(f"wrote markdown results -> {args.write_md}")
     tail = (
         f"tier={summary['tier']} cases={summary['n_cases']} match={summary['n_match']} "
         f"acc={summary['accuracy']:.2%} cost=${summary['total_cost_usd']:.4f} "
