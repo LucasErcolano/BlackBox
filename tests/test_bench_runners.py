@@ -65,6 +65,42 @@ def test_rtk_heading_break_01_is_green_in_offline_tier1():
     assert row["match"] or row.get("skeleton"), row
 
 
+def test_overnight_batch_loads_flat_rtk_npz_schema():
+    """#120 — overnight_batch.load_telemetry_npz must parse rtk_heading_break_01."""
+    import importlib.util
+    import numpy as np
+    from black_box.ingestion.rosbag_reader import TimeSeries
+
+    spec = importlib.util.spec_from_file_location(
+        "overnight_batch_test_mod", ROOT / "scripts" / "overnight_batch.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["overnight_batch_test_mod"] = mod
+    spec.loader.exec_module(mod)
+    npz = ROOT / "black-box-bench" / "cases" / "rtk_heading_break_01" / "telemetry.npz"
+    telemetry = mod.load_telemetry_npz(npz, np, TimeSeries)
+    assert telemetry, "rtk flat-schema npz produced no topics — loader regressed"
+    assert any("rover" in topic for topic in telemetry), list(telemetry)
+    rover_topic = next(t for t in telemetry if "rover" in t)
+    ts = telemetry[rover_topic]
+    assert ts.t_ns.shape[0] > 0
+    assert "carr" in ts.fields or "fixType" in ts.fields, ts.fields
+
+
+def test_overnight_batch_single_case_alias():
+    """#120 — --single-case must be accepted as alias for --only."""
+    res = subprocess.run(
+        [sys.executable, "scripts/overnight_batch.py", "--dry-run",
+         "--single-case", "rtk_heading_break_01"],
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert res.returncode == 0, res.stderr
+    assert "rtk_heading_break_01" in res.stdout
+
+
 def test_public_asset_fetch_idempotent_with_cache(tmp_path, monkeypatch):
     from black_box.eval.public_data import PublicAsset, fetch_asset
 
