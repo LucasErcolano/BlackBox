@@ -136,6 +136,23 @@ pip install -e ".[dev]" && python -m black_box --version
 
 CI (`.github/workflows/ci.yml`) gates on per-package coverage thresholds: ≥70% on `analysis/` + `ingestion/`, ≥40% overall. `pip-audit` runs on every PR; release sdist+wheel builds on `vX.Y.Z` tag pushes.
 
+### Cross-modal hero mode (`visual_mining_v2`)
+
+Per-tier mode mapping (#87):
+
+| Tier | Default prompt | When `visual_mining_v2` activates |
+|------|----------------|------------------------------------|
+| Tier-1 forensic | telemetry-only (`telemetry_drop_v1`) | hero cases with cameras (e.g. `sanfer_sanisidro`) escalate to `visual_mining_v2` after the telemetry pass picks suspicious windows. |
+| Tier-2 mining | telemetry-only | clean recordings with cameras escalate to `visual_mining_v2` for moments-of-interest. |
+| Tier-3 synthetic | telemetry-only | injected-bug runs stay telemetry-only — synthesized cameras add no signal. |
+
+Frame discipline (enforced in `src/black_box/analysis/visual_mining.py`):
+- 800×600 thumbnails default; 3.75 MP escalation only when the analysis step asks.
+- 5 cameras land in **one** prompt — never one call per camera.
+- Windows are anchored on telemetry findings via `from_timeline` + `sample_frames`. Uniform-stride sampling is rejected by `validate_plan`.
+
+Cost-delta over the same case (visual vs telemetry-only) is computed by `black_box.analysis.visual_mining.cost_delta(costs_path, case_key)` reading `data/costs.jsonl` after the run.
+
 ## Quickstart
 
 Offline smoke (no API key required, runs the 7-case public benchmark through
