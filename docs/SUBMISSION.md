@@ -22,8 +22,6 @@ Submit before Day 6 18:00 EST to leave 2 h buffer for form glitches, re-upload, 
   - [ ] Repo URL
   - [ ] Short description (90-second pitch, see PITCH.md)
   - [ ] Special-prize opt-ins: *Best use of Managed Agents* + *Most Creative Opus 4.7 Exploration* if offered as checkboxes
-- [ ] **Testimonial quote** — text + name + affiliation, in video and/or README
-- [ ] **Flag-plant X thread** — posted by Day 4, pinned, linked from README "press"
 
 ## Repo hygiene (before final commit)
 
@@ -31,7 +29,7 @@ Submit before Day 6 18:00 EST to leave 2 h buffer for form glitches, re-upload, 
 - [ ] `data/bags/`, `data/synthetic/`, `data/reports/`, `data/session/analyses/` gitignored (large artifacts out)
 - [ ] `data/costs.jsonl` included (evidence of token discipline)
 - [ ] `data/session/SESSION_SUMMARY.md` + `session_log.md` committed (audit trail)
-- [ ] `docs/` fully populated (ONBOARDING, PITCH, DEMO_SCRIPT, RISKS, SUBMISSION, TESTIMONIAL)
+- [ ] `docs/` fully populated (ONBOARDING, PITCH, DEMO_SCRIPT, RISKS, SUBMISSION)
 - [ ] README links verified (all external URLs resolve, all relative paths exist)
 - [ ] Smoke tests pass on clean clone: `pip install -e . && pytest tests/`
 
@@ -51,7 +49,6 @@ Submit before Day 6 18:00 EST to leave 2 h buffer for form glitches, re-upload, 
 ### Impact (30%)
 - [ ] NTSB framing in pitch
 - [ ] Market-size claim backed by concrete user (*"AV labs process petabytes"*)
-- [ ] Testimonial quote from qualified roboticist
 - [ ] Addressable use case beyond the demo (QA regression, training-data hygiene, post-incident review)
 
 ### Creativity (25%)

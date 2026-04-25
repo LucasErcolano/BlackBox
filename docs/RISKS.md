@@ -21,9 +21,9 @@ Mitigate on sight. Update as risks fire or new ones emerge.
 | 8 | Wan 2.2 render variance on impact physics | med | synthetic demo looks fake | 3–5 iterations per scene, keep best. Cut clip before final impact frame to hide rebound artifacts. | Lucas |
 | 9 | Max-plan rate limit during heavy Claude Code session | low-med | pauses build for ~hours | Run heavy loops during off-peak. Rate-limit reset is 5 h. Not blocking if planned. | Shared |
 | 10 | ~~Handoff gaps between Lucas / Aayush~~ | — | — | **RESOLVED** — Aayush shipped 10+ merged PRs (client factory, grounding, role split, bench consolidation, overnight batch). Async-via-PR worked; active sync window closed. | Shared |
-| 11 | Testimonial quote not captured | med (active 2026-04-25) | loses Impact (30%) boost | Pre-drafted script in TESTIMONIAL.md. Stop-loss: ship without if not in by Day 6 morning. | Lucas |
+| 11 | ~~Testimonial quote not captured~~ | — | — | **DROPPED 2026-04-25** — out of scope for submission. Ship without. | — |
 | 12 | ~~Benchmark repo not public by Day 3~~ | — | — | **RESOLVED** — `black-box-bench/` public with MIT license, README, scoring table. Reference run committed at `data/bench_runs/opus47_20260423T140758Z.json`. | Lucas |
-| 13 | LLM-agent-for-ROS convergence — another team ships similar | low-med | novelty erodes | Public repo + X thread Day 3–4 with first functional clip. Plant flag. | Lucas |
+| 13 | ~~LLM-agent-for-ROS convergence — another team ships similar~~ | — | — | **DROPPED 2026-04-25** — flag-plant X/LinkedIn thread skipped. Public repo at submission ships the same signal. | — |
 
 ## P2 — trackable, not urgent
 
@@ -44,6 +44,4 @@ Mitigate on sight. Update as risks fire or new ones emerge.
 ## Stop-loss triggers
 
 - **$400 API spend** → freeze new analyses. Demo-only budget from here.
-- **End of Day 4, no testimonial** → ship without it. Don't delay submission.
-- **End of Day 5, no NAO6 footage** → invoke DEMO_SCRIPT backup cut. Ship car-only + batch-run narrative.
 - **End of Day 6 09:00 EST, no video draft** → abandon polish, ship roughest viable cut. Submission > polish.

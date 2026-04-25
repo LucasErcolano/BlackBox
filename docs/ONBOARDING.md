@@ -59,7 +59,7 @@ FastAPI + HTMX already scaffolded. You own:
 - Synthetic failure injection for Tier 1 benchmark (bugs + telemetry + AI-generated video via Wan 2.2 / Nano Banana — runs on his GPU)
 - Public dataset integration (REFLECT, FAA drone incidents — Tier 2)
 - Demo video script, recording, editing
-- Pitch delivery + robotics network for testimonial quote
+- Pitch delivery
 
 ## Shared
 
