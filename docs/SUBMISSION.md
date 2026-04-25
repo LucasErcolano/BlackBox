@@ -44,7 +44,6 @@ Submit before Day 6 18:00 EST to leave 2 h buffer for form glitches, re-upload, 
 - [ ] 5-camera cross-view reasoning in a single prompt — screenshot in repo
 
 ### Depth (20%)
-- [ ] Two platforms (car + NAO6) both producing analyses
 - [ ] Real bags used, not only synthetic
 - [x] Benchmark repo with ground-truth cases — 3 synthetic with full `ground_truth.json` (bug_class, window_s, patch_target, evidence_hints).
 - [x] Eval harness output table committed — `black-box-bench/results/sample_eval_2026-04-22.md` (6.00/6.00 on scoreable set).
@@ -60,6 +59,10 @@ Submit before Day 6 18:00 EST to leave 2 h buffer for form glitches, re-upload, 
 - [ ] Memory stack / self-improving pipeline documented and shown
 - [ ] Synthetic failure injection framed as feature, not hack
 - [ ] Managed Agents used for real long-horizon work (overnight batch)
+
+## Bonus (shipped, not on critical path)
+
+- [x] NAO6 (SoftBank Aldebaran) platform adapter — scaffolded under `src/black_box/platforms/nao6/` with synthetic fall fixture, humanoid taxonomy mapping to global closed set, controller snapshots. Proves adapter shape generalizes. Primary pitch is rover/marine; NAO6 lives in bonus section per `SCOPE_FREEZE.md`.
 
 ## Do NOT include in submission
 

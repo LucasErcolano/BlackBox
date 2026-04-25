@@ -1,6 +1,6 @@
 # Black Box — Forensic copilot for robots
 
-Hackathon project (Built with Opus 4.7). Deadline 2026-04-26 20:00 EST. Solo builder. API budget tight ($500 total).
+Hackathon project (Built with Opus 4.7). Deadline 2026-04-26 20:00 EST. Two-person team (Lucas Ercolano + Aayush). API budget tight ($500 total).
 
 ## Response style
 - Terse. No preamble. No re-explaining what you just did.

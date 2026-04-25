@@ -6,12 +6,12 @@ Mitigate on sight. Update as risks fire or new ones emerge.
 
 | # | Risk | Likelihood | Impact | Mitigation | Owner |
 |---|------|------------|--------|------------|-------|
-| 1 | API budget overrun ($500 cap) | med | hard stop | Cost ledger per call. Hard stop alert at $350. Cache-padding fix in `prompts_v2.py` (>1024 tok) to enable caching on deep calls. Subscription covers dev loop, not product runtime. | Lucas |
-| 2 | NAO6 recordings not captured | med-high | demo loses second platform | Start **tonight.** 3–5 falls, 3 artifacts each. Don't batch Day 5. Backup cut in DEMO_SCRIPT drops NAO6 beat if it slips. | Aayush |
-| 3 | Grounding gate regresses — tool hallucinates on clean window | med | kills credibility, Anthropic judges see it | Integration test: run on 1 known-clean window, assert `no anomalies detected`. Ship in eval harness Tier 2. | Aayush |
+| 1 | API budget overrun ($500 cap) | **low (2026-04-25: $39.37 / $500 spent)** | hard stop | Cost ledger per call. Cache-padding active. Plenty of headroom for demo + final bench passes. | Lucas |
+| 2 | ~~NAO6 recordings not captured~~ | — | — | **RESOLVED** — NAO6 reframed as bonus adapter (synthetic fall fixture only). Pitch is single-platform (rover/marine) per `SCOPE_FREEZE.md`. Backup cut now the primary. | Aayush |
+| 3 | ~~Grounding gate regresses~~ | — | — | **RESOLVED** — `tests/test_grounding_gate.py` + `test_grounding.py` green (22 tests). Live fixture runner at `scripts/grounding_gate_live.py`. Refutation path proven on sanfer hero. | Aayush |
 | 4 | Hi-res re-analysis over-commits to wrong hypothesis (bag-0 case repeating) | med | lose trust, mislead patch output | Keep human-in-the-loop layer explicit. Confidence threshold on patch emission. Pre-loading prior flags in prompt is banned. | Shared |
 | 5 | Patch output looks dumb on real bag | low-med | kills credibility of whole tool | Scoped taxonomy enforced (clamps, timeouts, null checks, gains, calibration, latency). Reject any patch that touches architecture. Manual sanity check before demo recording. | Lucas |
-| 6 | Demo video record / edit slips | med | no submission | Dry-run Day 5 morning. Final cut Day 5 evening. Day 6 buffer for re-record, not first take. | Lucas |
+| 6 | Demo video record / edit slips | **HIGH (active 2026-04-25)** | no submission | All 10 blocks rendered. Master cut + upload pending — Day 6 work. Compose variants ready (`scripts/compose_demo_v4_xfade_exp.sh`). | Lucas |
 
 ## P1 — degrades the demo
 
@@ -20,9 +20,9 @@ Mitigate on sight. Update as risks fire or new ones emerge.
 | 7 | Bag 0 re-open cold (needs 11-min index rebuild) | high if rerun | 11 min wall time loss per attempt | Keep reader open across passes. Or run `rosbag reindex` once if we get ROS on a secondary machine. Documented in SESSION_SUMMARY. | Lucas |
 | 8 | Wan 2.2 render variance on impact physics | med | synthetic demo looks fake | 3–5 iterations per scene, keep best. Cut clip before final impact frame to hide rebound artifacts. | Lucas |
 | 9 | Max-plan rate limit during heavy Claude Code session | low-med | pauses build for ~hours | Run heavy loops during off-peak. Rate-limit reset is 5 h. Not blocking if planned. | Shared |
-| 10 | Handoff gaps between Lucas / Aayush (16 h overlap window) | med | decisions diverge | Standup 10:00 ART / 08:00 EST. Handoff sync 20:00 ART / 18:00 EST. Decisions logged in session_log.md. | Shared |
-| 11 | Testimonial quote not captured | med | loses Impact (30%) boost | Ask contacts **Day 4 latest.** Pre-drafted script in TESTIMONIAL.md. Follow up same day. | Lucas |
-| 12 | Benchmark repo not public by Day 3 | med | loses "tangible artifact" + flag-plant urgency | Push skeleton Day 2 with 2 cases + README. Fill in more cases as they come. | Lucas |
+| 10 | ~~Handoff gaps between Lucas / Aayush~~ | — | — | **RESOLVED** — Aayush shipped 10+ merged PRs (client factory, grounding, role split, bench consolidation, overnight batch). Async-via-PR worked; active sync window closed. | Shared |
+| 11 | Testimonial quote not captured | med (active 2026-04-25) | loses Impact (30%) boost | Pre-drafted script in TESTIMONIAL.md. Stop-loss: ship without if not in by Day 6 morning. | Lucas |
+| 12 | ~~Benchmark repo not public by Day 3~~ | — | — | **RESOLVED** — `black-box-bench/` public with MIT license, README, scoring table. Reference run committed at `data/bench_runs/opus47_20260423T140758Z.json`. | Lucas |
 | 13 | LLM-agent-for-ROS convergence — another team ships similar | low-med | novelty erodes | Public repo + X thread Day 3–4 with first functional clip. Plant flag. | Lucas |
 
 ## P2 — trackable, not urgent
