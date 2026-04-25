@@ -1081,6 +1081,22 @@ async def add_verification_note(
     )
 
 
+@app.get("/trace/{job_id}", response_class=HTMLResponse)
+async def evidence_trace(job_id: str) -> HTMLResponse:
+    """Glass-box audit trace: evidence, discarded, gate, cost, confidence (#77)."""
+    from black_box.reporting.trace import render_trace_html, trace_from_artifacts
+
+    manifest_path = REPORTS_DIR / job_id / "trace_manifest.json"
+    manifest = None
+    if manifest_path.exists():
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            manifest = None
+    trace = trace_from_artifacts(job_id, repo_root=REPO_ROOT, manifest=manifest)
+    return HTMLResponse(render_trace_html(trace))
+
+
 @app.post("/decide/{job_id}", response_class=HTMLResponse)
 async def decide_patch(
     job_id: str,
