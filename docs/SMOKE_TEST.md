@@ -29,7 +29,7 @@ Total: roughly 2 min on a fresh machine, 15 s on a warm one.
 - Editable install of the `black-box` wheel plus its dependency closure into
   the new venv.
 - Stdout table with one row per benchmark case and a summary tail:
-  `tier=3 cases=7 match=4 acc=57.14% cost=$0.0000 claude=False`.
+  `tier=3 cases=9 match=4 acc=44.44% cost=$0.0000 claude=False`.
 - No files written outside the venv directory. The offline stub path does
   not touch `data/`.
 
@@ -44,25 +44,29 @@ pip install -e .
 python -m black_box.eval.runner --tier 3 --case-dir black-box-bench/cases
 ```
 
-Expected stdout (verified 2026-04-23, Python 3.13.9, macOS arm64):
+Expected stdout (verified 2026-04-25, Python 3.10, Linux x86_64):
 
 ```
-predicted_bug    predicted_window  cost_usd  wall_time_s  source  case_key                ground_truth_bug  skeleton  match
----------------  ----------------  --------  -----------  ------  ----------------------  ----------------  --------  -----
-bad_gain_tuning  [5.0, 20.0]       0.0       0.0          stub    bad_gain_01             bad_gain_tuning   False     True
-unknown          None              0.0       0.0          stub    boat_lidar_01           unknown           True      False
-pid_saturation   [12.0, 18.0]      0.0       0.0          stub    pid_saturation_01       pid_saturation    False     True
-unknown          None              0.0       0.0          stub    reflect_public_01       unknown           True      False
-sensor_timeout   [0.0, 3626.8]     0.0       0.0          stub    rtk_heading_break_01    sensor_timeout    False     True
-unknown          None              0.0       0.0          stub    sensor_drop_cameras_01  sensor_timeout    True      False
-sensor_timeout   [10.0, 14.0]      0.0       0.0          stub    sensor_timeout_01       sensor_timeout    False     True
+predicted_bug    predicted_window      cost_usd    wall_time_s  source    case_key                ground_truth_bug    skeleton    match
+---------------  ------------------  ----------  -------------  --------  ----------------------  ------------------  ----------  -------
+bad_gain_tuning  [5.0, 20.0]                  0              0  stub      bad_gain_01             bad_gain_tuning     False       True
+unknown                                       0              0  stub      boat_lidar_01           unknown             True        False
+unknown                                       0              0  stub      car_1_01                other               True        False
+pid_saturation   [12.0, 18.0]                 0              0  stub      pid_saturation_01       pid_saturation      False       True
+unknown                                       0              0  stub      reflect_public_01       unknown             True        False
+sensor_timeout   [0.0, 3626.8]                0              0  stub      rtk_heading_break_01    sensor_timeout      False       True
+unknown                                       0              0  stub      sanfer_tunnel_01        sensor_timeout      True        False
+unknown                                       0              0  stub      sensor_drop_cameras_01  sensor_timeout      True        False
+sensor_timeout   [10.0, 14.0]                 0              0  stub      sensor_timeout_01       sensor_timeout      False       True
 
-tier=3 cases=7 match=4 acc=57.14% cost=$0.0000 claude=False
+tier=3 cases=9 match=4 acc=44.44% cost=$0.0000 claude=False
 ```
 
-Four matches, three skeleton (no-bag) cases intentionally fail rather than
-silently score `unknown == unknown`. Total session cost: $0.00. Seven
-public-dataset cases exercised end-to-end.
+Four matches, five skeleton (no-bag) cases intentionally fail rather than
+silently score `unknown == unknown`. Total session cost: $0.00. Nine
+public-dataset cases exercised end-to-end. The acc% number is intentionally
+honest: skeleton cases count against accuracy by design — silent
+"unknown == unknown" matches would inflate the score.
 
 ## Tier 1 smoke (offline, also free)
 
@@ -72,7 +76,7 @@ The tier-1 runner adds a patch-target prediction on top of the tier-3 row:
 python -m black_box.eval.runner --tier 1 --case-dir black-box-bench/cases
 ```
 
-Tail row: `tier=1 cases=7 match=4 acc=57.14% cost=$0.0000 claude=False total_score=7.50/14.00`.
+Tail row: `tier=1 cases=9 match=4 acc=44.44% cost=$0.0000 claude=False total_score=7.50/18.00`.
 
 ## Sanity: run_session help
 
