@@ -99,7 +99,9 @@ class ForensicAgentConfig:
     mcp_servers: list[dict] = field(default_factory=list)
     skills: list[str] = field(default_factory=list)          # e.g. ["ros-bag-decoder"]
     mounted_files: list[Path] = field(default_factory=list)  # bag, source tree
-    network: Literal["none", "egress_only"] = "egress_only"
+    # Default-deny per #79. Steps that need egress must opt in explicitly via
+    # ForensicAgent.with_egress(reason=...) which logs the reason.
+    network: Literal["none", "egress_only"] = "none"
     environment_template: str = "python-3.11-ros-tools"
     agent_name: str = "black-box-forensic"
 
