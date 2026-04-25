@@ -488,6 +488,7 @@ Primary mapping: [`demo_assets/INDEX.md`](demo_assets/INDEX.md). Tags per beat:
 - `reporting/` — reportlab PDF (NTSB-style), unified diff + HTML side-by-side.
 - `ui/` — FastAPI + HTMX progress polling (stub worker today; real wiring deferred per `SCOPE_FREEZE.md`).
 - `eval/` — tier-3 runner + offline stub path; tier-1/tier-2 batch runners pending.
+- `scripts/` — runners, demo asset builders, ops, dev utilities. Classified per category in [`scripts/README.md`](scripts/README.md) (eval / demo / ops / dev).
 
 ## Bonus — NAO6 humanoid adapter (not on the demo critical path)
 
