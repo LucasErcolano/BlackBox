@@ -1,0 +1,22 @@
+# Allow-list for the platform-promotion sanitizer.
+#
+# Schema:
+#   operator_names: list[str] — exact strings (case-insensitive) of human
+#       operators whose names are SAFE to land in `bb-platform-priors`. Anything
+#       not in this list, when matched by an operator-name regex, is BLOCKED.
+#   customer_names: list[str] — same semantics for customer / company names.
+#   site_names:     list[str] — same semantics for site / facility identifiers.
+#
+# The sanitizer is closed-by-default: an entry is required for each name that
+# may legitimately appear in promoted priors. The empty defaults below mean
+# "platform priors must be name-free" until the team explicitly opts a name in.
+#
+# How to add a name (paranoid checklist):
+#   1. Confirm with Lucas / the operator that the name may be persisted in the
+#      shared platform memory_store (it is read-only across cases / customers).
+#   2. Add the exact spelling to the relevant list. Aliases need their own line.
+#   3. Re-run `pytest -q tests/test_memory_sanitizer.py`.
+
+operator_names: []
+customer_names: []
+site_names: []
