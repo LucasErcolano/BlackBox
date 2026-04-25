@@ -115,7 +115,8 @@ The original post-freeze backlog (#75–#95) shipped in PRs #96–#116 before th
 - [Risks](docs/RISKS.md) — risk register + stop-loss triggers.
 - [Submission](docs/SUBMISSION.md) — deliverables checklist.
 - [Smoke test](docs/SMOKE_TEST.md) — clean-clone reproducibility steps for judges.
-- [Claims & evidence](docs/CLAIMS.md) — every strong claim in this README paired with a verifiable artifact.
+- [Testimonial](docs/TESTIMONIAL.md) — quote capture plan.
+- [Flag-plant](docs/FLAG_PLANT.md) — X/LinkedIn thread copy.
 - [Rehearsal](docs/REHEARSAL.md) — pitch timing, breath points, Q&A prep.
 - [Overnight batch](OVERNIGHT_BATCH.md) — unattended bench runner + budget-gated driver for `scripts/overnight_batch.py`. Dry-run log at [`docs/assets/overnight_batch_dryrun.txt`](docs/assets/overnight_batch_dryrun.txt); deterministic asciicast at [`docs/recordings/offline_batch.cast`](docs/recordings/offline_batch.cast) (regenerate with `python scripts/record_batch_asciicast.py`).
 
@@ -130,37 +131,6 @@ Every Claude call is logged to `data/costs.jsonl` (cached/uncached/creation toke
 - **Scenario mining** — clean recording in, 3–5 moments of interest out. Conservative: if nothing is found, the answer is "nothing anomalous detected."
 - **Synthetic QA** — injected-bug recording in, hypothesis + self-eval vs ground truth out.
 
-## Install
-
-For evaluators / clean-clone reproducibility steps see [`INSTALL.md`](INSTALL.md). One-line summary:
-
-```bash
-pip install -e ".[dev]" && python -m black_box --version
-```
-
-CI (`.github/workflows/ci.yml`) gates on per-package coverage thresholds: ≥70% on `analysis/` + `ingestion/`, ≥40% overall. `pip-audit` runs on every PR; release sdist+wheel builds on `vX.Y.Z` tag pushes.
-
-### Cross-modal hero mode (`visual_mining_v2`)
-
-Per-tier mode mapping (#87):
-
-| Tier | Default prompt | When `visual_mining_v2` activates |
-|------|----------------|------------------------------------|
-| Tier-1 forensic | telemetry-only (`telemetry_drop_v1`) | hero cases with cameras (e.g. `sanfer_sanisidro`) escalate to `visual_mining_v2` after the telemetry pass picks suspicious windows. |
-| Tier-2 mining | telemetry-only | clean recordings with cameras escalate to `visual_mining_v2` for moments-of-interest. |
-| Tier-3 synthetic | telemetry-only | injected-bug runs stay telemetry-only — synthesized cameras add no signal. |
-
-Frame discipline (enforced in `src/black_box/analysis/visual_mining.py`):
-- 800×600 thumbnails default; 3.75 MP escalation only when the analysis step asks.
-- 5 cameras land in **one** prompt — never one call per camera.
-- Windows are anchored on telemetry findings via `from_timeline` + `sample_frames`. Uniform-stride sampling is rejected by `validate_plan`.
-
-Cost-delta over the same case (visual vs telemetry-only) is computed by `black_box.analysis.visual_mining.cost_delta(costs_path, case_key)` reading `data/costs.jsonl` after the run.
-
-![5-camera grid anchored to telemetry window](docs/assets/visual_mining_v2_grid.png)
-
-The grid above is the actual `visual_mining_v2` payload for the highest-priority sanfer telemetry window (`carrSoln=NONE` full session). Regenerate with `python scripts/build_visual_mining_v2_grid.py`.
-
 ## Quickstart
 
 Offline smoke (no API key required, runs the 7-case public benchmark through
@@ -171,12 +141,6 @@ python3 -m venv .venv && source .venv/bin/activate
 pip install -e .
 python -m black_box.eval.runner --tier 3 --case-dir black-box-bench/cases
 ```
-
-Verified on this commit (2026-04-23, Python 3.13.9):
-
-- `pytest -q` -> **169 passed** in 20.65s (2 deprecation warnings, no failures).
-- `python scripts/cost_report.py` -> **TOTAL $30.56** across 90 entries (29 real Opus 4.7 calls: $26.97; 61 test fixtures: $3.59).
-- `lychee README.md` -> **11/11 links OK, 0 errors** (enforced in CI via `.github/workflows/link-check.yml`).
 
 Live-run (real Opus 4.7):
 

@@ -1,0 +1,65 @@
+{% extends "_base.html" %}
+{% set route = 'cases' %}
+{% block title %}Cases — Black Box{% endblock %}
+{% block vol %}Cases · archive{% endblock %}
+
+{% block content %}
+{% set confirmed = cases|selectattr('verdict', 'equalto', 'CONFIRMED')|list|length %}
+{% set refuted = cases|selectattr('verdict', 'equalto', 'REFUTED')|list|length %}
+{% set inconclusive = cases|selectattr('verdict', 'equalto', 'INCONCLUSIVE')|list|length %}
+
+<div style="display: grid; grid-template-columns: 1fr auto; align-items: end; margin-bottom: 16px;">
+  <div>
+    <h1>Case archive</h1>
+    <p class="meta" style="margin-top: 6px; font-family: var(--serif); font-size: 0.95rem;">
+      All completed runs. {{ cases|length }} on the docket.
+    </p>
+  </div>
+  <div class="meta mono" style="text-align: right; font-size: 0.78rem;">
+    confirmed · <span style="color: var(--ink);">{{ confirmed }}</span>
+    &nbsp;&nbsp;refuted · <span style="color: var(--accent);">{{ refuted }}</span>
+    &nbsp;&nbsp;inconclusive · <span style="color: var(--muted);">{{ inconclusive }}</span>
+  </div>
+</div>
+
+<table class="cases">
+  <thead>
+    <tr>
+      <th style="width: 110px;">Date</th>
+      <th>Case</th>
+      <th style="width: 60px;">Mode</th>
+      <th style="width: 130px;">Verdict</th>
+      <th>Summary</th>
+      <th class="num" style="width: 90px;">Cost</th>
+      <th class="num" style="width: 70px;">Runtime</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in cases %}
+    <tr onclick="window.location='/report?case={{ r.id }}'" style="cursor: pointer;">
+      <td class="mono">{{ r.date }}</td>
+      <td>
+        <div style="font-family: var(--mono); font-size: 0.84rem;">{{ r.key }}</div>
+        <div class="meta" style="font-size: 0.78rem; margin-top: 2px;">
+          {% for tag in r.tags %}<span class="mono" style="margin-right: 8px;">·{{ tag }}</span>{% endfor %}
+        </div>
+      </td>
+      <td class="mono">{{ r.mode }}</td>
+      <td><span class="vd {{ r.verdict|lower }}">{{ r.verdict }}</span></td>
+      <td style="font-family: var(--serif); font-size: 0.95rem;">{{ r.summary }}</td>
+      <td class="num">{{ r.cost }}</td>
+      <td class="num">{{ r.duration }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if cases|length == 0 %}
+<div class="empty">No cases on the docket yet.</div>
+{% endif %}
+
+<div class="meta" style="margin-top: 28px; font-size: 0.78rem; display: flex; justify-content: space-between;">
+  <span>HTMX · /cases · server-rendered fragment</span>
+  <span class="mono">{{ cases|length }} of {{ cases|length }} · sorted by date desc</span>
+</div>
+{% endblock %}

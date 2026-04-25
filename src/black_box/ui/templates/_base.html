@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}Black Box — Forensic copilot for robots{% endblock %}</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css?v=6">
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
+{% from "_glyphs.html" import glyph_cube %}
+<body>
+<div class="bb-shell">
+  <header class="bb-mast">
+    <a href="/" class="word">
+      {{ glyph_cube(22) }}
+      Black Box
+    </a>
+    <nav>
+      <a href="/" class="{% if route == 'intake' %}is-active{% endif %}">Intake</a>
+      <a href="/report" class="{% if route == 'report' %}is-active{% endif %}">Report</a>
+      <a href="/cases" class="{% if route == 'cases' %}is-active{% endif %}">Cases</a>
+    </nav>
+    <div class="vol">{% block vol %}Vol. III · No. 18{% endblock %}</div>
+  </header>
+
+  <main class="bb-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="bb-foot">
+    <span class="mono">Black Box</span>
+    <span>·</span>
+    <span class="mono">opus-4.7</span>
+    <span>·</span>
+    <span>evidence-graded forensic copilot for robots</span>
+    <span class="bb-foot-spacer"></span>
+    <span class="mono">v0.4.2</span>
+  </footer>
+</div>
+</body>
+</html>
