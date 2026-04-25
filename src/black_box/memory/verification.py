@@ -113,3 +113,100 @@ def disputes_for_class(disputed_class: str) -> list[VerificationNote]:
 
 def now_utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+# ---------------------------------------------------------------------------
+# Promotion gate for native managed-agents memory stores
+# ---------------------------------------------------------------------------
+class UnverifiedMemoryPromotionError(RuntimeError):
+    """Raised when promotion to the read-only platform store is attempted
+    with an entry that is not flagged as human-verified.
+
+    The native platform store represents verified human-curated knowledge.
+    Promoting unverified L1 case records or freshly-extracted operator
+    narratives into it would defeat the safety contract. This error is
+    deliberately loud — callers must opt in by either passing
+    `verified=True` per-entry or by sourcing entries from the global
+    verification ledger with `severity == "confirmation"`.
+    """
+
+
+def promote_verified_priors_to_managed_memory(
+    client,
+    store_id: str,
+    verified_priors: list[dict],
+    *,
+    require_verified: bool = True,
+) -> list[str]:
+    """Write human-verified priors into the read-only platform memory store.
+
+    `verified_priors` is a list of dicts shaped like:
+        {"path": "/priors/foo.md", "content": "...", "verified": True}
+
+    Each entry is rejected unless ``verified is True`` OR the entry
+    references an analysis_id whose verification ledger contains a
+    `severity == "confirmation"` note. Failures raise
+    `UnverifiedMemoryPromotionError` BEFORE any SDK call; the platform
+    store is never partially mutated by an unverified batch.
+
+    This is the load-bearing safety contract: untrusted recording content
+    cannot reach the platform store without passing through the human
+    ledger.
+    """
+    stores_api = getattr(getattr(client, "beta", None), "memory_stores", None)
+    if stores_api is None:
+        raise RuntimeError(
+            "client.beta.memory_stores is not available; cannot promote priors."
+        )
+    memories_api = getattr(stores_api, "memories", None)
+    if memories_api is None:
+        raise RuntimeError(
+            "client.beta.memory_stores.memories is not available; cannot promote priors."
+        )
+
+    # Validate the whole batch before mutating.
+    for prior in verified_priors:
+        path = prior.get("path")
+        content = prior.get("content")
+        if not path or content is None:
+            raise ValueError(
+                f"prior must include 'path' and 'content' keys; got {prior!r}"
+            )
+        if require_verified and not _is_verified(prior):
+            raise UnverifiedMemoryPromotionError(
+                f"refusing to promote {path!r}: entry is not flagged "
+                "verified=True and has no confirmation note in the "
+                "verification ledger. Untrusted recording content cannot "
+                "reach the platform store."
+            )
+
+    written: list[str] = []
+    for prior in verified_priors:
+        result = memories_api.create(
+            memory_store_id=store_id,
+            path=prior["path"],
+            content=prior["content"],
+        )
+        rid = getattr(result, "id", None)
+        if rid is not None:
+            written.append(rid)
+    return written
+
+
+def _is_verified(prior: dict) -> bool:
+    """An entry passes the gate if either:
+
+    1. It carries an explicit ``verified=True`` flag (caller takes
+       responsibility — used for human-curated bootstrap seeds), OR
+    2. Its `analysis_id` has at least one `severity == "confirmation"`
+       note in the global verification ledger.
+    """
+    if prior.get("verified") is True:
+        return True
+    analysis_id = prior.get("analysis_id")
+    if not analysis_id:
+        return False
+    for note in iter_notes_for(analysis_id):
+        if getattr(note, "severity", None) == "confirmation":
+            return True
+    return False
