@@ -416,17 +416,17 @@ def _run_pipeline_replay(job_id: str, replay_name: str) -> None:
 
 # ---- real pipeline ----------------------------------------------------------
 def _real_pipeline_enabled() -> bool:
-    """Live is the default canonical worker (#75).
+    """Live is the default canonical worker (#75); credential check via vault (#80).
 
-    Returns True whenever an ANTHROPIC_API_KEY is set. Operators can force
-    the stub for offline demo by setting BLACKBOX_REAL_PIPELINE=0 or by
-    passing ``?source=stub`` to /analyze. Pre-#75 behavior required an
-    explicit BLACKBOX_REAL_PIPELINE=1 opt-in; that's now the off-switch
-    rather than the on-switch.
+    Returns True whenever an ANTHROPIC_API_KEY credential is available. Operators can
+    force the stub for offline demo by setting BLACKBOX_REAL_PIPELINE=0 or by
+    passing ``?source=stub`` to /analyze.
     """
+    from black_box.security.vault import has_credential
+
     if os.getenv("BLACKBOX_REAL_PIPELINE") == "0":
         return False
-    return bool(os.getenv("ANTHROPIC_API_KEY"))
+    return has_credential("ANTHROPIC_API_KEY")
 
 
 def _fmt_stream_event(ev: dict) -> str | None:
@@ -791,7 +791,8 @@ async def analyze(
     if source == "stub":
         live = False
     elif source == "live":
-        if not os.getenv("ANTHROPIC_API_KEY"):
+        from black_box.security.vault import has_credential
+        if not has_credential("ANTHROPIC_API_KEY"):
             raise HTTPException(503, "source=live requested but ANTHROPIC_API_KEY is unset")
         live = True
     else:
