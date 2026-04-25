@@ -113,7 +113,7 @@ The 21 open issues #75–#95 form the post-freeze backlog. Each one is scoped, h
 - [Submission](docs/SUBMISSION.md) — deliverables checklist.
 - [Smoke test](docs/SMOKE_TEST.md) — clean-clone reproducibility steps for judges.
 - [Rehearsal](docs/REHEARSAL.md) — pitch timing, breath points, Q&A prep.
-- [Overnight batch](OVERNIGHT_BATCH.md) — unattended bench runner + budget-gated driver for `scripts/overnight_batch.py`. Dry-run log at [`docs/assets/overnight_batch_dryrun.txt`](docs/assets/overnight_batch_dryrun.txt); live asciinema cast is a followup.
+- [Overnight batch](OVERNIGHT_BATCH.md) — unattended bench runner + budget-gated driver for `scripts/overnight_batch.py`. Dry-run log at [`docs/assets/overnight_batch_dryrun.txt`](docs/assets/overnight_batch_dryrun.txt); deterministic asciicast at [`docs/recordings/offline_batch.cast`](docs/recordings/offline_batch.cast) (regenerate with `python scripts/record_batch_asciicast.py`).
 
 ## Token discipline
 
