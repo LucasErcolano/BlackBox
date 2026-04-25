@@ -22,9 +22,9 @@ Demo proof: `demo_assets/grounding_gate/README.md`.
 
 ## Out of scope — frozen, not built, not promised
 
-- **Self-improving memory loop** (L2 priors priming the system prompt, L3 tie-breaking, L4 regression alarms). Substrate ships; loop does not. README calls this out explicitly.
-- **Tier-1 / Tier-2 batch runners.** Single-case paths work; batched CLI is skeleton only.
-- **Public-data downloader path** (`eval.public_data`). Stub only.
+- ~~**Self-improving memory loop**~~ — shipped via #76 (`scripts/memory_loop_demo.py` proves run-N reads L1–L4 priors).
+- ~~**Tier-1 / Tier-2 batch runners.**~~ — shipped via #78 + #84 (`black_box.eval.runner` + `scripts/overnight_batch.py` with resume + cost cap).
+- ~~**Public-data downloader path** (`eval.public_data`).~~ — shipped via #78.
 - ~~**Real rosbag upload path in the deployed UI**~~ — promoted to canonical via #75. Live is the default worker whenever `ANTHROPIC_API_KEY` is set; the streaming stub is now opt-in via `?source=stub` for the deterministic demo cut.
 - **Video synthesis execution** (Wan 2.2, Nano Banana Pro, ComfyUI). We emit text prompts only. Operator runs video tools on their own GPU.
 - **ROS 2 runtime.** Never installed. `rosbags` library only.
@@ -51,4 +51,4 @@ If a change doesn't support the sanfer hero case or the honesty-tag discipline, 
 
 ## Post-freeze backlog
 
-The freeze is for the judged demo; backlog issues track what lands after submission. See `README.md#status--shipped-vs-partial-vs-roadmap` for the full state table and the 21 open issues #75–#95. None of the 🛣 items are in the demo critical path.
+The original 21-issue backlog (#75–#95) was fully merged before the deadline (PRs #96–#116). The freeze remains in effect for the judged demo. Current open issues track post-submission iteration — see `README.md` status table and `gh issue list`.
