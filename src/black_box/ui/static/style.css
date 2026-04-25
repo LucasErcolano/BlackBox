@@ -59,7 +59,13 @@ h2, .h2 { font-family: var(--serif); font-weight: 500; font-size: 1.25rem; lette
 .cite  { font-family: var(--mono); font-size: 0.72rem; }
 
 /* Layout */
-.bb-shell { max-width: 1840px; margin: 0 auto; padding: 28px clamp(28px, 2.5vw, 56px) 96px; }
+html, body { min-height: 100%; }
+body { display: flex; flex-direction: column; min-height: 100vh; }
+.bb-shell { max-width: 1840px; width: 100%; margin: 0 auto; padding: 28px clamp(28px, 2.5vw, 56px) 0; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 100vh; }
+.bb-main { flex: 1 1 auto; padding-bottom: 32px; }
+.bb-foot { display: flex; align-items: center; gap: 8px; padding: 18px 0 28px; margin-top: auto; border-top: 1px solid var(--line); font-family: var(--sans); font-size: 0.74rem; color: var(--muted); letter-spacing: 0.02em; }
+.bb-foot .mono { font-family: var(--mono); font-size: 0.74rem; color: var(--ink-2); }
+.bb-foot .bb-foot-spacer { flex: 1 1 auto; }
 .bb-narrow { max-width: 680px; margin: 0 auto; }
 
 /* Masthead */

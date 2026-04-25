@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/style.css?v=5">
+<link rel="stylesheet" href="/static/style.css?v=6">
 <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 </head>
 {% from "_glyphs.html" import glyph_cube %}
@@ -26,7 +26,19 @@
     <div class="vol">{% block vol %}Vol. III · No. 18{% endblock %}</div>
   </header>
 
-  {% block content %}{% endblock %}
+  <main class="bb-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="bb-foot">
+    <span class="mono">Black Box</span>
+    <span>·</span>
+    <span class="mono">opus-4.7</span>
+    <span>·</span>
+    <span>evidence-graded forensic copilot for robots</span>
+    <span class="bb-foot-spacer"></span>
+    <span class="mono">v0.4.2</span>
+  </footer>
 </div>
 </body>
 </html>
