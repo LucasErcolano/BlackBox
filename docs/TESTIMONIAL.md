@@ -24,7 +24,7 @@ Contact at least 3 in parallel. Don't serialize.
 
 ## Ask (message template — EN)
 
-> Hi [name], short ask. I'm in a hackathon this week (Cerebral Valley × Anthropic, "Built with Opus 4.7") shipping **Black Box** — a forensic copilot that reads a ROS bag and returns ranked root-cause hypotheses plus a scoped code patch. Two platforms: 5-camera autonomous car + NAO6 humanoid. Demo ships Apr 26.
+> Hi [name], short ask. I'm in a hackathon this week (Cerebral Valley × Anthropic, "Built with Opus 4.7") shipping **Black Box** — a forensic copilot that reads a ROS bag and returns ranked root-cause hypotheses plus a scoped code patch. Real bags from a 5-camera rover (hero finding: RTK-heading break) and a marine USV; NAO6 humanoid ships as a bonus platform-adapter shape proof. Demo ships Apr 26.
 >
 > Would you have 10 minutes to look at one analysis output? If you find it credible, I'd love a 1–2 sentence quote I can use in the submission video. If you think it's off, tell me and I'll take the note. No obligation either way.
 >
@@ -33,7 +33,7 @@ Contact at least 3 in parallel. Don't serialize.
 
 ## Ask (message template — ES)
 
-> Hola [nombre], una ask corta. Estoy en un hackathon esta semana (Cerebral Valley × Anthropic, "Built with Opus 4.7") shipeando **Black Box** — copilot forense que lee un ROS bag y devuelve hipótesis de causa raíz ranqueadas + un parche de código acotado. Dos plataformas: auto autónomo 5 cámaras + humanoid NAO6. Demo sale 26 abril.
+> Hola [nombre], una ask corta. Estoy en un hackathon esta semana (Cerebral Valley × Anthropic, "Built with Opus 4.7") shipeando **Black Box** — copilot forense que lee un ROS bag y devuelve hipótesis de causa raíz ranqueadas + un parche de código acotado. Bags reales de un rover 5 cámaras (hallazgo hero: rotura de heading RTK) y un USV marino; el humanoide NAO6 va como bonus, sólo para probar la forma del adaptador de plataforma. Demo sale 26 abril.
 >
 > ¿Tenés 10 min para ver un análisis? Si lo ves creíble, me gustaría una frase de 1–2 oraciones para el video de la submission. Si ves algo flojo, decímelo y lo anoto. Sin obligación.
 >
