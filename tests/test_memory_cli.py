@@ -5,15 +5,26 @@ Mocks the SDK surface — the installed anthropic 0.96.0 does not expose
 """
 from __future__ import annotations
 
+import importlib.util
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 from typing import Any
 
 import pytest
 
 from black_box.memory import cli as memcli
+
+_SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
+
+
+def _load_script(name: str) -> ModuleType:
+    spec = importlib.util.spec_from_file_location(name, _SCRIPTS_DIR / f"{name}.py")
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    return module
 
 
 # ---------------------------------------------------------------------------
@@ -105,7 +116,7 @@ def cwd_tmp(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 # 1. list_managed_memory_stores
 # ---------------------------------------------------------------------------
 def test_list_managed_memory_stores_table_and_json(capsys: pytest.CaptureFixture):
-    from scripts import list_managed_memory_stores as lms
+    lms = _load_script("list_managed_memory_stores")
 
     stores = _FakeMemoryStoresAPI(
         preexisting=[
@@ -124,7 +135,7 @@ def test_list_managed_memory_stores_table_and_json(capsys: pytest.CaptureFixture
 # 2. archive dry-run
 # ---------------------------------------------------------------------------
 def test_archive_dry_run_lists_old_case_stores(capsys: pytest.CaptureFixture):
-    from scripts import archive_old_case_memory_stores as arc
+    arc = _load_script("archive_old_case_memory_stores")
 
     stores = _FakeMemoryStoresAPI(
         preexisting=[
@@ -151,7 +162,7 @@ def test_archive_dry_run_lists_old_case_stores(capsys: pytest.CaptureFixture):
 # 3. archive guard against platform-priors
 # ---------------------------------------------------------------------------
 def test_archive_apply_never_deletes_platform_priors():
-    from scripts import archive_old_case_memory_stores as arc
+    arc = _load_script("archive_old_case_memory_stores")
 
     stores = _FakeMemoryStoresAPI(
         preexisting=[
@@ -171,7 +182,7 @@ def test_archive_apply_never_deletes_platform_priors():
 # 4. delete guard against platform-priors
 # ---------------------------------------------------------------------------
 def test_delete_case_memory_store_refuses_platform(capsys: pytest.CaptureFixture):
-    from scripts import delete_case_memory_store as dcs
+    dcs = _load_script("delete_case_memory_store")
 
     stores = _FakeMemoryStoresAPI(
         preexisting=[_store("memstore_p", "bb-platform-priors", days_old=1)]
@@ -186,7 +197,7 @@ def test_delete_case_memory_store_refuses_platform(capsys: pytest.CaptureFixture
 
 
 def test_delete_case_memory_store_deletes_named_case_store():
-    from scripts import delete_case_memory_store as dcs
+    dcs = _load_script("delete_case_memory_store")
 
     stores = _FakeMemoryStoresAPI(
         preexisting=[
