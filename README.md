@@ -63,28 +63,31 @@ Every claim in this README ties to one of three states:
 | `ForensicAgent` over Managed Agents SDK | ✅ | `analysis/managed_agent.py` | — |
 | Grounding gate (refute / silence) | ✅ | `analysis/grounding.py` | #77 (evidence trace surfacing) |
 | PDF + diff HTML reporting | ✅ | `reporting/` | — |
-| Memory L1–L4 substrate (append-only JSONL) | ✅ | `memory/` | #76 (visible loop demo), #86 (verification ledger) |
-| Memory self-improving loop (run-N improves over run-1) | 🟡 | `memory/` substrate present; loop wiring TBD | #76 |
+| Memory L1–L4 substrate (append-only JSONL) | ✅ | `memory/` | — |
+| Memory self-improving loop (visible run-N over run-1) | ✅ | `scripts/memory_loop_demo.py`, `memory/` | — |
+| Memory pruning + compaction (L1–L3) | ✅ | `memory/maintenance.py` | — |
+| Verification ledger + decisions / patch-not-applied | ✅ | `memory/verification.py`, `memory/decisions.py` | — |
 | FastAPI + HTMX UI (upload → progress → diff) | ✅ | `src/black_box/ui/` | — |
-| Real pipeline as canonical UI worker | 🟡 | `BLACKBOX_REAL_PIPELINE=1` reaches it; default is `_run_pipeline_stub` | #75 |
-| HITL approve/reject persistence | 🟡 | banner ships; persistence + no-auto-apply pending | #82 |
-| Live steering (`POST /steer/{job_id}`) | 🛣 | — | #85 |
-| Async/long-running batch worker | 🛣 | — | #84 |
-| Time-travel rollback UI | 🛣 | — | #95 |
+| Real pipeline as canonical UI worker | ✅ | live default; stub via `?source=stub` | — |
+| HITL approve/reject persistence + no-auto-apply gate | ✅ | `memory/decisions.py`, UI banner | — |
+| Live steering (`POST /steer/{job_id}`) | ✅ | UI button + JSONL audit | — |
+| Async/long-running batch worker | ✅ | `scripts/overnight_batch.py` (resume + cost cap) | — |
+| Time-travel rollback UI (checkpoints + fork) | ✅ | `POST /checkpoints/{id}/rollback` | — |
+| Glass-box evidence trace (citations, replayable) | ✅ | `GET /trace/{job_id}` | — |
 | Tier-3 case runner | ✅ | `eval/runner.py` | — |
-| Tier-1 batch runner | 🟡 | single-case path works; batch CLI skeleton | #78 |
-| Tier-2 batch runner | 🟡 | agent loop exists; bench integration pending | #78 |
-| Public-data downloader path | 🛣 | stub only | #78 |
-| `visual_mining_v2` enabled for hero cases | 🟡 | runs on synthetic; not yet on `sanfer_sanisidro` | #87 |
-| Asciinema of unattended live batch | 🛣 | — | #88 |
-| Network-isolated sandbox default | 🛣 | — | #79 |
-| MCP credential vault | 🛣 | — | #80 |
-| Prompt-injection role segregation | 🟡 | landed in agent; prime-path verification pending | #81 |
-| Visual PII redaction + path-traversal hardening | 🛣 | — | #93 |
-| Context hygiene (tool_search, programmatic calls, context editing) | 🛣 | — | #92 |
-| `scripts/` taxonomy split (eval/demo/ops/dev) | 🛣 | flat today | #90 |
-| pytest-cov gates + reproducible release packaging | 🛣 | — | #94 |
-| NAO6 platform adapter (synthetic fixture only) | ✅ | `src/black_box/platforms/nao6/` | #91 (positioning) |
+| Tier-1 / Tier-2 batch runners + markdown table | ✅ | `eval/runner.py`, `scripts/overnight_batch.py` | — |
+| Public-data downloader path | ✅ | `eval/public_data.py` | — |
+| `visual_mining_v2` enabled for hero cases | ✅ | per-tier mapping in this README | — |
+| Asciinema of unattended live batch | ✅ | `docs/recordings/offline_batch.cast` | — |
+| Network-isolated sandbox default (`network=none`) | ✅ | `security/sandbox.py`, `SECURITY.md` | — |
+| Credential vault (capabilities, not secrets) | ✅ | `security/vault.py` | — |
+| HTTP-Basic auth gate on mutating routes (off by default) | ✅ | `security/auth.py` | — |
+| Prompt-injection role segregation | ✅ | adversarial regression in `tests/` | — |
+| Visual PII redaction + path-traversal sandbox | ✅ | `security/redact.py`, `security/sandbox.py` | — |
+| Context hygiene (tool_search, programmatic calls, context editing) | ✅ | `analysis/context_hygiene.py` | — |
+| `scripts/` taxonomy split (eval/demo/ops/dev) | ✅ | `scripts/README.md` | — |
+| pytest-cov gates + reproducible release packaging | ✅ | `.github/workflows/ci.yml`, release tag flow | — |
+| NAO6 platform adapter (synthetic fixture only) | ✅ | `src/black_box/platforms/nao6/` | — |
 
 ## Mode taxonomy
 
@@ -100,7 +103,7 @@ The trust tag and the mode are independent: a `live` run can be in any mode, a `
 
 ## Open backlog
 
-The 21 open issues #75–#95 form the post-freeze backlog. Each one is scoped, has acceptance criteria, and is referenced in the status table above. Use `gh issue list` to walk it.
+The original post-freeze backlog (#75–#95) shipped in PRs #96–#116 before the deadline. Current open issues track the next iteration — security hardening (auth gate, memory pruning), demo-asset regen, judge-mode reproducibility, narrative tightening. See `gh issue list` for live state.
 
 ## Docs
 - [Project rules (`CLAUDE.md`)](CLAUDE.md) — hackathon hard rules, project shape, token discipline. Read this first.
