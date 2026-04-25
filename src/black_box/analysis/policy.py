@@ -141,6 +141,29 @@ class PolicyAdvisor:
         return "\n".join(lines)
 
     # ------------------------------------------------------------------
+    # HITL rejection ledger (#82): negative prior on rejected classes
+    # ------------------------------------------------------------------
+    def rejection_caveat_block(self) -> str:
+        """Surface taxonomy classes that have been rejected by operators.
+
+        Notes are tagged ``class:<name>`` in the rejection note. Empty
+        string when no rejections carry that tag.
+        """
+        from ..memory import rejected_classes_count
+        # Walk known taxonomy keys from L3 totals; fall back to a literal list.
+        try:
+            classes = list(self.memory.taxonomy.totals_by_class().keys())
+        except Exception:
+            classes = []
+        counts = {c: rejected_classes_count(c) for c in classes if rejected_classes_count(c)}
+        if not counts:
+            return ""
+        lines = ["Operator-rejected hypothesis classes (HITL ledger):"]
+        for cls, n in sorted(counts.items(), key=lambda kv: -kv[1]):
+            lines.append(f"- `{cls}` rejected {n} time{'s' if n != 1 else ''}; require stronger evidence before re-asserting.")
+        return "\n".join(lines)
+
+    # ------------------------------------------------------------------
     # L4: raise alarms when per-class accuracy regresses
     # ------------------------------------------------------------------
     def regression_alarms(self) -> list[RegressionAlarm]:
