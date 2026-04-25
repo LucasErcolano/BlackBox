@@ -17,7 +17,9 @@ from html import escape as html_escape
 from pathlib import Path
 from typing import Literal
 
-from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
+from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
+
+from black_box.security.auth import require_auth
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -753,7 +755,7 @@ async def analyze_replay(
     )
 
 
-@app.post("/analyze", response_class=HTMLResponse)
+@app.post("/analyze", response_class=HTMLResponse, dependencies=[Depends(require_auth)])
 async def analyze(
     request: Request,
     background: BackgroundTasks,
@@ -1041,7 +1043,7 @@ async def diff_view(job_id: str) -> HTMLResponse:
     return HTMLResponse(page)
 
 
-@app.post("/verify/{job_id}", response_class=HTMLResponse)
+@app.post("/verify/{job_id}", response_class=HTMLResponse, dependencies=[Depends(require_auth)])
 async def add_verification_note(
     job_id: str,
     operator_id: str = Form(...),
@@ -1127,7 +1129,7 @@ async def list_checkpoints_view() -> HTMLResponse:
     )
 
 
-@app.post("/checkpoints/{checkpoint_id}/rollback", response_class=HTMLResponse)
+@app.post("/checkpoints/{checkpoint_id}/rollback", response_class=HTMLResponse, dependencies=[Depends(require_auth)])
 async def rollback_checkpoint(checkpoint_id: str) -> HTMLResponse:
     """#95 — fork active memory from a checkpoint; archive current state."""
     from black_box.memory.checkpoint import rollback
@@ -1152,7 +1154,7 @@ def _steer_path(job_id: str) -> Path:
     return JOBS_DIR / f"{job_id}.steer.jsonl"
 
 
-@app.post("/steer/{job_id}", response_class=HTMLResponse)
+@app.post("/steer/{job_id}", response_class=HTMLResponse, dependencies=[Depends(require_auth)])
 async def steer_session(
     job_id: str,
     message: str = Form(...),
@@ -1221,7 +1223,7 @@ async def steer_history(job_id: str) -> HTMLResponse:
     )
 
 
-@app.post("/decide/{job_id}", response_class=HTMLResponse)
+@app.post("/decide/{job_id}", response_class=HTMLResponse, dependencies=[Depends(require_auth)])
 async def decide_patch(
     job_id: str,
     decision: str = Form(...),
