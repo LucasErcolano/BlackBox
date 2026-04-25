@@ -397,7 +397,12 @@ flowchart TB
 
 **Shipped:** stack wiring, pydantic records, four independent stores, `MemoryStack.open()`, accuracy roll-ups by case and bug class, taxonomy counts on every finalize.
 
-**Native Managed Agents memory stores** sit alongside the local stack. Every `ForensicAgent.open_session(...)` provisions two `client.beta.memory_stores.*` resources mounted under `/mnt/memory/`: a shared `bb-platform-priors` store (read-only, seeded from the bug taxonomy and verified anti-hypotheses like the `rtk_heading_break_01` prior that refutes "GPS fails in tunnel"), and a fresh per-case `bb-forensic-learnings-{case_key}` store (read-write, case-isolated). Promotion of unverified content into the platform store is blocked by `promote_verified_priors_to_managed_memory` until a human writes a `severity="confirmation"` entry to the verification ledger. Beta header `managed-agents-2026-04-01`, model `claude-opus-4-7`. Details: [docs/MEMORY_STACK.md](docs/MEMORY_STACK.md#native-managed-agents-memory-stores).
+**Native Managed Agents memory-store integration** is implemented and unit-tested; live edge smoke evidence is pending. Wiring details: [`docs/MANAGED_AGENTS_MEMORY.md`](docs/MANAGED_AGENTS_MEMORY.md). Reproduce locally with `python scripts/managed_memory_smoke.py --help`; the harness refuses to run until the SDK exposes `client.beta.memory_stores` and `--yes` confirms the projected $0.50–$1.50 spend.
+
+<!-- TODO(post-smoke): swap to live-validated phrasing -->
+<!--
+BlackBox combines a local audit-friendly L1-L4 memory stack with Claude Managed Agents native memory stores. Each forensic session mounts a shared read-only platform-priors store and a fresh case-isolated read-write store under /mnt/memory/. Cross-case promotion is gated by a human verification ledger.
+-->
 
 **Memory lifecycle CLI.** `blackbox-memory` (entry point installed by `pyproject.toml`) wraps the stores for ops:
 

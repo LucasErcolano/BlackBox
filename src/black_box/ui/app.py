@@ -20,7 +20,7 @@ from typing import Literal
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 
 from black_box.security.auth import require_auth
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -735,10 +735,43 @@ def _run_pipeline_stub(job_id: str, upload_path: Path, mode: Mode) -> None:
         )
 
 
+# ---- native memory status ---------------------------------------------------
+def _native_memory_status() -> dict:
+    """Return live config of the native managed-agents memory mounts.
+
+    Reads `ForensicAgentConfig` defaults so the UI card cannot drift from the
+    code that actually provisions the stores.
+    """
+    from black_box.analysis.managed_agent import ForensicAgentConfig
+
+    cfg = ForensicAgentConfig()
+    return {
+        "platform_store": {
+            "present": True,
+            "name": cfg.platform_store_name,
+            "mode": "read_only",
+        },
+        "case_store_template": cfg.case_store_name_template,
+        "gate": "verification_ledger",
+    }
+
+
 # ---- routes -----------------------------------------------------------------
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(request, "index.html", {})
+    return templates.TemplateResponse(
+        request, "index.html", {"memory_status": _native_memory_status()}
+    )
+
+
+@app.get("/memory/native_status")
+async def memory_native_status() -> JSONResponse:
+    """Surface the native managed-agents memory mount config.
+
+    The UI memory card is server-side rendered from this same payload so the
+    card cannot drift from the agent provisioning code.
+    """
+    return JSONResponse(_native_memory_status())
 
 
 @app.get("/analyze", response_class=HTMLResponse)
@@ -778,7 +811,10 @@ async def analyze_replay(
     return templates.TemplateResponse(
         request,
         "index.html",
-        {"initial_html": progress_html},
+        {
+            "initial_html": progress_html,
+            "memory_status": _native_memory_status(),
+        },
     )
 
 
