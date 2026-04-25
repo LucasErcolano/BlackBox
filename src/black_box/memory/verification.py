@@ -137,22 +137,36 @@ def promote_verified_priors_to_managed_memory(
     verified_priors: list[dict],
     *,
     require_verified: bool = True,
+    allow_list: "AllowList | None" = None,
 ) -> list[str]:
     """Write human-verified priors into the read-only platform memory store.
 
     `verified_priors` is a list of dicts shaped like:
         {"path": "/priors/foo.md", "content": "...", "verified": True}
 
+    Pipeline (atomic — every check runs over the whole batch before any
+    SDK mutation):
+
+      1. structural validation (`path` + `content` present)
+      2. human-verification gate (this module)
+      3. PII / secret sanitizer (``black_box.memory.sanitizer``)
+
     Each entry is rejected unless ``verified is True`` OR the entry
     references an analysis_id whose verification ledger contains a
     `severity == "confirmation"` note. Failures raise
     `UnverifiedMemoryPromotionError` BEFORE any SDK call; the platform
-    store is never partially mutated by an unverified batch.
+    store is never partially mutated by an unverified or unsafe batch.
 
     This is the load-bearing safety contract: untrusted recording content
-    cannot reach the platform store without passing through the human
-    ledger.
+    cannot reach the platform store without passing through both the human
+    ledger and the sanitizer.
     """
+    from .sanitizer import (
+        AllowList,
+        UnsafePromotionContentError,
+        assert_safe_for_platform_promotion,
+    )
+
     stores_api = getattr(getattr(client, "beta", None), "memory_stores", None)
     if stores_api is None:
         raise RuntimeError(
@@ -164,7 +178,11 @@ def promote_verified_priors_to_managed_memory(
             "client.beta.memory_stores.memories is not available; cannot promote priors."
         )
 
+    if allow_list is None:
+        allow_list = AllowList.load()
+
     # Validate the whole batch before mutating.
+    cleaned: list[tuple[str, str]] = []
     for prior in verified_priors:
         path = prior.get("path")
         content = prior.get("content")
@@ -179,13 +197,22 @@ def promote_verified_priors_to_managed_memory(
                 "verification ledger. Untrusted recording content cannot "
                 "reach the platform store."
             )
+        try:
+            safe_content = assert_safe_for_platform_promotion(
+                content, allow_list=allow_list
+            )
+        except UnsafePromotionContentError as exc:
+            raise UnsafePromotionContentError(
+                f"refusing to promote {path!r}: {exc}"
+            ) from exc
+        cleaned.append((path, safe_content))
 
     written: list[str] = []
-    for prior in verified_priors:
+    for path, safe_content in cleaned:
         result = memories_api.create(
             memory_store_id=store_id,
-            path=prior["path"],
-            content=prior["content"],
+            path=path,
+            content=safe_content,
         )
         rid = getattr(result, "id", None)
         if rid is not None:

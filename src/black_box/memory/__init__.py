@@ -24,6 +24,14 @@ from .records import (
     PlatformPrior,
     TaxonomyCount,
 )
+from .sanitizer import (
+    AllowList,
+    Finding,
+    SanitizerResult,
+    UnsafePromotionContentError,
+    assert_safe_for_platform_promotion,
+    scan,
+)
 from .verification import (
     UnverifiedMemoryPromotionError,
     VerificationNote,
@@ -60,6 +68,12 @@ __all__ = [
     "iter_notes_for",
     "now_utc_iso",
     "promote_verified_priors_to_managed_memory",
+    "AllowList",
+    "Finding",
+    "SanitizerResult",
+    "UnsafePromotionContentError",
+    "assert_safe_for_platform_promotion",
+    "scan",
     "DecisionRecord",
     "PatchNotApprovedError",
     "apply_patch_if_approved",
