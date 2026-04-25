@@ -1,0 +1,97 @@
+{
+  "schema": "opus_vision_d1/1.0",
+  "timestamp_utc": "20260425T185628Z",
+  "secret_token": "ANOM_TS=42.5s",
+  "annotation_font_pt": 10,
+  "canvas_size": [
+    2400,
+    1600
+  ],
+  "plot_path": "data/bench_runs/vision_assets/vision_plot_20260425T185628Z.png",
+  "models": [
+    "claude-opus-4-6",
+    "claude-opus-4-7"
+  ],
+  "aggregates": [
+    {
+      "model": "claude-opus-4-6",
+      "n_runs": 3,
+      "detection_rate": 0.0,
+      "total_cost_usd": 0.093345,
+      "total_wall_time_s": 17.685359954833984,
+      "rows": [
+        {
+          "model": "claude-opus-4-6",
+          "seed": 0,
+          "detected": false,
+          "response_excerpt": "Here are all the text annotations, labels, and notes I can read on the image:\n\n1. **Title:** `Telemetry: PWM left/right vs time`\n2. **Y-axis label:** `PWM`\n3. **X-axis label:** `t (s)`\n4. **Note in upper-right corner:** `NOTE: ANOM TS=42.5s`",
+          "cost_usd": 0.03114,
+          "wall_time_s": 9.144052267074585,
+          "notes": "ok"
+        },
+        {
+          "model": "claude-opus-4-6",
+          "seed": 1,
+          "detected": false,
+          "response_excerpt": "Here are all the text annotations, labels, and notes I can read on the image:\n\n1. **Title**: `Telemetry: PWM left/right vs time`\n2. **Y-axis label**: `PWM`\n3. **X-axis label**: `t (s)`\n4. **Note in upper-right corner**: `NOTE: ANOM TS=42.5s`",
+          "cost_usd": 0.03114,
+          "wall_time_s": 3.607041120529175,
+          "notes": "ok"
+        },
+        {
+          "model": "claude-opus-4-6",
+          "seed": 2,
+          "detected": false,
+          "response_excerpt": "Here are all the text annotations, labels, and notes I can read on the image:\n\n1. **Title:** `Telemetry: PWM left/right vs time`\n2. **Y-axis label:** `PWM`\n3. **X-axis label:** `t (s)`\n4. **Note in upper right corner:** `NOTE: ANOM TS=42.5s`",
+          "cost_usd": 0.031065,
+          "wall_time_s": 4.934266567230225,
+          "notes": "ok"
+        }
+      ]
+    },
+    {
+      "model": "claude-opus-4-7",
+      "n_runs": 3,
+      "detection_rate": 1.0,
+      "total_cost_usd": 0.24417000000000003,
+      "total_wall_time_s": 20.752583503723145,
+      "rows": [
+        {
+          "model": "claude-opus-4-7",
+          "seed": 0,
+          "detected": true,
+          "response_excerpt": "Here are all the text elements I can read on the image:\n\n1. **Title (top left):** \"Telemetry: PWM left/right vs time\"\n2. **Y-axis label (upper left):** \"PWM\"\n3. **X-axis label (bottom left):** \"t (s)\"\n4. **Note (top right, in a boxed annotation):** \"NOTE: ANOM_TS=42.5s\"",
+          "cost_usd": 0.081765,
+          "wall_time_s": 6.3659446239471436,
+          "notes": "ok"
+        },
+        {
+          "model": "claude-opus-4-7",
+          "seed": 1,
+          "detected": true,
+          "response_excerpt": "Here is every text annotation I can read on the image:\n\n1. **Title (top left):** \"Telemetry: PWM left/right vs time\"\n2. **Y-axis label (upper left):** \"PWM\"\n3. **X-axis label (bottom left):** \"t (s)\"\n4. **Note box (top right):** \"NOTE: ANOM_TS=42.5s\"",
+          "cost_usd": 0.081165,
+          "wall_time_s": 5.974198341369629,
+          "notes": "ok"
+        },
+        {
+          "model": "claude-opus-4-7",
+          "seed": 2,
+          "detected": true,
+          "response_excerpt": "Here are all the text annotations I can read on the image:\n\n1. **Title (top left):** \"Telemetry: PWM left/right vs time\"\n2. **Y-axis label (upper left):** \"PWM\"\n3. **X-axis label (bottom left):** \"t (s)\"\n4. **Note box (top right):** \"NOTE: ANOM_TS=42.5s\"",
+          "cost_usd": 0.08124,
+          "wall_time_s": 8.412440538406372,
+          "notes": "ok"
+        }
+      ]
+    }
+  ],
+  "delta": {
+    "from_model": "claude-opus-4-6",
+    "to_model": "claude-opus-4-7",
+    "detection_rate_delta": 1.0,
+    "total_cost_usd_delta": 0.15082500000000004,
+    "total_wall_time_s_delta": 3.06722354888916
+  },
+  "total_spent_usd": 0.337515
+}

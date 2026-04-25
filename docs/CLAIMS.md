@@ -18,6 +18,7 @@ Every strong claim in the README, pitch, and demo gets one row here, paired with
 | 12 | Time-travel rollback to a pre-bad-ingest state | `POST /checkpoints/{id}/rollback` in `src/black_box/ui/app.py` + `memory/checkpoint.py`. PR #110. |
 | 13 | Long-horizon batch via Managed Agents | `scripts/overnight_batch.py` with resume + cost cap (PR #111); asciinema at `docs/recordings/offline_batch.cast` (PR #115). |
 | 14 | Tunnel **did not** cause the sanfer failure | Grounding asset in `demo_assets/grounding_gate/README.md`: tunnel caused mild GNSS degradation (`numSV 29→16`, `h_acc 645mm→1294mm`), but RTK `carr_soln=none` was already present 43 min pre-tunnel and DBW was never engaged. The narrative in PITCH.md / DEMO_SCRIPT.md / FLAG_PLANT.md matches this evidence (PR #132 for #125). |
+| 15 | Opus 4.7 measurably improves BlackBox's forensic workflow vs Opus 4.6 | A/B harness `scripts/compare_opus_models.py` (same prompts, same cases, same budget, model id swapped) plus D1 vision harness `scripts/compare_opus_vision.py`. Three live passes committed: clean (`opus46_vs_opus47_20260425T182237Z.json`), false-operator (`opus46_vs_opus47_20260425T183141Z.json`), vision (`opus_vision_d1_20260425T185628Z.json`). Headline: 4.7 +100pp abstention on under-specified cases, -0.077 Brier under adversarial operator pressure, +100pp fine-grain text detection at 3.84 MP, ~30% lower wall time. Methodology + caveats in `docs/OPUS47_DELTA.md`. |
 
 ## How to use this table
 
