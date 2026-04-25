@@ -157,6 +157,10 @@ Frame discipline (enforced in `src/black_box/analysis/visual_mining.py`):
 
 Cost-delta over the same case (visual vs telemetry-only) is computed by `black_box.analysis.visual_mining.cost_delta(costs_path, case_key)` reading `data/costs.jsonl` after the run.
 
+![5-camera grid anchored to telemetry window](docs/assets/visual_mining_v2_grid.png)
+
+The grid above is the actual `visual_mining_v2` payload for the highest-priority sanfer telemetry window (`carrSoln=NONE` full session). Regenerate with `python scripts/build_visual_mining_v2_grid.py`.
+
 ## Quickstart
 
 Offline smoke (no API key required, runs the 7-case public benchmark through
