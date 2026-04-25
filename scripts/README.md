@@ -22,6 +22,7 @@ Per #90: classify each script as **eval / demo / ops / dev** so evaluators can t
 | `hero_analysis.py` | eval | hero analysis driver wrapper. |
 | `hero_bag0_indoor.py` | eval | hero-case indoor variant (legacy). |
 | `managed_agent_smoke.py` | eval | smoke for the ForensicAgent / Managed Agents wiring. |
+| `exercise_steering_live.py` | eval | live verification of `/steer/{job_id}` consumer on the sanfer hero (#129). |
 | `analyze_bag.py` | eval | single-bag analysis (legacy v1). |
 | `analyze_bag_v2.py` | eval | single-bag analysis (current; v2). |
 | `memory_loop_demo.py` | demo | two-run sequence proving memory L1–L4 priors are read and applied (#76). |
