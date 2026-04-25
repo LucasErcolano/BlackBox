@@ -1144,6 +1144,83 @@ async def rollback_checkpoint(checkpoint_id: str) -> HTMLResponse:
     )
 
 
+STEERABLE_STAGES = {"ingesting", "analyzing", "synthesizing", "reporting"}
+MAX_STEER_LEN = 1000
+
+
+def _steer_path(job_id: str) -> Path:
+    return JOBS_DIR / f"{job_id}.steer.jsonl"
+
+
+@app.post("/steer/{job_id}", response_class=HTMLResponse)
+async def steer_session(
+    job_id: str,
+    message: str = Form(...),
+    operator: str = Form("anonymous"),
+) -> HTMLResponse:
+    """Push a steer message into a running session's input queue.
+
+    Validates the job is steerable, bounds the payload, appends to a
+    per-job JSONL audit trace. The pipeline worker consumes this file
+    between stages.
+    """
+    msg = (message or "").strip()
+    if not msg:
+        raise HTTPException(400, "steer message cannot be empty")
+    if len(msg) > MAX_STEER_LEN:
+        raise HTTPException(400, f"steer message exceeds {MAX_STEER_LEN} chars")
+
+    status = _read_status(job_id)
+    if status is None:
+        raise HTTPException(404, f"unknown job {job_id}")
+    stage = status.get("stage", "missing")
+    if stage not in STEERABLE_STAGES:
+        raise HTTPException(409, f"job is in stage {stage!r}; not steerable")
+
+    from datetime import datetime, timezone
+
+    entry = {
+        "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "operator": operator.strip() or "anonymous",
+        "message": msg,
+        "stage_when_sent": stage,
+    }
+    p = _steer_path(job_id)
+    with p.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(entry) + "\n")
+    return HTMLResponse(
+        f'{_GATE_STYLE}<section class="gate"><div class="gate-headline">steer queued</div>'
+        f'<div class="gate-meta">{html_escape(entry["ts"])} · stage <code>{html_escape(stage)}</code></div>'
+        f'<div class="gate-note">{html_escape(msg)}</div></section>'
+    )
+
+
+@app.get("/steer/{job_id}", response_class=HTMLResponse)
+async def steer_history(job_id: str) -> HTMLResponse:
+    p = _steer_path(job_id)
+    if not p.exists():
+        return HTMLResponse(
+            f'<section class="gate"><div class="gate-headline">no steers for {html_escape(job_id)}</div></section>'
+        )
+    rows = []
+    for line in p.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            rows.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+    items = "".join(
+        f'<li><code>{html_escape(r["ts"])}</code> · stage <code>{html_escape(r.get("stage_when_sent", "?"))}</code> · '
+        f'<strong>{html_escape(r.get("operator", ""))}</strong>: {html_escape(r.get("message", ""))}</li>'
+        for r in rows
+    )
+    return HTMLResponse(
+        f'{_GATE_STYLE}<section class="gate"><div class="gate-headline">steers — {html_escape(job_id)}</div>'
+        f'<ol>{items}</ol></section>'
+    )
+
+
 @app.post("/decide/{job_id}", response_class=HTMLResponse)
 async def decide_patch(
     job_id: str,

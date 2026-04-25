@@ -62,6 +62,29 @@
 {% endif %}{% endfor %}{% if not done and buffer %}<span class="cursor">▍</span>{% endif %}</pre>
   </div>
 
+  {% set steerable_stages = ['ingesting', 'analyzing', 'synthesizing', 'reporting'] %}
+  {% if stage in steerable_stages %}
+  <form
+    class="steer-form"
+    hx-post="/steer/{{ job_id }}"
+    hx-target="#steer-result"
+    hx-swap="innerHTML"
+  >
+    <label class="steer-label" for="steer-msg-{{ job_id }}">Steer agent</label>
+    <textarea
+      id="steer-msg-{{ job_id }}"
+      name="message"
+      placeholder='e.g. "focus on RTK degradation window before the tunnel"'
+      maxlength="1000"
+      rows="2"
+      required
+    ></textarea>
+    <input type="hidden" name="operator" value="ui">
+    <button type="submit" class="steer-btn">Steer</button>
+  </form>
+  <div id="steer-result"></div>
+  {% endif %}
+
   {% if review %}
   <div class="review-state rs-{{ review.status }}" data-review-status="{{ review.status }}">
     <span class="rs-dot" aria-hidden="true"></span>
