@@ -12,19 +12,13 @@ Judging weights: Opus 4.7 Use 25% + Depth 20% + Impact 30% + Creativity 25%.
 
 ## Your scope
 
-### 1. NAO6 recordings — critical path, start tonight
+### 1. ~~NAO6 recordings — critical path~~ (descoped)
 
-Target: **3–5 failure recordings** (falls, grip fails, balance loss). Three artifacts per incident:
+> **Status (2026-04-25):** real-hardware NAO6 captures did not land. NAO6 is now a **bonus adapter only** — synthetic fall fixture under `src/black_box/platforms/nao6/` proves the adapter shape generalizes, but the judged demo runs on rover (`sanfer_sanisidro`) and marine bags only. Do **not** invest more time on NAO6 hardware.
 
-- onboard camera footage
-- controller / state logs at failure time
-- controller source code snapshot
+### 2. NAO6 ingestion adapter — keep as bonus, do not extend
 
-Each fall needs setup + reset, so this is ~2 days. **Don't batch at the end.**
-
-### 2. NAO6 ingestion adapter
-
-Code in `src/black_box/platforms/nao6/`. Convert the three artifact types into the pipeline's canonical format (frames + time series + code blobs). Mirror the API of the car adapter Lucas is building at `src/black_box/platforms/car_av/`.
+Existing scaffold under `src/black_box/platforms/nao6/` (synthetic fall fixture, humanoid taxonomy → global closed set, controller snapshots) stays. It is referenced in the pitch with **one line only**: *"platform adapter shape already validated on NAO6"*. No NAO6 footage in the judged beat, no NAO6 hero asset in the landing UI.
 
 ### 3. Managed Agents — real implementation
 
@@ -93,14 +87,14 @@ FastAPI + HTMX already scaffolded. You own:
 
 | Day | Focus |
 |-----|-------|
-| 1–2 (now) | NAO6 recordings start. Read Opus 4.7 + Managed Agents docs. Fork repo, get local setup running. |
-| 3 | NAO6 ingestion adapter + first fall analysis with all three artifacts fused. First real test of the core novelty claim — prioritize. |
+| 1–2 | ~~NAO6 recordings~~ (descoped). Read Opus 4.7 + Managed Agents docs. Fork repo, get local setup running. |
+| 3 | ~~NAO6 ingestion adapter~~ — synthetic fixture only, scaffolded. Move to managed agent + memory stack port early. |
 | 4 | Managed Agents real implementation + memory stack port. Joint prompt iteration with Lucas. |
-| 5 | Grounding gate + UI polish + PDF templates final. Demo rehearsal. |
+| 5 | Grounding gate + UI polish + PDF templates final. Demo rehearsal on rover/marine bags. |
 | 6 | Buffer + submit. |
 
 ## Watch-outs
 
 - **Kairos was Gemini, this is Anthropic.** Not everything ports 1:1. Flag uncertain patterns on tomorrow's call — we'll review what's portable vs needs adaptation.
-- **No scope creep.** Two platforms (car + NAO6) with depth beats four shallow. Don't pull in other robots.
+- **No scope creep.** Single judged platform (rover/marine, real bags) with depth beats two shallow. NAO6 stays a bonus adapter, not a demo beat.
 - **Patches stay scoped.** Clamps, timeouts, null checks, gain adjustments — never rewrites. A dumb patch kills credibility of the whole tool.

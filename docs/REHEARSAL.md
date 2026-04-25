@@ -84,7 +84,7 @@ Pre-answered, 2 sentences each:
 > AURA is telemetry-only, live, no patch. ROSA is NASA-JPL's air-traffic-control layer. We're post-mortem, fuse camera + code + logs, and emit a scoped diff. Different axis.
 
 **"Real data or synthetic?"**
-> Both. Three synthetic cases with ground truth for eval; real AV bags (5-camera, multi-minute) for the hero findings. NAO6 humanoid recordings land on Day 4–5.
+> Both. Three synthetic cases with ground truth for eval; real bags (rover `sanfer_sanisidro` for the hero RTK-heading finding, marine USV for cross-platform proof). NAO6 ships only as a bonus platform adapter (synthetic fall fixture, taxonomy mapping) — not in the judged demo beat.
 
 **"What's the business?"**
 > AV labs and humanoid teams process petabytes of bags. Post-incident review is a staffing problem. If this saves one engineer-week per incident, it pays for itself on the first bag.
