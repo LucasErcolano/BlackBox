@@ -37,26 +37,37 @@ class CostLog:
 class ClaudeClient:
     """Wraps the Anthropic SDK with caching, image handling, and cost tracking."""
 
-    # Opus 4.7 pricing (can be overridden via OPUS_PRICING_JSON env var)
-    DEFAULT_PRICING = {
-        "input": 15.0,  # $ per MTok
-        "cache_write": 18.75,  # $ per MTok
-        "cache_read": 1.50,  # $ per MTok
-        "output": 75.0,  # $ per MTok
+    # Per-model pricing ($ per MTok). Override via OPUS_PRICING_JSON env (applies to selected model).
+    PRICING_BY_MODEL = {
+        "claude-opus-4-7": {
+            "input": 15.0,
+            "cache_write": 18.75,
+            "cache_read": 1.50,
+            "output": 75.0,
+        },
+        "claude-opus-4-6": {
+            "input": 15.0,
+            "cache_write": 18.75,
+            "cache_read": 1.50,
+            "output": 75.0,
+        },
     }
+    DEFAULT_MODEL = "claude-opus-4-7"
+    # Back-compat alias
+    DEFAULT_PRICING = PRICING_BY_MODEL["claude-opus-4-7"]
 
-    def __init__(self):
+    def __init__(self, model: str | None = None):
         self.client = build_client()
-        self.model = "claude-opus-4-7"
+        self.model = model or os.getenv("BLACKBOX_MODEL") or self.DEFAULT_MODEL
         self.pricing = self._load_pricing()
         self._ensure_costs_file()
 
     def _load_pricing(self) -> dict:
-        """Load pricing from env var or use defaults."""
+        """Load pricing: OPUS_PRICING_JSON env wins, else per-model table, else 4.7 default."""
         pricing_json = os.getenv("OPUS_PRICING_JSON")
         if pricing_json:
             return json.loads(pricing_json)
-        return self.DEFAULT_PRICING
+        return self.PRICING_BY_MODEL.get(self.model, self.DEFAULT_PRICING)
 
     def _ensure_costs_file(self):
         """Ensure data/costs.jsonl exists."""
@@ -96,12 +107,17 @@ class ClaudeClient:
         b64 = b64encode(output.getvalue()).decode("utf-8")
         return b64
 
+    # Per-resolution max long-side. ``hires_xl`` exists to exercise the
+    # Opus 4.7 image cap (2576px / 3.75MP) — Anthropic auto-downsamples for
+    # 4.6 to its 1568px / 1.15MP cap. Used by the D1 vision A/B harness.
+    RESOLUTION_MAX_SIDE = {"thumb": 800, "hires": 1920, "hires_xl": 2400}
+
     def _build_messages(
         self,
         prompt_spec: dict,
         user_fields: dict | None = None,
         images: list[Image.Image] | None = None,
-        resolution: Literal["thumb", "hires"] = "thumb",
+        resolution: Literal["thumb", "hires", "hires_xl"] = "thumb",
     ) -> tuple[list[dict], str]:
         """Build system + messages for API call. Returns (system_blocks, user_content_text)."""
         if user_fields is None:
@@ -113,7 +129,7 @@ class ClaudeClient:
         # Add image blocks if provided
         image_blocks = []
         if images:
-            max_side = 800 if resolution == "thumb" else 1920
+            max_side = self.RESOLUTION_MAX_SIDE.get(resolution, 800)
             for img in images:
                 resized = self._resize_image(img, max_side)
                 b64 = self._image_to_base64_jpeg(resized)
@@ -145,9 +161,10 @@ class ClaudeClient:
         prompt_spec: dict,
         images: list[Image.Image] | None = None,
         user_fields: dict | None = None,
-        resolution: Literal["thumb", "hires"] = "thumb",
+        resolution: Literal["thumb", "hires", "hires_xl"] = "thumb",
         max_tokens: int = 4000,
         apply_grounding: bool = True,
+        temperature: float | None = None,
     ) -> tuple[BaseModel, CostLog]:
         """
         Run Claude analysis with aggressive caching.
@@ -183,12 +200,17 @@ class ClaudeClient:
         )
         content[-1]["text"] = final_text
 
+        extra_kwargs: dict[str, Any] = {}
+        if temperature is not None:
+            extra_kwargs["temperature"] = temperature
+
         # First attempt
         response = self.client.messages.create(
             model=self.model,
             max_tokens=max_tokens,
             system=system_blocks,
             messages=[{"role": "user", "content": content}],
+            **extra_kwargs,
         )
 
         # Parse response
@@ -222,6 +244,7 @@ class ClaudeClient:
                 max_tokens=max_tokens,
                 system=system_blocks,
                 messages=[{"role": "user", "content": retry_content}],
+                **extra_kwargs,
             )
             text = response.content[0].text
             if text.startswith("```json"):
