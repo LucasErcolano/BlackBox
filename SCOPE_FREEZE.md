@@ -48,3 +48,7 @@ Demo proof: `demo_assets/grounding_gate/README.md`.
 6. Every asset mentioned in README or the video script must carry a `live | replay | sample` tag.
 
 If a change doesn't support the sanfer hero case or the honesty-tag discipline, it does not ship before 2026-04-26.
+
+## Post-freeze backlog
+
+The freeze is for the judged demo; backlog issues track what lands after submission. See `README.md#status--shipped-vs-partial-vs-roadmap` for the full state table and the 21 open issues #75–#95. None of the 🛣 items are in the demo critical path.

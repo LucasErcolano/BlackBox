@@ -43,6 +43,65 @@ Hero-case telemetry-only one-shot (no frames, no vision):
 python scripts/run_rtk_heading_case.py   # tag: live, requires ANTHROPIC_API_KEY
 ```
 
+## Status — shipped vs partial vs roadmap
+
+Every claim in this README ties to one of three states:
+
+| State | Meaning |
+|-------|---------|
+| ✅ Shipped | Reachable from the canonical demo path, exercised by tests. |
+| 🟡 Partial | Code path exists, gated behind `BLACKBOX_REAL_PIPELINE=1` env or a single-case CLI; not the canonical UI flow yet. |
+| 🛣 Roadmap | Tracked as an open issue. Not on the judged beat. |
+
+| Capability | State | File pointer | Tracking |
+|------------|-------|--------------|----------|
+| Session discovery (folder → bag bundles) | ✅ | `src/black_box/ingestion/session.py::discover_session_assets` | — |
+| `rosbags`-based ROS1+ROS2 reader | ✅ | `src/black_box/ingestion/` | — |
+| Telemetry-anchored frame sampling (`from_timeline` + `sample_frames`) | ✅ | `analysis/windows.py`, `ingestion/frame_sampler.py` | — |
+| `ClaudeClient` with prompt caching, cost ledger | ✅ | `analysis/client.py`, `data/costs.jsonl` | #89 (cache-padding regression) |
+| `prompts_v2` / `prompts_generic` / `prompts_boat` templates | ✅ | `src/black_box/analysis/prompts*.py` | — |
+| `ForensicAgent` over Managed Agents SDK | ✅ | `analysis/managed_agent.py` | — |
+| Grounding gate (refute / silence) | ✅ | `analysis/grounding.py` | #77 (evidence trace surfacing) |
+| PDF + diff HTML reporting | ✅ | `reporting/` | — |
+| Memory L1–L4 substrate (append-only JSONL) | ✅ | `memory/` | #76 (visible loop demo), #86 (verification ledger) |
+| Memory self-improving loop (run-N improves over run-1) | 🟡 | `memory/` substrate present; loop wiring TBD | #76 |
+| FastAPI + HTMX UI (upload → progress → diff) | ✅ | `src/black_box/ui/` | — |
+| Real pipeline as canonical UI worker | 🟡 | `BLACKBOX_REAL_PIPELINE=1` reaches it; default is `_run_pipeline_stub` | #75 |
+| HITL approve/reject persistence | 🟡 | banner ships; persistence + no-auto-apply pending | #82 |
+| Live steering (`POST /steer/{job_id}`) | 🛣 | — | #85 |
+| Async/long-running batch worker | 🛣 | — | #84 |
+| Time-travel rollback UI | 🛣 | — | #95 |
+| Tier-3 case runner | ✅ | `eval/runner.py` | — |
+| Tier-1 batch runner | 🟡 | single-case path works; batch CLI skeleton | #78 |
+| Tier-2 batch runner | 🟡 | agent loop exists; bench integration pending | #78 |
+| Public-data downloader path | 🛣 | stub only | #78 |
+| `visual_mining_v2` enabled for hero cases | 🟡 | runs on synthetic; not yet on `sanfer_sanisidro` | #87 |
+| Asciinema of unattended live batch | 🛣 | — | #88 |
+| Network-isolated sandbox default | 🛣 | — | #79 |
+| MCP credential vault | 🛣 | — | #80 |
+| Prompt-injection role segregation | 🟡 | landed in agent; prime-path verification pending | #81 |
+| Visual PII redaction + path-traversal hardening | 🛣 | — | #93 |
+| Context hygiene (tool_search, programmatic calls, context editing) | 🛣 | — | #92 |
+| `scripts/` taxonomy split (eval/demo/ops/dev) | 🛣 | flat today | #90 |
+| pytest-cov gates + reproducible release packaging | 🛣 | — | #94 |
+| NAO6 platform adapter (synthetic fixture only) | ✅ | `src/black_box/platforms/nao6/` | #91 (positioning) |
+
+## Mode taxonomy
+
+Three orthogonal axes, all relevant when reading the rest of this README:
+
+| Axis | Values | Meaning |
+|------|--------|---------|
+| **Trust tag** | `live` / `replay` / `sample` | How an asset was produced (regenerable vs pre-baked vs hand-authored). See *What is live vs replay* below. |
+| **Mode** | forensic post-mortem / scenario-mining / synthetic-QA | What question the pipeline is answering on this run (see *Modes* below). |
+| **Tier** | 1 / 2 / 3 | Which benchmark slice — known crashes (T1), clean bags (T2), injected bugs (T3). |
+
+The trust tag and the mode are independent: a `live` run can be in any mode, a `replay` artifact can illustrate any mode.
+
+## Open backlog
+
+The 21 open issues #75–#95 form the post-freeze backlog. Each one is scoped, has acceptance criteria, and is referenced in the status table above. Use `gh issue list` to walk it.
+
 ## Docs
 - [Project rules (`CLAUDE.md`)](CLAUDE.md) — hackathon hard rules, project shape, token discipline. Read this first.
 - [Build journal & strategy](https://gist.github.com/LucasErcolano/851c5e976c6aa364f69c9e6875544061) — narrative, novelty positioning, findings.
