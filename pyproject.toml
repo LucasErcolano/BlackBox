@@ -28,7 +28,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "ruff>=0.3"]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "ruff>=0.3",
+  "pip-audit>=2.7",
+  "build>=1.2",
+]
 
 [project.scripts]
 blackbox = "black_box.cli:main"
@@ -39,3 +45,25 @@ where = ["src"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["src/black_box"]
+branch = true
+omit = [
+  "src/black_box/platforms/nao6/_fixture.py",
+  "src/black_box/synthesis/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+exclude_lines = [
+  "pragma: no cover",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]

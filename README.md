@@ -126,6 +126,16 @@ Every Claude call is logged to `data/costs.jsonl` (cached/uncached/creation toke
 - **Scenario mining** — clean recording in, 3–5 moments of interest out. Conservative: if nothing is found, the answer is "nothing anomalous detected."
 - **Synthetic QA** — injected-bug recording in, hypothesis + self-eval vs ground truth out.
 
+## Install
+
+For evaluators / clean-clone reproducibility steps see [`INSTALL.md`](INSTALL.md). One-line summary:
+
+```bash
+pip install -e ".[dev]" && python -m black_box --version
+```
+
+CI (`.github/workflows/ci.yml`) gates on per-package coverage thresholds: ≥70% on `analysis/` + `ingestion/`, ≥40% overall. `pip-audit` runs on every PR; release sdist+wheel builds on `vX.Y.Z` tag pushes.
+
 ## Quickstart
 
 Offline smoke (no API key required, runs the 7-case public benchmark through

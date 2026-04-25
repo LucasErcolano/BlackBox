@@ -76,7 +76,10 @@ def _cmd_synth(args: argparse.Namespace) -> int:
 
 # --- main -------------------------------------------------------------------
 def _build_parser() -> argparse.ArgumentParser:
+    from black_box import __version__
+
     p = argparse.ArgumentParser(prog="blackbox", description="Black Box CLI")
+    p.add_argument("--version", action="version", version=f"black-box {__version__}")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     pa = sub.add_parser("analyze", help="analyze a recording")
