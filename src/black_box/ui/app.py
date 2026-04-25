@@ -416,8 +416,17 @@ def _run_pipeline_replay(job_id: str, replay_name: str) -> None:
 
 # ---- real pipeline ----------------------------------------------------------
 def _real_pipeline_enabled() -> bool:
-    """Real pipeline only fires when explicitly enabled AND an API key is set."""
-    return os.getenv("BLACKBOX_REAL_PIPELINE") == "1" and bool(os.getenv("ANTHROPIC_API_KEY"))
+    """Live is the default canonical worker (#75).
+
+    Returns True whenever an ANTHROPIC_API_KEY is set. Operators can force
+    the stub for offline demo by setting BLACKBOX_REAL_PIPELINE=0 or by
+    passing ``?source=stub`` to /analyze. Pre-#75 behavior required an
+    explicit BLACKBOX_REAL_PIPELINE=1 opt-in; that's now the off-switch
+    rather than the on-switch.
+    """
+    if os.getenv("BLACKBOX_REAL_PIPELINE") == "0":
+        return False
+    return bool(os.getenv("ANTHROPIC_API_KEY"))
 
 
 def _fmt_stream_event(ev: dict) -> str | None:
@@ -570,10 +579,10 @@ def _run_pipeline_real(job_id: str, upload_path: Path, mode: Mode) -> None:
 
         _push("done", "Complete", 1.0, done=True)
     except Exception as e:  # pragma: no cover - live API failure path
+        # #75: surface the error. NO silent stub fallback — the canonical
+        # path is live. If the operator wants the stub they pass ?source=stub.
         buffer.append(f"ERROR: {e!r}")
-        buffer.append("[fallback] Falling back to stub pipeline so the UI stays responsive.")
-        _push("analyzing", "Live pipeline failed — replaying stub", 0.3)
-        _run_pipeline_stub(job_id, upload_path, mode)
+        _push("failed", f"Live pipeline failed: {e}", 0.0)
 
 
 def _run_pipeline_telemetry_only(
@@ -750,9 +759,12 @@ async def analyze(
     background: BackgroundTasks,
     file: UploadFile = File(...),
     mode: str = Form("post_mortem"),
+    source: str = Form("auto"),
 ) -> HTMLResponse:
     if mode not in ("post_mortem", "scenario_mining", "synthetic_qa"):
         raise HTTPException(400, f"unknown mode: {mode}")
+    if source not in ("auto", "live", "stub"):
+        raise HTTPException(400, f"unknown source: {source!r} (auto|live|stub)")
 
     job_id = uuid.uuid4().hex[:12]
     upload_path = UPLOADS_DIR / f"{job_id}_{file.filename}"
@@ -774,7 +786,16 @@ async def analyze(
             "has_diff": False,
         },
     )
-    live = _real_pipeline_enabled()
+    # #75: live is the canonical worker. ?source=stub forces the offline
+    # walkthrough; ?source=live demands live and 503s if no API key set.
+    if source == "stub":
+        live = False
+    elif source == "live":
+        if not os.getenv("ANTHROPIC_API_KEY"):
+            raise HTTPException(503, "source=live requested but ANTHROPIC_API_KEY is unset")
+        live = True
+    else:
+        live = _real_pipeline_enabled()
     worker = _run_pipeline_real if live else _run_pipeline_stub
     # Re-stamp with correct source before the worker starts so the progress
     # card's first render already shows the right badge.
