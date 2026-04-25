@@ -1,0 +1,26 @@
+{
+  "batch_id": "batch_2026-04-25_dryrun",
+  "mode": "dry-run",
+  "model": "claude-opus-4-7",
+  "started_utc": "2026-04-25T12:22:20.696753+00:00",
+  "finished_utc": "2026-04-25T12:22:20.697189+00:00",
+  "budget_usd": 50.0,
+  "baseline_cost_usd": 37.67704425000002,
+  "spent_usd": 0.0,
+  "n_cases": 1,
+  "n_match": 1,
+  "rows": [
+    {
+      "case_key": "rtk_heading_break_01",
+      "ground_truth_bug": "sensor_timeout",
+      "predicted_bug": "sensor_timeout",
+      "bug_class_match": true,
+      "confidence": 0.77,
+      "cost_usd": 0.0,
+      "wall_time_s": 0.0,
+      "status": "ok",
+      "source": "stub",
+      "notes": "dry-run: stub predictor echoed ground truth"
+    }
+  ]
+}

@@ -193,6 +193,60 @@ def stub_predict(case: Path, gt: dict[str, Any]) -> CaseRow:
     )
 
 
+def load_telemetry_npz(npz_path: Path, np, TimeSeries) -> dict[str, Any]:
+    """Load telemetry.npz under either the prefixed or flat schema.
+
+    Two npz schemas are accepted:
+
+    1. Prefixed (run_opus_bench): ``<base>__t_ns``, ``<base>__values``,
+       ``<base>__fields`` — values is (N,D), fields names the columns.
+    2. Flat (rtk_heading_break_01 family): ``<prefix>_t_ns`` plus sibling
+       1-D scalar arrays ``<prefix>_<field>``. Stacked into a (N,D)
+       matrix at load time so downstream prompt code is uniform.
+    """
+    telemetry: dict[str, Any] = {}
+    z = np.load(npz_path, allow_pickle=True)
+    keys = list(z.files)
+    for key in keys:
+        if key.endswith("__t_ns"):
+            base = key[: -len("__t_ns")]
+            topic = "/" + base.replace(".", "/")
+            try:
+                fields = [str(f) for f in z[f"{base}__fields"].tolist()]
+                telemetry[topic] = TimeSeries(
+                    t_ns=z[f"{base}__t_ns"],
+                    values=z[f"{base}__values"],
+                    fields=fields,
+                )
+            except KeyError:
+                continue
+        elif key.endswith("_t_ns"):
+            base = key[: -len("_t_ns")]
+            if not base:
+                continue
+            t_ns = z[key]
+            siblings = [
+                k for k in keys
+                if k != key and k.startswith(base + "_") and not k.endswith("_t_ns")
+            ]
+            if not siblings:
+                continue
+            fields_list: list[str] = []
+            cols: list[Any] = []
+            for sk in sorted(siblings):
+                arr = z[sk]
+                if arr.ndim != 1 or arr.shape[0] != t_ns.shape[0]:
+                    continue
+                fields_list.append(sk[len(base) + 1 :])
+                cols.append(arr)
+            if not cols:
+                continue
+            values = np.column_stack(cols) if len(cols) > 1 else cols[0]
+            topic = "/" + base.replace("_", "/")
+            telemetry[topic] = TimeSeries(t_ns=t_ns, values=values, fields=fields_list)
+    return telemetry
+
+
 def claude_predict(case: Path, gt: dict[str, Any]) -> CaseRow:
     """Real Opus 4.7 post_mortem pass.
 
@@ -241,26 +295,8 @@ def claude_predict(case: Path, gt: dict[str, Any]) -> CaseRow:
             notes=f"import_error:{e!r}",
         )
 
-    # Load telemetry with the same prefixed-npz convention used by
-    # scripts/run_opus_bench.py. Cases whose npz layout the loader can't
-    # parse (e.g. rtk_heading_break_01) are flagged but not fatal.
-    telemetry: dict[str, Any] = {}
     try:
-        z = np.load(case / "telemetry.npz", allow_pickle=True)
-        for key in z.files:
-            if not key.endswith("__t_ns"):
-                continue
-            base = key[: -len("__t_ns")]
-            topic = "/" + base.replace(".", "/")
-            try:
-                fields = [str(f) for f in z[f"{base}__fields"].tolist()]
-                telemetry[topic] = TimeSeries(
-                    t_ns=z[f"{base}__t_ns"],
-                    values=z[f"{base}__values"],
-                    fields=fields,
-                )
-            except KeyError:
-                continue
+        telemetry = load_telemetry_npz(case / "telemetry.npz", np, TimeSeries)
     except Exception as e:
         return CaseRow(
             case_key=case.name,
@@ -404,7 +440,8 @@ def main(argv: list[str] | None = None) -> int:
                     help="Case directory. Default: black-box-bench/cases/.")
     ap.add_argument("--out-dir", type=Path, default=None,
                     help="Override output directory. Default: data/bench_runs/batch_<date>[_dryrun]/")
-    ap.add_argument("--only", default=None, help="Run a single case by key.")
+    ap.add_argument("--only", "--single-case", dest="only", default=None,
+                    help="Run a single case by key.")
     ap.add_argument("--suffix", default=None,
                     help="Extra suffix on the batch directory (e.g. 'v2').")
     args = ap.parse_args(argv)
