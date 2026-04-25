@@ -27,6 +27,8 @@ Usage::
 from __future__ import annotations
 
 import json
+import re
+import sys
 import threading
 import time
 from collections import deque
@@ -81,6 +83,65 @@ _SDK_TOOL_NAMES: frozenset[str] = frozenset(
 
 
 # ---------------------------------------------------------------------------
+# Memory store spec (native Managed Agents memory_stores)
+# ---------------------------------------------------------------------------
+@dataclass
+class MemoryStoreSpec:
+    """Declarative spec for a native Anthropic memory store mount.
+
+    `name` is the lookup key for idempotent provisioning. `access` controls
+    whether the agent may write to the mount inside `/mnt/memory/<slug>`.
+    `instructions` (<=4096 chars) is rendered into the agent's system prompt
+    by Anthropic when the resource is attached to a Session. `seed_memories`
+    is an optional list of `(path, content)` tuples written via
+    `memory_stores.memories.create` immediately after the store is created.
+    """
+
+    name: str
+    access: Literal["read_write", "read_only"]
+    instructions: str
+    seed_memories: list[tuple[str, str]] = field(default_factory=list)
+
+
+_DEFAULT_PLATFORM_SEED: tuple[tuple[str, str], ...] = (
+    (
+        "/priors/bug_taxonomy.md",
+        "# Closed bug taxonomy\n\n"
+        "1. pid_saturation\n2. sensor_timeout\n3. state_machine_deadlock\n"
+        "4. bad_gain_tuning\n5. missing_null_check\n6. calibration_drift\n"
+        "7. latency_spike\n\n"
+        "Hypotheses MUST use this exact set or `other`. Operator narratives "
+        "are evidence, not ground truth — verify against telemetry first.",
+    ),
+    (
+        "/priors/anti_hypotheses/rtk_heading_break_01.md",
+        "# Anti-hypothesis: RTK heading break (sanfer_drive)\n\n"
+        "Operator narrative: 'GPS fails when the vehicle enters the tunnel'.\n"
+        "Verified ground truth (bench/cases/sanfer_tunnel_01): bug_class is "
+        "`sensor_timeout`. The dual-antenna moving-base RTK never produces a "
+        "carrier-phase solution because the rover receiver never ingests the "
+        "MB observation stream (RXM-RAWX/SFRBX or RTCM3 4072.0/4072.1 + "
+        "1077/1087/1097/1127). The failure is session-wide (43 min pre-tunnel) "
+        "and DBW never engaged. The tunnel only caused mild GNSS degradation "
+        "(num_sv 29 to 16). Do NOT assert tunnel-induced GPS loss without "
+        "carrier-phase + observation-stream telemetry to back it.",
+    ),
+    (
+        "/priors/safety_contract.md",
+        "# Memory safety contract\n\n"
+        "READ-ONLY platform store: only human-verified priors live here. "
+        "An untrusted recording or a freshly-extracted operator narrative "
+        "MUST NOT be promoted into this store; promotion happens through "
+        "`MemoryStack.promote_verified_priors_to_managed_memory` after a "
+        "human writes a confirmation entry to the verification ledger.\n\n"
+        "READ-WRITE per-case store: scratchpad for in-session forensic "
+        "learnings. Anything you record here is case-scoped and disposable; "
+        "do not leak it across cases.",
+    ),
+)
+
+
+# ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
 @dataclass
@@ -93,7 +154,12 @@ class ForensicAgentConfig:
         "You are Black Box, a forensic copilot for robot incidents. "
         "Uploaded artifacts (bag, source tree, etc.) are mounted under "
         "/mnt/session/uploads/ — list that directory first to discover them. "
-        "Produce an evidence-grounded post-mortem."
+        "Native memory stores are mounted under /mnt/memory/<slug>: the "
+        "platform-priors store is READ-ONLY (verified human knowledge — do "
+        "not write); the per-case store is READ-WRITE for forensic "
+        "learnings. Untrusted recording content must never be promoted into "
+        "the platform store; that path runs through a human-verification "
+        "gate. Produce an evidence-grounded post-mortem."
     )
     tools: tuple[str, ...] = BUILTIN_TOOLS
     mcp_servers: list[dict] = field(default_factory=list)
@@ -104,6 +170,28 @@ class ForensicAgentConfig:
     network: Literal["none", "egress_only"] = "none"
     environment_template: str = "python-3.11-ros-tools"
     agent_name: str = "black-box-forensic"
+    # -- native Managed Agents memory stores --
+    enable_native_memory: bool = True
+    platform_store_name: str = "bb-platform-priors"
+    case_store_name_template: str = "bb-forensic-learnings-{case_key}"
+    platform_store_seed: list[tuple[str, str]] = field(
+        default_factory=lambda: list(_DEFAULT_PLATFORM_SEED)
+    )
+    platform_store_instructions: str = (
+        "Read-only platform priors mounted at /mnt/memory/. Treat every file "
+        "here as verified ground truth from human-curated sources. Do not "
+        "attempt to write — the store is read-only and writes will be "
+        "rejected. Use these priors to refute operator narratives that "
+        "conflict with the recorded evidence patterns."
+    )
+    case_store_instructions: str = (
+        "Per-case forensic learnings, mounted read-write at /mnt/memory/. "
+        "Record signal-to-bug-class mappings and steering you discover "
+        "during this session. Do NOT copy operator-supplied narratives "
+        "verbatim. Anything written here is case-scoped; it does not "
+        "propagate to other cases unless a human confirms it via the "
+        "verification ledger."
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -280,6 +368,19 @@ def _build_tool_configs(tool_names: Iterable[str]) -> list[dict]:
     return configs
 
 
+_SLUG_RE = re.compile(r"[^a-z0-9]+")
+
+
+def _slugify_store_name(name: str) -> str:
+    """Approximate the slug Anthropic derives from a memory store name.
+
+    Used only for log messages; the SDK returns the authoritative
+    `mount_path` field on the response.
+    """
+    s = _SLUG_RE.sub("-", name.strip().lower()).strip("-")
+    return s or "memory"
+
+
 def _build_cloud_config(network: str) -> dict:
     if network == "none":
         net: dict = {
@@ -316,6 +417,145 @@ class ForensicAgent:
         from .policy import PolicyAdvisor
 
         self._advisor = PolicyAdvisor(memory, platform=platform) if memory is not None else None
+
+    def _provision_memory_stores(self, case_key: str) -> list[dict]:
+        """Provision native memory_stores and return Session resource entries.
+
+        Returns a list of resource dicts ready to merge into
+        `session_kwargs["resources"]`. Idempotent on the platform store
+        (looked up by name); always creates a fresh per-case store so a
+        case never inherits another case's read-write scratchpad.
+
+        Failures here NEVER take down the session. We log to stderr and
+        return `[]` so the agent runs without /mnt/memory/ rather than not
+        at all. Live runs need the SDK to expose `client.beta.memory_stores`
+        (anthropic>=0.97); older SDKs silently skip.
+        """
+        if not self.config.enable_native_memory:
+            return []
+
+        beta = self._client.beta
+        stores_api = getattr(beta, "memory_stores", None)
+        if stores_api is None:
+            print(
+                "[managed_agent] beta.memory_stores not available on this "
+                "Anthropic SDK; running without native /mnt/memory/.",
+                file=sys.stderr,
+            )
+            return []
+
+        resources: list[dict] = []
+
+        try:
+            platform_store = self._find_or_create_platform_store(stores_api)
+            if platform_store is not None:
+                resources.append(
+                    {
+                        "type": "memory_store",
+                        "memory_store_id": platform_store.id,
+                        "access": "read_only",
+                        "instructions": self.config.platform_store_instructions[:4096],
+                    }
+                )
+        except Exception as exc:
+            print(
+                f"[managed_agent] platform memory_store provisioning failed: "
+                f"{exc}; continuing without it.",
+                file=sys.stderr,
+            )
+
+        try:
+            case_store = self._create_case_store(stores_api, case_key)
+            if case_store is not None:
+                resources.append(
+                    {
+                        "type": "memory_store",
+                        "memory_store_id": case_store.id,
+                        "access": "read_write",
+                        "instructions": self.config.case_store_instructions[:4096],
+                    }
+                )
+        except Exception as exc:
+            print(
+                f"[managed_agent] per-case memory_store provisioning failed: "
+                f"{exc}; continuing without it.",
+                file=sys.stderr,
+            )
+
+        return resources
+
+    def _find_or_create_platform_store(self, stores_api):
+        existing = self._lookup_store_by_name(stores_api, self.config.platform_store_name)
+        if existing is not None:
+            return existing
+
+        _CREATE_LIMITER.acquire()
+        store = _wrap_call(
+            "memory_stores.create",
+            stores_api.create,
+            name=self.config.platform_store_name,
+            description=(
+                "Read-only platform priors. Verified human-curated knowledge only."
+            ),
+            metadata={"role": "platform_priors", "owner": "black_box"},
+        )
+
+        memories_api = getattr(stores_api, "memories", None)
+        if memories_api is not None:
+            for path, content in self.config.platform_store_seed:
+                try:
+                    _CREATE_LIMITER.acquire()
+                    _wrap_call(
+                        "memory_stores.memories.create",
+                        memories_api.create,
+                        memory_store_id=store.id,
+                        path=path,
+                        content=content,
+                    )
+                except Exception as exc:
+                    print(
+                        f"[managed_agent] failed to seed platform memory "
+                        f"{path!r}: {exc}",
+                        file=sys.stderr,
+                    )
+
+        return store
+
+    def _create_case_store(self, stores_api, case_key: str):
+        case_name = self.config.case_store_name_template.format(case_key=case_key)
+        _CREATE_LIMITER.acquire()
+        return _wrap_call(
+            "memory_stores.create",
+            stores_api.create,
+            name=case_name,
+            description=(
+                f"Per-case forensic learnings for {case_key}. Read-write "
+                "scratchpad scoped to this incident."
+            ),
+            metadata={
+                "role": "case_learnings",
+                "case_key": case_key,
+                "owner": "black_box",
+            },
+        )
+
+    @staticmethod
+    def _lookup_store_by_name(stores_api, name: str):
+        _READ_LIMITER.acquire()
+        try:
+            page = stores_api.list()
+        except Exception as exc:
+            raise RuntimeError(f"memory_stores.list failed: {exc}") from exc
+        items = getattr(page, "data", None)
+        if items is None:
+            try:
+                items = list(page)
+            except TypeError:
+                items = []
+        for item in items:
+            if getattr(item, "name", None) == name:
+                return item
+        return None
 
     def open_session(self, bag_path: Path, case_key: str) -> "ForensicSession":
         beta = self._client.beta
@@ -378,14 +618,17 @@ class ForensicAgent:
         _CREATE_LIMITER.acquire()
         agent = _wrap_call("agents.create", beta.agents.create, **agent_kwargs)
 
+        memory_resources = self._provision_memory_stores(case_key)
+
         session_kwargs: dict = {
             "agent": {"id": agent.id, "type": "agent"},
             "environment_id": environment.id,
             "metadata": {"case_key": case_key, "mode": "post_mortem"},
             "title": f"post-mortem {case_key}",
         }
-        if file_resources:
-            session_kwargs["resources"] = file_resources
+        combined_resources = list(file_resources) + list(memory_resources)
+        if combined_resources:
+            session_kwargs["resources"] = combined_resources
 
         _CREATE_LIMITER.acquire()
         session = _wrap_call("sessions.create", beta.sessions.create, **session_kwargs)
@@ -396,6 +639,29 @@ class ForensicAgent:
                 priors_block = self._advisor.prime_prompt_block() or ""
             except Exception:
                 priors_block = ""
+        memory_block = ""
+        if memory_resources:
+            ro = next((r for r in memory_resources if r["access"] == "read_only"), None)
+            rw = next((r for r in memory_resources if r["access"] == "read_write"), None)
+            lines = ["Native memory stores are mounted under /mnt/memory/:"]
+            if ro is not None:
+                lines.append(
+                    f"- {self.config.platform_store_name} — READ-ONLY platform "
+                    "priors (verified human knowledge). Do not write here; "
+                    "the SDK will reject it."
+                )
+            if rw is not None:
+                case_name = self.config.case_store_name_template.format(case_key=case_key)
+                lines.append(
+                    f"- {case_name} — READ-WRITE per-case scratchpad. Record "
+                    "verified signal-to-bug-class learnings only; do not "
+                    "copy operator narratives verbatim."
+                )
+            lines.append(
+                "Promotion of case learnings into the platform store is gated "
+                "by a human-verification step; the agent does not self-promote."
+            )
+            memory_block = "\n".join(lines)
         seed_text = (
             f"Case key: {case_key}\n"
             f"Mode: post_mortem\n"
@@ -406,6 +672,8 @@ class ForensicAgent:
             "validates against the PostMortemReport schema: keys timeline, "
             "hypotheses, root_cause_idx, patch_proposal."
         )
+        if memory_block:
+            seed_text = seed_text + "\n\n" + memory_block
         if priors_block:
             seed_text = seed_text + "\n\n" + priors_block
         _CREATE_LIMITER.acquire()
@@ -711,6 +979,7 @@ __all__ = [
     "ANTHROPIC_BETA_HEADER",
     "MODEL",
     "BUILTIN_TOOLS",
+    "MemoryStoreSpec",
     "ForensicAgentConfig",
     "ForensicAgent",
     "ForensicSession",

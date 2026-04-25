@@ -25,11 +25,13 @@ from .records import (
     TaxonomyCount,
 )
 from .verification import (
+    UnverifiedMemoryPromotionError,
     VerificationNote,
     add_note,
     disputes_for_class,
     iter_notes_for,
     now_utc_iso,
+    promote_verified_priors_to_managed_memory,
 )
 from .decisions import (
     DecisionRecord,
@@ -52,10 +54,12 @@ __all__ = [
     "TaxonomyCount",
     "EvalRecord",
     "VerificationNote",
+    "UnverifiedMemoryPromotionError",
     "add_note",
     "disputes_for_class",
     "iter_notes_for",
     "now_utc_iso",
+    "promote_verified_priors_to_managed_memory",
     "DecisionRecord",
     "PatchNotApprovedError",
     "apply_patch_if_approved",

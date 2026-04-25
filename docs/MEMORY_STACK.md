@@ -152,6 +152,86 @@ the v2 cached payload is below the minimum block size Anthropic accepts
 for caching. Fix is a one-line padding change; numbers above show the
 payoff.
 
+## Native Managed Agents memory stores
+
+The local L1-L4 stack drives the policy advisor and the Tier-1 prompt
+priors. Native Anthropic Managed Agents memory stores are a *separate*
+substrate that gives the in-session agent direct filesystem-like access at
+`/mnt/memory/` while the session is running. Both layers coexist; one does
+not replace the other.
+
+Wired in
+[`src/black_box/analysis/managed_agent.py`](../src/black_box/analysis/managed_agent.py)
+on top of `client.beta.memory_stores.*` (anthropic SDK, beta header
+`managed-agents-2026-04-01`, model `claude-opus-4-7`).
+
+Two stores are mounted on every `ForensicAgent.open_session(...)`:
+
+| Store | Access | Lifecycle | Mount path | Source of truth |
+|-------|--------|-----------|------------|-----------------|
+| `bb-platform-priors` | read_only | shared across all cases (idempotent — created once, reused thereafter) | `/mnt/memory/bb-platform-priors` | human-curated taxonomy + verified anti-hypotheses (e.g. the `rtk_heading_break_01` anti-prior that refutes "GPS fails in tunnel") |
+| `bb-forensic-learnings-{case_key}` | read_write | fresh per session — never reused across cases | `/mnt/memory/bb-forensic-learnings-<case_key>` | in-session agent scratchpad for signal-to-bug-class learnings |
+
+```mermaid
+flowchart LR
+    subgraph LOCAL[Local L1-L4 JSONL stack]
+        L1[L1 case]
+        L2[L2 platform priors]
+        L3[L3 taxonomy]
+        L4[L4 eval]
+    end
+
+    subgraph NATIVE[Native managed-agents memory stores]
+        RO[bb-platform-priors<br/>read-only<br/>shared across cases]
+        RW[bb-forensic-learnings-<br/>case_key<br/>read-write<br/>fresh per session]
+    end
+
+    LOCAL -- "drives PolicyAdvisor + prime_prompt_block" --> AGENT[ForensicAgent]
+    AGENT -- "open_session" --> NATIVE
+    NATIVE -- "/mnt/memory/" --> CLAUDE[Opus 4.7 in-session]
+    CLAUDE -. "verified L2/L3 entries" .-> GATE{human verification gate}
+    GATE -- confirmation severity --> RO
+```
+
+### The promotion gate
+
+`promote_verified_priors_to_managed_memory` in
+[`src/black_box/memory/verification.py`](../src/black_box/memory/verification.py)
+is the only sanctioned write path into the read-only platform store. It
+refuses to forward an entry into the SDK unless one of the following is
+true:
+
+1. The entry carries an explicit `verified=True` flag (used for
+   human-curated bootstrap seeds).
+2. The entry references an `analysis_id` for which the global
+   verification ledger contains at least one
+   `severity == "confirmation"` note.
+
+Otherwise it raises `UnverifiedMemoryPromotionError` *before* any SDK call.
+The platform store is never partially mutated by an unverified batch. This
+closes the loop: untrusted recording content (operator narratives,
+freshly-extracted hypotheses from a fresh bag) cannot reach the read-only
+store without a human writing a confirmation note first.
+
+The agent itself never calls this function — it is invoked from operator
+tooling after a verification ledger entry is filed.
+
+### Why both layers
+
+* **Local L1-L4** is the source of truth for the offline policy advisor,
+  regression alarms, and prompt priming. It survives reboots, is
+  inspectable in the repo, and is the audit log for cross-run learning.
+* **Native memory stores** give the live agent a filesystem at
+  `/mnt/memory/` it can `read`/`grep` during a session — Anthropic
+  renders the store's `instructions` field into the agent's system prompt
+  at session boot, so the agent knows the mount layout without an extra
+  user message round trip. They are also *case-isolated* by design: the
+  per-case read-write store never leaks scratch state into another case.
+
+If `enable_native_memory=False` (offline tests, regression runs), the
+provisioning calls are skipped entirely and `/mnt/memory/` is simply not
+present — the local stack continues to drive the prompt as before.
+
 ## Pointers
 
 - Implementation: [`src/black_box/memory/`](../src/black_box/memory/)

@@ -397,6 +397,8 @@ flowchart TB
 
 **Shipped:** stack wiring, pydantic records, four independent stores, `MemoryStack.open()`, accuracy roll-ups by case and bug class, taxonomy counts on every finalize.
 
+**Native Managed Agents memory stores** sit alongside the local stack. Every `ForensicAgent.open_session(...)` provisions two `client.beta.memory_stores.*` resources mounted under `/mnt/memory/`: a shared `bb-platform-priors` store (read-only, seeded from the bug taxonomy and verified anti-hypotheses like the `rtk_heading_break_01` prior that refutes "GPS fails in tunnel"), and a fresh per-case `bb-forensic-learnings-{case_key}` store (read-write, case-isolated). Promotion of unverified content into the platform store is blocked by `promote_verified_priors_to_managed_memory` until a human writes a `severity="confirmation"` entry to the verification ledger. Beta header `managed-agents-2026-04-01`, model `claude-opus-4-7`. Details: [docs/MEMORY_STACK.md](docs/MEMORY_STACK.md#native-managed-agents-memory-stores).
+
 **Not yet shipped (roadmap):** the policy loop that reads L2 priors to bias the system prompt, uses L3 frequency as a tie-breaker on low-confidence hypotheses, and raises a regression alarm when L4 accuracy on a previously-solved case class drops below a threshold. Calling that "self-improving" would be overclaim until the loop is visible between runs.
 
 ## Grounding gate
