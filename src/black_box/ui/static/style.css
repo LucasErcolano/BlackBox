@@ -941,3 +941,60 @@ footer {
 [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea {
   background: #16181e; color: var(--ink); border-color: var(--line);
 }
+
+/* ---------- native memory mount card ---------- */
+.memory-card {
+  margin: 0 0 1.75rem;
+  padding: 0.95rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.memory-card-eyebrow {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  margin-bottom: 0.55rem;
+}
+.memory-card-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+.memory-card-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.memory-card-check {
+  font-weight: 600;
+  color: #2f855a;
+  width: 1ch;
+}
+.memory-card-name {
+  font-family: var(--mono);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.78rem;
+  color: var(--ink);
+}
+.memory-card-mode {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.memory-card-gate { color: var(--muted); }
+[data-theme="dark"] .memory-card-name { background: #16181e; border-color: var(--line); }

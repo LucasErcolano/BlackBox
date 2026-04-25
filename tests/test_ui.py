@@ -538,3 +538,26 @@ def test_decide_404s_when_patch_missing(tmp_path, monkeypatch):
     client = TestClient(app)
     r = client.post("/decide/no-such-job", data={"decision": "approve"})
     assert r.status_code == 404
+
+
+def test_memory_native_status_endpoint_reflects_config():
+    client = TestClient(app)
+    r = client.get("/memory/native_status")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["platform_store"]["present"] is True
+    assert body["platform_store"]["mode"] == "read_only"
+    assert body["platform_store"]["name"] == "bb-platform-priors"
+    assert body["case_store_template"] == "bb-forensic-learnings-{case_key}"
+    assert body["gate"] == "verification_ledger"
+
+
+def test_index_renders_native_memory_card():
+    client = TestClient(app)
+    r = client.get("/")
+    assert r.status_code == 200
+    assert "native claude memory mounted" in r.text.lower()
+    assert "bb-platform-priors" in r.text
+    assert "read_only" in r.text
+    assert "bb-forensic-learnings-{case_key}" in r.text
+    assert "verification ledger" in r.text
