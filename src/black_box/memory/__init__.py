@@ -31,6 +31,15 @@ from .verification import (
     iter_notes_for,
     now_utc_iso,
 )
+from .decisions import (
+    DecisionRecord,
+    PatchNotApprovedError,
+    apply_patch_if_approved,
+    history_for,
+    latest_for,
+    record_decision,
+    rejected_classes_count,
+)
 
 __all__ = [
     "CaseMemory",
@@ -47,4 +56,11 @@ __all__ = [
     "disputes_for_class",
     "iter_notes_for",
     "now_utc_iso",
+    "DecisionRecord",
+    "PatchNotApprovedError",
+    "apply_patch_if_approved",
+    "history_for",
+    "latest_for",
+    "record_decision",
+    "rejected_classes_count",
 ]

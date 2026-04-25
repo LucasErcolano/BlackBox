@@ -1101,4 +1101,32 @@ async def decide_patch(
         raise HTTPException(409, f"already {existing['status']}")
     status = "approved" if decision == "approve" else "rejected"
     saved = _save_decision(job_id, status=status, note=note.strip())
+    # Also append to the durable, append-only JSONL audit ledger (#82). The
+    # per-job .decision.json above is the latest-state cache; the JSONL is
+    # the audit log apply_patch_if_approved gates on.
+    from black_box.memory import record_decision
+    record_decision(job_id=job_id, status=status, note=note.strip())
     return HTMLResponse(_gate_footer_html(job_id, saved))
+
+
+@app.get("/decisions/{job_id}", response_class=HTMLResponse)
+async def decision_history(job_id: str) -> HTMLResponse:
+    """Render the full decision history for a job. #82 acceptance criterion."""
+    from black_box.memory import history_for
+
+    rows = history_for(job_id)
+    if not rows:
+        return HTMLResponse(
+            f'<section class="gate"><div class="gate-headline">no decisions for {html_escape(job_id)}</div></section>'
+        )
+    items = "".join(
+        f'<li><strong>{html_escape(r.status)}</strong> at {html_escape(r.decided_at)} '
+        f'by <code>{html_escape(r.operator)}</code>'
+        + (f' — {html_escape(r.note)}' if r.note else "")
+        + "</li>"
+        for r in rows
+    )
+    return HTMLResponse(
+        f'{_GATE_STYLE}<section class="gate"><div class="gate-headline">decision history — {html_escape(job_id)}</div>'
+        f'<ol>{items}</ol></section>'
+    )
