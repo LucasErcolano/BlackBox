@@ -112,6 +112,7 @@ The 21 open issues #75–#95 form the post-freeze backlog. Each one is scoped, h
 - [Risks](docs/RISKS.md) — risk register + stop-loss triggers.
 - [Submission](docs/SUBMISSION.md) — deliverables checklist.
 - [Smoke test](docs/SMOKE_TEST.md) — clean-clone reproducibility steps for judges.
+- [Claims & evidence](docs/CLAIMS.md) — every strong claim in this README paired with a verifiable artifact.
 - [Rehearsal](docs/REHEARSAL.md) — pitch timing, breath points, Q&A prep.
 - [Overnight batch](OVERNIGHT_BATCH.md) — unattended bench runner + budget-gated driver for `scripts/overnight_batch.py`. Dry-run log at [`docs/assets/overnight_batch_dryrun.txt`](docs/assets/overnight_batch_dryrun.txt); deterministic asciicast at [`docs/recordings/offline_batch.cast`](docs/recordings/offline_batch.cast) (regenerate with `python scripts/record_batch_asciicast.py`).
 
