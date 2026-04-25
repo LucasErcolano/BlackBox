@@ -220,6 +220,7 @@ def test_analyze_routes_to_stub_by_default(monkeypatch, tmp_path):
     monkeypatch.setattr(ui_app, "UPLOADS_DIR", tmp_path)
     monkeypatch.setattr(ui_app, "JOBS_DIR", tmp_path)
     monkeypatch.delenv("BLACKBOX_REAL_PIPELINE", raising=False)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
 
     scheduled: list[tuple] = []
 

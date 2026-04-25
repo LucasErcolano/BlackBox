@@ -24,6 +24,8 @@ Per #90: classify each script as **eval / demo / ops / dev** so evaluators can t
 | `managed_agent_smoke.py` | eval | smoke for the ForensicAgent / Managed Agents wiring. |
 | `analyze_bag.py` | eval | single-bag analysis (legacy v1). |
 | `analyze_bag_v2.py` | eval | single-bag analysis (current; v2). |
+| `memory_loop_demo.py` | demo | two-run sequence proving memory L1–L4 priors are read and applied (#76). |
+| `record_batch_asciicast.py` | demo | produces v2 asciicast of the offline batch runner for `docs/recordings/` (#88). |
 | `cost_report.py` | ops | summarize / chart `data/costs.jsonl` — cumulative spend, per-prompt CSV. |
 | `overnight_batch.py` | ops | unattended bench runner with budget gates; pairs with `OVERNIGHT_BATCH.md`. |
 | `record_replay.py` | ops | record a deterministic replay of a session (compressed). |
