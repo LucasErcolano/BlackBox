@@ -399,6 +399,15 @@ flowchart TB
 
 **Native Managed Agents memory stores** sit alongside the local stack. Every `ForensicAgent.open_session(...)` provisions two `client.beta.memory_stores.*` resources mounted under `/mnt/memory/`: a shared `bb-platform-priors` store (read-only, seeded from the bug taxonomy and verified anti-hypotheses like the `rtk_heading_break_01` prior that refutes "GPS fails in tunnel"), and a fresh per-case `bb-forensic-learnings-{case_key}` store (read-write, case-isolated). Promotion of unverified content into the platform store is blocked by `promote_verified_priors_to_managed_memory` until a human writes a `severity="confirmation"` entry to the verification ledger. Beta header `managed-agents-2026-04-01`, model `claude-opus-4-7`. Details: [docs/MEMORY_STACK.md](docs/MEMORY_STACK.md#native-managed-agents-memory-stores).
 
+**Memory lifecycle CLI.** `blackbox-memory` (entry point installed by `pyproject.toml`) wraps the stores for ops:
+
+- `audit-native --store NAME` — paths, last-modified, version count, sha256.
+- `export-native-versions --store NAME [--include-content]` — dumps version history to `data/memory_exports/<store_id>/`.
+- `redact-native-version --version ID --reason TXT` — SDK redaction with a required reason.
+- `propose-promotion ANALYSIS_ID` / `diff-promotion ANALYSIS_ID` / `approve-promotion ANALYSIS_ID` / `reject-promotion ANALYSIS_ID --reason TXT` — human-gated promotion of agent-emitted candidates from `data/memory/proposed_promotions/` into `bb-platform-priors`. Approve and reject both append to `data/memory/promotion_log.jsonl`.
+
+Companion ops scripts: `scripts/list_managed_memory_stores.py`, `scripts/archive_old_case_memory_stores.py` (dry-run by default), `scripts/delete_case_memory_store.py` (hard guard against `bb-platform-priors`), `scripts/export_memory_versions.py`.
+
 **Not yet shipped (roadmap):** the policy loop that reads L2 priors to bias the system prompt, uses L3 frequency as a tie-breaker on low-confidence hypotheses, and raises a regression alarm when L4 accuracy on a previously-solved case class drops below a threshold. Calling that "self-improving" would be overclaim until the loop is visible between runs.
 
 ## Grounding gate

@@ -35,6 +35,10 @@ Per #90: classify each script as **eval / demo / ops / dev** so evaluators can t
 | `legal_review.py` | ops | scan repo for license/legal risk markers (release gating). |
 | `snapshot_controllers.py` | ops | freeze the controller source tree for an analysis. |
 | `download_sample_bag.py` | ops | fetch the public sample bag (idempotent). |
+| `list_managed_memory_stores.py` | ops | list all native managed memory stores (id/name/created/size); JSON or table. |
+| `archive_old_case_memory_stores.py` | ops | dry-run/apply deletion of `bb-case-*` stores older than N days; refuses platform store. |
+| `delete_case_memory_store.py` | ops | delete one specific managed memory store by id or name; refuses `bb-platform-priors`. |
+| `export_memory_versions.py` | ops | dump every memory path's version history from a store to `data/memory_exports/`. |
 | `final_pipeline.py` | demo | submission-cut full pipeline driver (long; produces final video assets). |
 | `build_grounding_gate_demo.py` | demo | builds the grounding-gate replay demo asset. |
 | `build_sanfer_timelapse.py` | demo | timelapse of the sanfer hero session for the demo video. |

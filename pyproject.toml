@@ -38,6 +38,7 @@ dev = [
 
 [project.scripts]
 blackbox = "black_box.cli:main"
+blackbox-memory = "black_box.memory.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
