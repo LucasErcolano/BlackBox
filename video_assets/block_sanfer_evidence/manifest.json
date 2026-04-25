@@ -1,0 +1,62 @@
+{
+  "block_id": "block_sanfer_evidence",
+  "duration_target": "65-75s",
+  "duration_actual": 70.0,
+  "fps": 30,
+  "resolution": "1920x1080",
+  "codec": "h264",
+  "deliverable_mode": "FINAL_NOW",
+  "ui_dependency_level": "none",
+  "narration_target_windows": {
+    "0-10s":  "telemetry-anchored visual mining / 5-camera grid + window strip",
+    "10-22s": "operator tunnel hypothesis (field log quote, provisional triage)",
+    "22-32s": "BlackBox refutation — rover numSV never collapses, fixType=3 100%",
+    "32-52s": "real RTK heading root cause — moving-base→rover RTCM uplink silent",
+    "52-70s": "scoped patch / diff proposal · proposed for human review (no auto-apply)"
+  },
+  "beats": [
+    {"t": "0.0-10.0s",  "name": "visual_mining",       "content": "5-camera grid (cam1..cam5, w03 slot 4) + 7-window timeline strip (priority ≥ 0.95 in amber, lower in muted amber). Rejects uniform sampling, densifies inside windows."},
+    {"t": "10.0-22.0s", "name": "operator_hypothesis", "content": "Field-log quote 'el GPS falla cuando entramos al túnel.' + provisional triage (bug class #2 sensor timeout, GNSS) + 'what the data must show to confirm' checklist."},
+    {"t": "22.0-32.0s", "name": "refutation",          "content": "rtk_numsv plot (median 29, min 16, never approaches 4-SV floor) + verdict pills + 'operator hypothesis — GNSS outage during tunnel REFUTED' strike-through."},
+    {"t": "32.0-52.0s", "name": "real_root_cause",     "content": "rtk_carrier_contrast plot (rover CARR_NONE 100% vs MB FLOAT 63.6%/FIXED 30.7%) + rel_pos_valid plot (REL_POS_VALID flat zero, DIFF_SOLN 15%) + numeric stat card sourced from rtk_heading_break_01.json."},
+    {"t": "52.0-70.0s", "name": "patch_proposal",      "content": "Three-file scoped diff (moving_base.yaml RTCM3 enable, rover.yaml RTCM3 in_protocol + UART2INPROT-RTCM3X, prelaunch_watchdog.py latched RTK gate) with slow vertical pan over the diff PNG. 'human review required — no auto-apply' caveat box."}
+  ],
+  "source_assets_used": [
+    "data/runs/sanfer_sanisidro__no_prompt/frames/  (5× cam1..cam5, window w03 slot 04, real bag frames)",
+    "data/runs/sanfer_sanisidro__no_prompt/windows.json  (7 candidate windows, priorities — rendered verbatim on timeline strip)",
+    "docs/assets/rtk_carrier_contrast.png  (matplotlib output of scripts/render_rtk_plots.py over telemetry.npz)",
+    "docs/assets/rel_pos_valid.png        (same script, navrelposned flag traces)",
+    "docs/assets/rtk_numsv.png            (same script, rover numSV vs 4-SV 3D-fix floor)",
+    "demo_assets/diff_viewer/moving_base_rover.png  (playwright screenshot of the 3-panel HTML diff produced by scripts/render_rtk_diff.py)",
+    "black-box-bench/runs/sample/rtk_heading_break_01.json  (real Claude analyze run — stat-card numbers come from its evidence array)",
+    "black-box-bench/cases/rtk_heading_break_01/telemetry.npz  (upstream of the three RTK plots)"
+  ],
+  "shared_visual_language_with": ["block_05_first_moment", "block_07_grounding", "block_08_money_shot"],
+  "palette": {
+    "bg": "#0a0c10", "fg": "#e6e8ec", "dim": "#78808c",
+    "panel": "#12141a", "border": "#3c424e",
+    "accent": "#ffb840", "muted_amber": "#c49648",
+    "muted_red": "#aa5656", "health": "#bae6aa", "strike": "#5a5e64"
+  },
+  "render_script": "scripts/render_block_sanfer_evidence.py",
+  "outputs": {
+    "clip":     "video_assets/block_sanfer_evidence/clip.mp4",
+    "preview":  "video_assets/block_sanfer_evidence/preview.png",
+    "notes":    "video_assets/block_sanfer_evidence/notes.md",
+    "manifest": "video_assets/block_sanfer_evidence/manifest.json"
+  },
+  "edits_performed": [
+    "PIL composite of 5 beats at 30 fps, 2100 frames total",
+    "smoothstep crossfades (XFADE=0.5s) between beats, matching block_07/08 cadence",
+    "5-cam grid with shadow recipe + black corner cam-id labels in amber",
+    "telemetry timeline strip with priority-coloured window markers",
+    "operator quote in IBM Plex-style serif weight (DejaVu fallback) on muted-amber accent rail",
+    "REFUTED tag reuses block_07 strike-through + tag visual",
+    "diff panel slow vertical pan (ease-in-out, 2.0s–14.0s of beat E)",
+    "ffmpeg libx264 CRF 18, yuv420p, +faststart"
+  ],
+  "remaining_work": [
+    "voice-over not recorded (timing windows above were authored to be VO-friendly; bake in an audio pass before final cut)",
+    "operator quote text is a faithful Spanish paraphrase of the field-note recorded in memory (project_sanfer_finding.md). Not a verbatim transcript — see notes.md before publishing."
+  ]
+}
