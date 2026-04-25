@@ -25,7 +25,7 @@ Demo proof: `demo_assets/grounding_gate/README.md`.
 - **Self-improving memory loop** (L2 priors priming the system prompt, L3 tie-breaking, L4 regression alarms). Substrate ships; loop does not. README calls this out explicitly.
 - **Tier-1 / Tier-2 batch runners.** Single-case paths work; batched CLI is skeleton only.
 - **Public-data downloader path** (`eval.public_data`). Stub only.
-- **Real rosbag upload path in the deployed UI** — the video demo uses the streaming stub (`_run_pipeline_stub`). Real pipeline is reachable via env flag and `scripts/managed_agent_smoke.py`; not the demo critical path.
+- ~~**Real rosbag upload path in the deployed UI**~~ — promoted to canonical via #75. Live is the default worker whenever `ANTHROPIC_API_KEY` is set; the streaming stub is now opt-in via `?source=stub` for the deterministic demo cut.
 - **Video synthesis execution** (Wan 2.2, Nano Banana Pro, ComfyUI). We emit text prompts only. Operator runs video tools on their own GPU.
 - **ROS 2 runtime.** Never installed. `rosbags` library only.
 - **LangChain / AutoGen / LlamaIndex / vector DBs / RAG.** None, ever.

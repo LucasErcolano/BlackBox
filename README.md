@@ -461,9 +461,17 @@ Reproduce: `python scripts/capture_screenshots.py` (requires `playwright` + `pla
 
 ## UI status
 
-`src/black_box/ui/` ships the upload → streaming-reasoning → side-by-side-diff UX. Behind the UI, the pipeline worker is currently the streaming **stub** (`_run_pipeline_stub` in `ui/app.py`) that walks through realistic stage chunks and emits a canned patch artifact for the diff viewer (tag: `replay`). The demo video uses this path.
+`src/black_box/ui/` ships the upload → streaming-reasoning → side-by-side-diff UX. Behind the UI the canonical worker is **live** (ingestion → `ForensicAgent` session → PDF render). It runs by default whenever `ANTHROPIC_API_KEY` is set; no `BLACKBOX_REAL_PIPELINE` opt-in required (#75).
 
-The real worker (ingestion → `ForensicAgent` session → PDF render) runs today via `scripts/managed_agent_smoke.py` (tag: `live`, gated on `BLACKBOX_REAL_PIPELINE=1`); wiring that into the UI background task is deferred — see [`SCOPE_FREEZE.md`](SCOPE_FREEZE.md).
+Source-mode selection at upload time (form field `source`, default `auto`):
+
+| `source=` | Behavior |
+|---|---|
+| `auto` | Live when an API key is set; stub otherwise. |
+| `live` | Force the real worker. 503 if the key is missing. |
+| `stub` | Force the offline scripted walkthrough — used in the demo video for deterministic playback. |
+
+If the live pipeline fails mid-run, the failure is surfaced as a `failed` job with the error message — there is **no** silent stub fallback. `BLACKBOX_REAL_PIPELINE=0` remains as the kill-switch for offline-only environments.
 
 ## Demo asset catalog
 
@@ -496,7 +504,7 @@ Primary mapping: [`demo_assets/INDEX.md`](demo_assets/INDEX.md). Tags per beat:
 - `platforms/` — robot-specific adapters + taxonomies (see **Bonus** below).
 - `synthesis/` — injected-bug recordings + text video prompts.
 - `reporting/` — reportlab PDF (NTSB-style), unified diff + HTML side-by-side.
-- `ui/` — FastAPI + HTMX progress polling (stub worker today; real wiring deferred per `SCOPE_FREEZE.md`).
+- `ui/` — FastAPI + HTMX progress polling. Live worker is canonical (#75); `?source=stub` opt-in for the offline demo.
 - `eval/` — tier-3 runner + offline stub path; tier-1/tier-2 batch runners pending.
 - `scripts/` — runners, demo asset builders, ops, dev utilities. Classified per category in [`scripts/README.md`](scripts/README.md) (eval / demo / ops / dev).
 
