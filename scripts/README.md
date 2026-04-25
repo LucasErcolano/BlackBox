@@ -39,6 +39,7 @@ Per #90: classify each script as **eval / demo / ops / dev** so evaluators can t
 | `build_sanfer_timelapse.py` | demo | timelapse of the sanfer hero session for the demo video. |
 | `build_bag_timelapse.py` | demo | generic bag timelapse for promo/demo cuts. |
 | `build_multicam_composite.py` | demo | 5-camera composite for the cross-view beat. |
+| `build_visual_mining_v2_grid.py` | demo | 5-camera grid PNG anchored on a telemetry window — proof asset for the cross-modal beat (#128). |
 | `build_boat_traffic_plot.py` | demo | marine USV traffic plot for the cross-platform demo beat. |
 | `capture_screenshots.py` | demo | capture UI screenshots for README / submission. |
 | `capture_nao6.py` | demo | NAO6 fixture capture (bonus only — see `NAO6_CAPTURE_GUIDE.md`). |
