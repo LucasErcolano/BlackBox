@@ -1,0 +1,151 @@
+{
+  "schema": "opus_model_compare/1.0",
+  "timestamp_utc": "20260425T171622Z",
+  "budget_usd": 6.0,
+  "cases": [
+    "bad_gain_01",
+    "pid_saturation_01",
+    "sensor_timeout_01"
+  ],
+  "models": [
+    "claude-opus-4-6",
+    "claude-opus-4-7"
+  ],
+  "aggregates": [
+    {
+      "model": "claude-opus-4-6",
+      "n_cases": 3,
+      "n_bug_match": 2,
+      "bug_class_accuracy": 0.6666666666666666,
+      "n_patch_target_match": 0,
+      "patch_target_accuracy": 0.0,
+      "mean_evidence_count": 3.3333333333333335,
+      "tool_error_count": 0,
+      "total_cost_usd": 0.35313,
+      "total_wall_time_s": 72.21893095970154,
+      "rows": [
+        {
+          "case_key": "bad_gain_01",
+          "model": "claude-opus-4-6",
+          "ground_truth_bug": "bad_gain_tuning",
+          "predicted_bug": "bad_gain_tuning",
+          "bug_match": true,
+          "patch_target_file": "source/buggy/heading_controller.py",
+          "patch_target_function": "HeadingController.step",
+          "patch_target_match": false,
+          "confidence": 0.88,
+          "evidence_count": 3,
+          "tool_error": false,
+          "cost_usd": 0.11262,
+          "wall_time_s": 22.477147579193115,
+          "notes": "ok"
+        },
+        {
+          "case_key": "pid_saturation_01",
+          "model": "claude-opus-4-6",
+          "ground_truth_bug": "pid_saturation",
+          "predicted_bug": "pid_saturation",
+          "bug_match": true,
+          "patch_target_file": "source/buggy/pid_controller.py",
+          "patch_target_function": "PIDController.step",
+          "patch_target_match": false,
+          "confidence": 0.88,
+          "evidence_count": 4,
+          "tool_error": false,
+          "cost_usd": 0.11547,
+          "wall_time_s": 23.871602535247803,
+          "notes": "ok"
+        },
+        {
+          "case_key": "sensor_timeout_01",
+          "model": "claude-opus-4-6",
+          "ground_truth_bug": "sensor_timeout",
+          "predicted_bug": "bad_gain_tuning",
+          "bug_match": false,
+          "patch_target_file": "source/buggy/obstacle_avoider.py",
+          "patch_target_function": "ObstacleAvoider.step",
+          "patch_target_match": false,
+          "confidence": 0.82,
+          "evidence_count": 3,
+          "tool_error": false,
+          "cost_usd": 0.12503999999999998,
+          "wall_time_s": 25.87018084526062,
+          "notes": "ok"
+        }
+      ]
+    },
+    {
+      "model": "claude-opus-4-7",
+      "n_cases": 3,
+      "n_bug_match": 2,
+      "bug_class_accuracy": 0.6666666666666666,
+      "n_patch_target_match": 1,
+      "patch_target_accuracy": 0.3333333333333333,
+      "mean_evidence_count": 3.0,
+      "tool_error_count": 0,
+      "total_cost_usd": 0.34840800000000005,
+      "total_wall_time_s": 50.791414737701416,
+      "rows": [
+        {
+          "case_key": "bad_gain_01",
+          "model": "claude-opus-4-7",
+          "ground_truth_bug": "bad_gain_tuning",
+          "predicted_bug": "bad_gain_tuning",
+          "bug_match": true,
+          "patch_target_file": "source/buggy/heading_controller.py",
+          "patch_target_function": "HeadingController.step",
+          "patch_target_match": false,
+          "confidence": 0.88,
+          "evidence_count": 3,
+          "tool_error": false,
+          "cost_usd": 0.15438000000000002,
+          "wall_time_s": 19.348488569259644,
+          "notes": "ok"
+        },
+        {
+          "case_key": "pid_saturation_01",
+          "model": "claude-opus-4-7",
+          "ground_truth_bug": "pid_saturation",
+          "predicted_bug": "pid_saturation",
+          "bug_match": true,
+          "patch_target_file": "source/buggy/pid_controller.py",
+          "patch_target_function": "PIDController.step",
+          "patch_target_match": false,
+          "confidence": 0.78,
+          "evidence_count": 3,
+          "tool_error": false,
+          "cost_usd": 0.097914,
+          "wall_time_s": 15.90299105644226,
+          "notes": "ok"
+        },
+        {
+          "case_key": "sensor_timeout_01",
+          "model": "claude-opus-4-7",
+          "ground_truth_bug": "sensor_timeout",
+          "predicted_bug": "bad_gain_tuning",
+          "bug_match": false,
+          "patch_target_file": "source/buggy/obstacle_avoider.py",
+          "patch_target_function": "ObstacleAvoider.step",
+          "patch_target_match": true,
+          "confidence": 0.82,
+          "evidence_count": 3,
+          "tool_error": false,
+          "cost_usd": 0.096114,
+          "wall_time_s": 15.539935111999512,
+          "notes": "ok"
+        }
+      ]
+    }
+  ],
+  "delta": {
+    "from_model": "claude-opus-4-6",
+    "to_model": "claude-opus-4-7",
+    "bug_class_accuracy_delta": 0.0,
+    "patch_target_accuracy_delta": 0.3333333333333333,
+    "mean_evidence_count_delta": -0.3333333333333335,
+    "tool_error_count_delta": 0,
+    "total_cost_usd_delta": -0.0047219999999999485,
+    "total_wall_time_s_delta": -21.427516222000122
+  },
+  "total_spent_usd": 0.701538
+}
