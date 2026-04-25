@@ -532,6 +532,32 @@ def _run_pipeline_real(job_id: str, upload_path: Path, mode: Mode) -> None:
         buffer.append(f"[agent] session_id={session.session_id}")
         _push("analyzing", "Claude is reviewing evidence", 0.25)
 
+        steer_path = _steer_path(job_id)
+        seen_steers = 0
+
+        def _drain_steers() -> None:
+            nonlocal seen_steers
+            if not steer_path.exists():
+                return
+            try:
+                lines = [ln for ln in steer_path.read_text(encoding="utf-8").splitlines() if ln.strip()]
+            except OSError:
+                return
+            for raw in lines[seen_steers:]:
+                try:
+                    rec = json.loads(raw)
+                    msg = (rec.get("message") or "").strip()
+                except (json.JSONDecodeError, AttributeError):
+                    msg = raw.strip()
+                if not msg:
+                    continue
+                try:
+                    session.steer(msg)
+                    buffer.append(f"[steer] -> agent: {msg}")
+                except Exception as se:
+                    buffer.append(f"[steer] FAILED ({se!r}): {msg}")
+            seen_steers = len(lines)
+
         event_count = 0
         for ev in session.stream():
             event_count += 1
@@ -541,6 +567,7 @@ def _run_pipeline_real(job_id: str, upload_path: Path, mode: Mode) -> None:
             stage, label = _REAL_STAGE_MAP.get(ev.get("type", ""), ("analyzing", "Claude is reviewing evidence"))
             # Coarse progress: 0.25 -> 0.75 across the stream; never regress.
             progress = min(0.75, 0.25 + 0.005 * event_count)
+            _drain_steers()
             _push(stage, label, progress)
 
         buffer.append("[finalize] Parsing agent report payload...")
