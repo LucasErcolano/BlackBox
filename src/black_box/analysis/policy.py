@@ -113,6 +113,34 @@ class PolicyAdvisor:
         return ordered
 
     # ------------------------------------------------------------------
+    # Verification ledger: human-recorded disputes flow back as a caveat.
+    # ------------------------------------------------------------------
+    def dispute_caveat_block(self) -> str:
+        """Return a prompt fragment surfacing classes the operators have disputed.
+
+        Empty string when nothing is disputed. The block is meant to be folded
+        into the prompt context so that subsequent runs treat a frequently-
+        disputed class with a higher evidence bar — without rewriting L1.
+        """
+        from ..memory import VerificationNote
+        from ..memory.verification import _global_store  # noqa: PLC2701 — tested module-private
+        try:
+            notes: list[VerificationNote] = list(_global_store().iter_all())  # type: ignore[assignment]
+        except Exception:
+            return ""
+        counts: dict[str, int] = {}
+        for n in notes:
+            cls = getattr(n, "disputed_class", None)
+            if cls:
+                counts[cls] = counts.get(cls, 0) + 1
+        if not counts:
+            return ""
+        lines = ["Operator-recorded disputes (human verification ledger):"]
+        for cls, n in sorted(counts.items(), key=lambda kv: -kv[1]):
+            lines.append(f"- class `{cls}` disputed {n} time{'s' if n != 1 else ''} — raise the evidence bar before re-asserting it.")
+        return "\n".join(lines)
+
+    # ------------------------------------------------------------------
     # L4: raise alarms when per-class accuracy regresses
     # ------------------------------------------------------------------
     def regression_alarms(self) -> list[RegressionAlarm]:

@@ -341,6 +341,18 @@ flowchart LR
 
 Default tier is a thumbnail grid across the selected views in one cross-view prompt — **never** one call per camera. The budgeter escalates to full-resolution crops only when the analysis step explicitly asks.
 
+## Honest forensics — human verification ledger
+
+When the agent is wrong, history must not be silently rewritten. Every analysis carries a writable, append-only `verification_note.md` next to its L1 record where an operator records *"the agent concluded X, real cause was Y"*. The original L1 entry is never edited; corrections are themselves new appended entries.
+
+- Per-analysis ledger: `data/reports/<job_id>/verification_note.md`
+- Cross-run structured ledger: `data/memory/verification.jsonl`
+- UI affordance: `POST /verify/{job_id}` (operator_id, agent_conclusion, real_cause, optional disputed_class, severity ∈ `dispute|correction|confirmation`)
+- Surfaced as a caveat in subsequent runs via `PolicyAdvisor.dispute_caveat_block()` — repeated disputes on a class raise the evidence bar before re-asserting it.
+- Tamper-evident by convention: the module exposes no edit / delete API. The test suite asserts the public surface is append-only (`tests/test_verification_ledger.py`).
+
+This is the differentiator vs opaque automation: the agent's conclusions are auditable, and the audit is *writable* by the human in the loop.
+
 ## Benchmark status
 
 The benchmark lives in a sibling repo (`black-box-bench/`). Seven cases are present. Scoring requires exact match on `bug_class`.
