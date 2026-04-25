@@ -139,6 +139,103 @@ When reporting moments, label the underlying suspected cause only when visually 
 - Water spray from the ego's own tires in wet conditions, unless it obscures a hazard.
 
 Environmental transitions (tunnel entry/exit, shadow bands, overpass shadow, glare) are NOT automatically excluded: when they coincide with telemetry degradation or a downstream planning/perception anomaly, report the correlation anchored to a t_ns.
+
+## Sub-classification per taxonomy entry
+
+Each top-level bug class breaks down further. Use the parent label in `evidence.snippet`; the sub-class belongs in `why_review` for reviewer triage.
+
+### pid_saturation sub-classes
+- `pid_saturation.steering_windup` — sustained steering output at limit while heading error continues to grow; visually, monotonic horizon roll without correction.
+- `pid_saturation.throttle_windup` — throttle pegged with no acceleration response visible; scene compression flat across many frames where motion expected.
+- `pid_saturation.brake_windup` — brake at limit with continued forward motion; scene compression continues despite expected stop cue (red light, lead-vehicle stop).
+
+### sensor_timeout sub-classes
+- `sensor_timeout.frozen_frame` — byte-identical frames across ≥3 timestamps from the same camera.
+- `sensor_timeout.partial_dropout` — one camera frozen, neighbors live; cross-camera disagreement is the tell.
+- `sensor_timeout.cascading_dropout` — multiple sensors freeze in sequence; usually a topic-bridge or DDS issue rather than per-sensor.
+
+### state_machine_deadlock sub-classes
+- `state_machine_deadlock.intersection_hold` — vehicle stopped at an intersection past the expected go-cue (light green ≥2s, no leading vehicle).
+- `state_machine_deadlock.lane_change_abort` — partial lane-change attitude held without completion or rollback.
+- `state_machine_deadlock.startup_hang` — engine on, no commanded motion, no obstruction in any camera.
+
+### bad_gain_tuning sub-classes
+- `bad_gain_tuning.steering_oscillation` — horizon yaw oscillates around a setpoint with decaying or undamped envelope.
+- `bad_gain_tuning.speed_hunting` — scene compression alternates between approach and depart on a constant-speed setpoint.
+- `bad_gain_tuning.lateral_overshoot` — lane-change attitude exceeds target lane center before correction.
+
+### missing_null_check sub-classes
+- `missing_null_check.absent_perception_input` — hazard visible in two cameras, no behavioral response (no scene compression / no horizon roll).
+- `missing_null_check.absent_localization` — vehicle behavior consistent with not knowing its lane (drifts or holds against curb).
+- `missing_null_check.absent_route` — vehicle stops at a routine waypoint with no clear blocker.
+
+### calibration_drift sub-classes
+- `calibration_drift.extrinsic` — same object jumps in image-space across overlap boundaries.
+- `calibration_drift.intrinsic` — straight-line features bow toward image edges in one camera but not its peer.
+- `calibration_drift.temporal` — overlap object lags by ≥2 frames across cameras with shared trigger.
+
+### latency_spike sub-classes
+- `latency_spike.network` — multi-topic synchronized lag across all cameras for a bounded interval.
+- `latency_spike.bus_contention` — single-camera lag while others remain on schedule, repeating every N frames.
+- `latency_spike.disk_io_pause` — burst-bounded freeze followed by catch-up frames clustered close in time.
+
+## Canonical exemplars (positive + negative)
+
+### Positive — should be reported
+
+EX-P1 — calibration_drift.extrinsic. cam5 shows a parked van centered at image x≈1100 px at t_ns=T. cam6, whose left edge overlaps cam5's right edge, shows the same van centered at x≈40 px at t_ns=T+5ms. Geometry says these positions are inconsistent by ~0.4 m at 8 m range. confidence 0.85 (two cameras, multi-frame stable). why_review: extrinsic recalibration before the next mission.
+
+EX-P2 — sensor_timeout.frozen_frame. cam3 produces visually identical frames across t_ns=T, T+33ms, T+66ms, T+100ms while cam1, cam5, cam6, cam4 all show smooth scene change. Pixels match within JPEG noise floor on the static-detail subregion. confidence 0.95. why_review: investigate cam3 driver buffer; correlate with `/diagnostics`.
+
+EX-P3 — state_machine_deadlock.intersection_hold. All 5 cameras static for 4.2 s. cam1+cam5 show a green left-turn arrow throughout. No leading vehicle. confidence 0.7 (visual only, no behavior_planner state). why_review: requires telemetry to confirm; flag for replay.
+
+EX-P4 — bad_gain_tuning.steering_oscillation. Horizon roll in cam1 swings ±2° at ~1.4 Hz across 6 cycles with no decay while ego is on a straight road (lane markings parallel to motion in cam4). confidence 0.8.
+
+### Negative — must NOT be reported
+
+EX-N1 — Single sun-glare frame in cam5 with no downstream behavior change. Reason: lens flare on bright pointwise light without hazard interference is excluded.
+
+EX-N2 — Pedestrian on sidewalk walking parallel to ego heading. Reason: routine scene content.
+
+EX-N3 — One JPEG compression block in cam6 lasting one frame. Reason: single-frame artifact without multi-frame or multi-camera pattern.
+
+EX-N4 — Tunnel entry causing 0.5 s exposure dip on all cameras with vehicle continuing on path normally. Reason: environmental transition without coincident anomaly downstream.
+
+EX-N5 — Water spray from ego tires visible in cam4. Reason: ego-generated, no hazard occlusion.
+
+## Reviewer-priority hints
+
+When multiple moments fit a single window, sort the response array by likely operator value:
+1. Anything labelled missing_null_check sub-classes — these correlate with safety-critical failures.
+2. calibration_drift.extrinsic — easy to verify offline, common root cause for downstream perception bugs.
+3. sensor_timeout.cascading_dropout — points to platform-level health rather than a per-sensor flake.
+4. state_machine_deadlock.* — high operator-experience impact.
+5. bad_gain_tuning.* and pid_saturation.* — usually known-knowns, lower triage urgency.
+6. latency_spike.* — useful for postmortem timing reconstruction.
+
+## Glossary — extended
+
+- **specular flare**: streak of light along a single axis caused by lens internal reflection; distinguish from sun glare which is a localized blob.
+- **rolling-shutter skew**: vertical edges appear slanted on fast lateral motion; not a finding by itself.
+- **chroma noise floor**: low-light grain primarily in chroma channels; separates real scene content from sensor noise when judging "frozen frame" candidates.
+- **edge ringing**: halo around high-contrast edges from sharpening or compression; not a hazard, do not report.
+- **ego-motion blur**: directional blur correlated with inferred ego speed; expected on long exposures.
+- **handover marker**: brief loss of feature continuity at FOV overlap boundary; expected and not a finding unless persistent.
+- **scene depth gradient**: foreground-to-background pixel-size change rate; useful proxy for inferred speed.
+
+## Operator workflow context
+
+The forensic copilot output feeds three downstream consumers:
+1. Replay UI — picks `t_ns` to seek to. Therefore every reported moment MUST carry a real frame timestamp from the input list, never an interpolated value.
+2. PDF report — renders `label`, `why_review`, and `evidence` snippets. Keep them human-readable; no JSON-inside-strings, no shell escapes.
+3. Memory L2 — accumulates patterns across runs. Stable taxonomy labels (`pid_saturation`, `calibration_drift`, etc.) drive aggregation. Sub-classes are advisory in `why_review` and should NOT be invented outside the list above.
+
+## Output discipline — extended
+
+- Confidence floor 0.4 for any reported moment unless it is the only candidate in an otherwise unremarkable window.
+- Use `inferred_ego_motion` even on still scenes — write "stationary" rather than leaving it empty.
+- Empty `cameras.misses` is fine when only one camera could plausibly see the event.
+- For multi-camera evidence, list per-camera `evidence` entries in geometric order: cam1, cam5, cam6, cam4, cam3 (front_left → front_right → right → rear → left). Reviewers scan in that order.
 """
 
 DOMAIN_CONTEXT_BLOCK = {
