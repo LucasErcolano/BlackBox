@@ -1098,6 +1098,52 @@ async def evidence_trace(job_id: str) -> HTMLResponse:
     return HTMLResponse(render_trace_html(trace))
 
 
+@app.get("/checkpoints", response_class=HTMLResponse)
+async def list_checkpoints_view() -> HTMLResponse:
+    """#95 — timeline of memory checkpoints with rollback links."""
+    from black_box.memory.checkpoint import list_checkpoints
+
+    cps = list_checkpoints()
+    if not cps:
+        return HTMLResponse(
+            f'{_GATE_STYLE}<section class="gate"><div class="gate-headline">no checkpoints</div></section>'
+        )
+    rows = "".join(
+        f"<tr>"
+        f"<td><code>{html_escape(c.checkpoint_id)}</code></td>"
+        f"<td>{html_escape(c.kind)}</td>"
+        f"<td>{html_escape(c.label)}</td>"
+        f"<td>{html_escape(c.provenance)}</td>"
+        f"<td>{html_escape(c.created_at)}</td>"
+        f"<td><form method='post' action='/checkpoints/{c.checkpoint_id}/rollback'>"
+        f"<button class='gate-btn gate-reject' type='submit'>Rollback</button></form></td>"
+        f"</tr>"
+        for c in cps
+    )
+    return HTMLResponse(
+        f'{_GATE_STYLE}<section class="gate"><div class="gate-headline">memory timeline ({len(cps)} checkpoints)</div>'
+        f'<table><thead><tr><th>id</th><th>kind</th><th>label</th><th>prov</th><th>created</th><th></th></tr></thead>'
+        f'<tbody>{rows}</tbody></table></section>'
+    )
+
+
+@app.post("/checkpoints/{checkpoint_id}/rollback", response_class=HTMLResponse)
+async def rollback_checkpoint(checkpoint_id: str) -> HTMLResponse:
+    """#95 — fork active memory from a checkpoint; archive current state."""
+    from black_box.memory.checkpoint import rollback
+
+    try:
+        result = rollback(checkpoint_id)
+    except KeyError as e:
+        raise HTTPException(404, str(e))
+    return HTMLResponse(
+        f'{_GATE_STYLE}<section class="gate"><div class="gate-headline">rolled back</div>'
+        f'<div class="gate-meta">checkpoint <code>{html_escape(checkpoint_id)}</code></div>'
+        f'<div class="gate-note">previous active state archived to <code>{html_escape(result["archived_to"])}</code> '
+        f'(immutable timeline preserved).</div></section>'
+    )
+
+
 @app.post("/decide/{job_id}", response_class=HTMLResponse)
 async def decide_patch(
     job_id: str,
