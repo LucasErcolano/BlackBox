@@ -1,0 +1,208 @@
+{
+  "pack": "black_box_final_demo_pack/v1",
+  "generated_utc": "2026-04-25",
+  "spine_case": "sanfer_tunnel",
+  "target_runtime_s": 180,
+  "files": [
+    {
+      "path": "charts/cost_curve.png",
+      "bytes": 31881
+    },
+    {
+      "path": "charts/d1_vision_plot.png",
+      "bytes": 48210
+    },
+    {
+      "path": "charts/moving_base_vs_rover.png",
+      "bytes": 361560
+    },
+    {
+      "path": "charts/moving_base_vs_rover_2x.png",
+      "bytes": 974492
+    },
+    {
+      "path": "charts/multicam_composite.png",
+      "bytes": 2340554
+    },
+    {
+      "path": "charts/rel_pos_valid.png",
+      "bytes": 45883
+    },
+    {
+      "path": "charts/rtk_carrier_contrast.png",
+      "bytes": 55049
+    },
+    {
+      "path": "charts/rtk_numsv.png",
+      "bytes": 81624
+    },
+    {
+      "path": "charts/visual_mining_v2_grid.png",
+      "bytes": 1172032
+    },
+    {
+      "path": "clips/block_01_hook.mp4",
+      "bytes": 1585519
+    },
+    {
+      "path": "clips/block_02_problem.mp4",
+      "bytes": 2074866
+    },
+    {
+      "path": "clips/block_03_setup.mp4",
+      "bytes": 1282498
+    },
+    {
+      "path": "clips/block_04_analysis_live_v2.mp4",
+      "bytes": 5794452
+    },
+    {
+      "path": "clips/block_05_first_moment.mp4",
+      "bytes": 1492542
+    },
+    {
+      "path": "clips/block_06_second_moment.mp4",
+      "bytes": 1647316
+    },
+    {
+      "path": "clips/block_07_grounding.mp4",
+      "bytes": 1017922
+    },
+    {
+      "path": "clips/block_08_money_shot.mp4",
+      "bytes": 1123716
+    },
+    {
+      "path": "clips/block_09_punchline.mp4",
+      "bytes": 1170502
+    },
+    {
+      "path": "clips/block_10_outro.mp4",
+      "bytes": 387217
+    },
+    {
+      "path": "clips/demo_final_v0.mp4",
+      "bytes": 17565169
+    },
+    {
+      "path": "clips/replay_mid.png",
+      "bytes": 73189
+    },
+    {
+      "path": "clips/replay_sanfer_tunnel.mp4",
+      "bytes": 888797
+    },
+    {
+      "path": "demo_script_visuals.md",
+      "bytes": 3079
+    },
+    {
+      "path": "drop_reasons.json",
+      "bytes": 513
+    },
+    {
+      "path": "editor_handoff.md",
+      "bytes": 4754
+    },
+    {
+      "path": "gated_report.json",
+      "bytes": 344
+    },
+    {
+      "path": "panels/breadth_montage.png",
+      "bytes": 827707
+    },
+    {
+      "path": "panels/operator_vs_blackbox.png",
+      "bytes": 192538
+    },
+    {
+      "path": "panels/opus47_delta_panel.png",
+      "bytes": 139344
+    },
+    {
+      "path": "pdfs/boat_lidar/page-1.png",
+      "bytes": 90869
+    },
+    {
+      "path": "pdfs/boat_lidar/page-2.png",
+      "bytes": 156154
+    },
+    {
+      "path": "pdfs/boat_lidar/page-3.png",
+      "bytes": 262109
+    },
+    {
+      "path": "pdfs/boat_lidar/page-4.png",
+      "bytes": 32966
+    },
+    {
+      "path": "pdfs/boat_lidar.md",
+      "bytes": 5126
+    },
+    {
+      "path": "pdfs/car_1/page-1.png",
+      "bytes": 80550
+    },
+    {
+      "path": "pdfs/car_1/page-2.png",
+      "bytes": 132275
+    },
+    {
+      "path": "pdfs/car_1/page-3.png",
+      "bytes": 207251
+    },
+    {
+      "path": "pdfs/car_1.md",
+      "bytes": 3734
+    },
+    {
+      "path": "pdfs/sanfer_tunnel/page-1.png",
+      "bytes": 98409
+    },
+    {
+      "path": "pdfs/sanfer_tunnel/page-2.png",
+      "bytes": 237749
+    },
+    {
+      "path": "pdfs/sanfer_tunnel/page-3.png",
+      "bytes": 103823
+    },
+    {
+      "path": "pdfs/sanfer_tunnel/page-4.png",
+      "bytes": 273877
+    },
+    {
+      "path": "pdfs/sanfer_tunnel/page-5.png",
+      "bytes": 270667
+    },
+    {
+      "path": "pdfs/sanfer_tunnel.md",
+      "bytes": 12991
+    },
+    {
+      "path": "raw_hypotheses.json",
+      "bytes": 2390
+    },
+    {
+      "path": "shot_plan.md",
+      "bytes": 6540
+    },
+    {
+      "path": "ui/01_intake.png",
+      "bytes": 107510
+    },
+    {
+      "path": "ui/02_live_panel.png",
+      "bytes": 181933
+    },
+    {
+      "path": "ui/03_report.png",
+      "bytes": 175756
+    },
+    {
+      "path": "visual_asset_inventory.md",
+      "bytes": 4722
+    }
+  ]
+}
