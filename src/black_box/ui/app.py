@@ -1019,6 +1019,47 @@ async def diff_view(job_id: str) -> HTMLResponse:
     return HTMLResponse(page)
 
 
+@app.post("/verify/{job_id}", response_class=HTMLResponse)
+async def add_verification_note(
+    job_id: str,
+    operator_id: str = Form(...),
+    agent_conclusion: str = Form(...),
+    real_cause: str = Form(...),
+    disputed_class: str = Form(""),
+    severity: str = Form("dispute"),
+) -> HTMLResponse:
+    """Append a human verification note next to the L1 record. Append-only.
+
+    Notes never overwrite the original record. They are surfaced as caveats
+    on subsequent runs that touch the same disputed taxonomy class via
+    `black_box.memory.verification.disputes_for_class`.
+    """
+    from black_box.memory import VerificationNote, add_note, now_utc_iso
+
+    if severity not in ("dispute", "correction", "confirmation"):
+        raise HTTPException(400, "severity must be dispute/correction/confirmation")
+    if not operator_id.strip() or not agent_conclusion.strip() or not real_cause.strip():
+        raise HTTPException(400, "operator_id, agent_conclusion, real_cause are required")
+
+    note = VerificationNote(
+        analysis_id=job_id,
+        operator_id=operator_id.strip(),
+        written_at=now_utc_iso(),
+        agent_conclusion=agent_conclusion.strip(),
+        real_cause=real_cause.strip(),
+        disputed_class=(disputed_class.strip() or None),
+        severity=severity,
+    )
+    analysis_root = REPORTS_DIR / job_id
+    md_path = add_note(analysis_root, note)
+    return HTMLResponse(
+        f'<div class="gate"><div class="gate-headline">verification note recorded</div>'
+        f'<div class="gate-meta">{note.written_at} · operator {note.operator_id}</div>'
+        f'<div class="gate-note">appended to <code>{md_path}</code> '
+        f'and global ledger.</div></div>'
+    )
+
+
 @app.post("/decide/{job_id}", response_class=HTMLResponse)
 async def decide_patch(
     job_id: str,

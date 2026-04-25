@@ -24,6 +24,13 @@ from .records import (
     PlatformPrior,
     TaxonomyCount,
 )
+from .verification import (
+    VerificationNote,
+    add_note,
+    disputes_for_class,
+    iter_notes_for,
+    now_utc_iso,
+)
 
 __all__ = [
     "CaseMemory",
@@ -35,4 +42,9 @@ __all__ = [
     "PlatformPrior",
     "TaxonomyCount",
     "EvalRecord",
+    "VerificationNote",
+    "add_note",
+    "disputes_for_class",
+    "iter_notes_for",
+    "now_utc_iso",
 ]
