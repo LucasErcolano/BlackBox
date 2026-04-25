@@ -47,11 +47,15 @@ def build_client(
     inside ``black_box.analysis``. A repo-wide grep enforces that every other
     call-site imports from here.
     """
+    from black_box.security.vault import has_credential, get_credential
+
     headers = default_headers(extra_betas)
     if extra_headers:
         headers = {**headers, **extra_headers}
+    if api_key is None and has_credential("ANTHROPIC_API_KEY"):
+        api_key = get_credential("ANTHROPIC_API_KEY", caller="analysis.client.build_client")
     return Anthropic(
-        api_key=api_key or os.getenv("ANTHROPIC_API_KEY"),
+        api_key=api_key,
         default_headers=headers,
     )
 
