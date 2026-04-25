@@ -33,7 +33,7 @@
 >
 > Operator's theory: a tunnel knocked out GPS.
 >
-> What the rover receiver actually did: held a 3D fix, 29 satellites median, no dropouts, sub-metre hAcc for the entire session. A tunnel would collapse numSV. It never does.
+> What the rover receiver actually did: held a 3D fix the entire session. The tunnel caused mild GNSS degradation (`numSV 29→16`, `h_acc 645mm→1294mm`), but the RTK-heading break the operator blamed on it was already present 43 min pre-tunnel and DBW was never engaged. The tunnel did not cause the reported behavior change.
 
 ### 3/ — The real finding
 > Moving-base antenna: carrier-phase FLOAT 64%, FIXED 31%. Healthy.
