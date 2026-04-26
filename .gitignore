@@ -16,6 +16,10 @@ demo_assets/final_demo_pack/normalized_clips/
 demo_assets/final_demo_pack/trimmed_clips/
 demo_assets/final_demo_pack/final_video_v2/_segments/
 demo_assets/final_demo_pack/final_video_v2/_qa_frames/
+demo_assets/claude_code_final_edit/segments/
+demo_assets/claude_code_final_edit/_work/
+demo_assets/claude_code_final_edit_v2/segments/
+demo_assets/claude_code_final_edit_v2/_work/
 video_assets/
 
 data/bags/*
