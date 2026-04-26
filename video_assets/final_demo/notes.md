@@ -25,7 +25,7 @@ All source clips have **no audio stream** (verified via ffprobe). Output muxed `
 
 ## Visual issues to fix before adding voice-over
 
-- Lower-third scrim covers bottom 180 px on every non-hook segment — confirm it does not occlude critical chart axes in `block_sanfer_evidence` clip 40–60s root-cause panels. Spot-checked: stat card and plots sit above 900 px, so axes remain visible. Re-verify on 1080p monitor.
+- Lower-third caption overlays REMOVED in this revision. Source clips now play unmodified — original embedded text in Batch A/B and UI captures is the only on-screen text.
 - 10 fps UI clips upscaled to 30 fps via plain `fps` filter — playback shows mild judder on cursor moves. Acceptable for demo, but if VO timing requires smooth scrubs, re-render UI clips at 30 fps source.
 - Hook cards (0:00–0:12) are pure black with centered white text. If VO opens cold on a louder beat, consider adding 1–2 frames of preview.png Ken-Burns instead.
 

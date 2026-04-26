@@ -1,0 +1,45 @@
+{
+  "outputs": {
+    "intro_card": "video_assets/final_intro_outro/intro_card.mp4",
+    "intro_still": "video_assets/final_intro_outro/intro.png",
+    "outro_card": "video_assets/final_intro_outro/outro_card.mp4",
+    "outro_still": "video_assets/final_intro_outro/outro.png"
+  },
+  "spec": {
+    "resolution": "1920x1080",
+    "fps": 30,
+    "container": "mp4",
+    "video_codec": "libx264",
+    "pixel_format": "yuv420p",
+    "audio": "none (-an)"
+  },
+  "intro": {
+    "duration_seconds": 4.0,
+    "background": "#f3efe6 (cream — matches src/black_box/ui/static/style.css :root --bg)",
+    "ink": "#14150f",
+    "elements": [
+      {"text": "BlackBox", "font": "DejaVuSerif-Bold (IBM Plex Serif fallback)", "size": 140, "color": "ink"},
+      {"text": "Forensic copilot for robot failures", "font": "DejaVuSans", "size": 44, "color": "ink"},
+      {"text": "video · telemetry · tools · memory · patch", "font": "DejaVuSansMono", "size": 26, "color": "muted #6e6c5e"},
+      {"shape": "horizontal rule", "color": "#b8b09b", "y": 460}
+    ]
+  },
+  "outro": {
+    "duration_seconds": 6.0,
+    "background": "#f3efe6",
+    "ink": "#14150f",
+    "elements": [
+      {"text": "Robot forensics in minutes, for cents.", "font": "DejaVuSerif-Bold", "size": 60, "color": "ink"},
+      {"text": "Open benchmark · Reproducible runs · Evidence-grounded", "font": "DejaVuSans", "size": 36, "color": "ink"},
+      {"text": "github.com/LucasErcolano/BlackBox", "font": "DejaVuSansMono", "size": 34, "color": "ink"},
+      {"text": "bench: black-box-bench · cost ledger: data/costs.jsonl (283 calls, $53.13)", "font": "DejaVuSansMono", "size": 24, "color": "muted"},
+      {"text": "Built with Opus 4.7", "font": "DejaVuSansMono", "size": 24, "color": "muted"},
+      {"shape": "horizontal rules", "color": "#b8b09b", "y": [270, 820]}
+    ]
+  },
+  "build_commands": {
+    "intro": "ffmpeg -f lavfi -i color=c=0xf3efe6:s=1920x1080:r=30:d=4 -vf 'drawbox=...,drawtext=fontfile=DejaVuSerif-Bold.ttf:text=BlackBox:fontsize=140:...' -c:v libx264 -pix_fmt yuv420p -an intro_card.mp4",
+    "outro": "ffmpeg -f lavfi -i color=c=0xf3efe6:s=1920x1080:r=30:d=6 -vf 'drawbox=...,drawtext=...:textfile=...:expansion=none:...' -c:v libx264 -pix_fmt yuv420p -an outro_card.mp4",
+    "stills": "ffmpeg -ss <t> -i <card.mp4> -frames:v 1 <still.png>"
+  }
+}

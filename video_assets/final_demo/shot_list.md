@@ -23,6 +23,7 @@ Runtime: 3:00.000 (exact). 1920x1080, h264, 30 fps, no audio track.
 | 12b| 2:57.5–3:00   | 2.5  | ui_feature_inserts/evidence_trace_insert.mp4                  | 0–2.5      | (same as 12a)                                                                          | close — evidence trace as final visual |
 
 Notes:
-- All overlays are bottom lower-third, black @55% scrim, white DejaVuSans-Bold, 44pt primary / 34pt secondary.
+- Lower-third caption overlays REMOVED in this revision (per user request). Overlay text column above documents the *intended* on-screen labels for VO/script reference only — they are NOT rendered into the mp4.
+- Hook cards (01a, 01b) still carry their centered text — pure black slates with single line each.
 - Source 30 fps clips passed through; 10 fps UI clips upsampled to 30 fps via `fps=30` filter (visual judder unchanged).
 - Hard cuts only — no crossfades — to keep tone forensic.
