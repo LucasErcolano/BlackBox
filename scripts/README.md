@@ -68,6 +68,12 @@ Per #90: classify each script as **eval / demo / ops / dev** so evaluators can t
 | `render_diff.py` | demo | render a unified diff into the demo's HTML aesthetic. |
 | `render_rtk_diff.py` | demo | render the RTK diff for the hero-case money shot. |
 | `render_rtk_plots.py` | demo | render the RTK telemetry plots for the demo. |
+| `build_breadth_montage.py` | demo | contact-sheet montage proving generalization across sanfer + car_1 + boat_lidar + clean. |
+| `build_final_video.sh` | demo | assemble final 2:55 demo cut (normalize segments → concat-demuxer). |
+| `build_opus47_panel.py` | demo | render Opus 4.7 vs 4.6 comparison panel from canonical bench JSONs. |
+| `build_refutation_card.py` | demo | operator-claim vs BlackBox-refutation 1920x1080 side-by-side card. |
+| `compare_opus_models.py` | eval | A/B harness — same cases × prompts × K seeds across two models; per-case metrics + cost. |
+| `compare_opus_vision.py` | eval | D1 vision-resolution A/B for Opus 4.6 vs 4.7 — hi-res annotation legibility under server-side downsample. |
 | `salvage_analysis.py` | dev | salvage partial analysis output when a session crashes mid-run. |
 | `bag_duration.py` | dev | print bag duration; used during ingestion debugging. |
 | `inspect_bag.py` | dev | print bag topic schema / counts; used to bootstrap a new platform adapter. |
