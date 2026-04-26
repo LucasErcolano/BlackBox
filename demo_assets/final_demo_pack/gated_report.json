@@ -1,0 +1,17 @@
+{
+  "timeline": [
+    {
+      "t_ns": 0,
+      "label": "session start",
+      "cross_view": false
+    },
+    {
+      "t_ns": 180000000000,
+      "label": "session end",
+      "cross_view": false
+    }
+  ],
+  "hypotheses": [],
+  "root_cause_idx": 0,
+  "patch_proposal": "No anomaly detected with sufficient evidence to support a scoped fix."
+}
