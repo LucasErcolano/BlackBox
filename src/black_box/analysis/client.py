@@ -8,10 +8,11 @@ transport layer.
 """
 from __future__ import annotations
 
-import os
 from typing import Iterable
 
 from anthropic import Anthropic
+
+from black_box.security.vault import EnvVault, SecretMissingError
 
 
 MANAGED_AGENTS_BETA = "managed-agents-2026-04-01"
@@ -50,10 +51,15 @@ def build_client(
     headers = default_headers(extra_betas)
     if extra_headers:
         headers = {**headers, **extra_headers}
-    return Anthropic(
-        api_key=api_key or os.getenv("ANTHROPIC_API_KEY"),
-        default_headers=headers,
-    )
+    if api_key is None:
+        try:
+            api_key = EnvVault(allow_names=("ANTHROPIC_API_KEY",)).get(
+                "ANTHROPIC_API_KEY",
+                caller="black_box.analysis.client.build_client",
+            )
+        except SecretMissingError:
+            api_key = None
+    return Anthropic(api_key=api_key, default_headers=headers)
 
 
 __all__ = ["MANAGED_AGENTS_BETA", "build_client", "default_headers"]
