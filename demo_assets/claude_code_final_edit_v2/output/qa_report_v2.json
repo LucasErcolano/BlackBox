@@ -1,0 +1,31 @@
+{
+  "duration_s": 172.466016,
+  "duration_ok": true,
+  "resolution": "1920x1080",
+  "resolution_ok": true,
+  "fps": 30.0,
+  "fps_ok": true,
+  "codec": "h264",
+  "codec_ok": true,
+  "pix_fmt": "yuv420p",
+  "pix_fmt_ok": true,
+  "audio_present": true,
+  "size_bytes": 58255570,
+  "freeze_window_count": 13,
+  "freeze_starts": [
+    "[freezedetect @ 0x7f40dc002080] lavfi.freezedetect.freeze_start: 16.766667",
+    "[freezedetect @ 0x7f40dc002080] lavfi.freezedetect.freeze_start: 27.066667",
+    "[freezedetect @ 0x7f40dc002080] lavfi.freezedetect.freeze_start: 30.4",
+    "[freezedetect @ 0x7f40dc002080] lavfi.freezedetect.freeze_start: 32.1",
+    "[freezedetect @ 0x7f40dc002080] lavfi.freezedetect.freeze_start: 44.933333",
+    "[freezedetect @ 0x7f40dc002080] lavfi.freezedetect.freeze_start: 50.033333",
+    "[freezedetect @ 0x7f40dc002080] lavfi.freezedetect.freeze_start: 51.766667",
+    "[freezedetect @ 0x7f40dc002080] lavfi.freezedetect.freeze_start: 54.766667",
+    "[freezedetect @ 0x7f40dc002080] lavfi.freezedetect.freeze_start: 83.266667",
+    "[freezedetect @ 0x7f40dc002080] lavfi.freezedetect.freeze_start: 85.033333",
+    "[freezedetect @ 0x7f40dc002080] lavfi.freezedetect.freeze_start: 130.8",
+    "[freezedetect @ 0x7f40dc002080] lavfi.freezedetect.freeze_start: 133.166667",
+    "[freezedetect @ 0x7f40dc002080] lavfi.freezedetect.freeze_start: 136.8"
+  ],
+  "overall": "PASS"
+}
