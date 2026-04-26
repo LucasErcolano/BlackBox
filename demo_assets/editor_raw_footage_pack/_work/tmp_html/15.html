@@ -1,0 +1,138 @@
+<!doctype html><html><head><meta charset='utf-8'><title>Boat lidar — report</title>
+<style>
+:root{color-scheme:dark;}
+body{background:#0b0d11;color:#dfe5ec;font-family:-apple-system,Inter,Segoe UI,Roboto,sans-serif;
+     max-width:1180px;margin:0 auto;padding:48px 56px;font-size:18px;line-height:1.6;}
+h1{font-size:38px;color:#fff;border-bottom:1px solid #2a3340;padding-bottom:12px;}
+h2{font-size:28px;color:#9bd1ff;margin-top:36px;}
+h3{font-size:22px;color:#cbd5e1;}
+code{background:#161b22;color:#ffd28a;padding:2px 6px;border-radius:4px;font-size:0.9em;}
+pre{background:#0f1419;border:1px solid #1f2937;padding:16px;border-radius:8px;overflow:auto;
+    font-size:14px;line-height:1.5;}
+blockquote{border-left:4px solid #ffb86b;padding:6px 16px;margin:18px 0;background:#1a1410;color:#ffd9aa;}
+table{border-collapse:collapse;width:100%;margin:16px 0;}
+th,td{border:1px solid #2a3340;padding:8px 12px;text-align:left;}
+th{background:#171c25;}
+strong{color:#fff;}
+a{color:#9bd1ff;}
+ul,ol{padding-left:28px;}
+</style>
+</head><body><h1>Black Box — Forensic Report</h1>
+<p><strong>Case:</strong> <code>boat_lidar</code> &nbsp;·&nbsp; <strong>Mode:</strong> <code>scenario_mining</code><br />
+<strong>Duration:</strong> 416.76 s<br />
+<strong>Generated:</strong> 2026-04-23 16:32:05Z<br />
+<strong>Model:</strong> <code>claude-opus-4-7</code> (inference-only)</p>
+<blockquote>
+<p>The LIDAR companion IMU stream was declared with a QoS profile but published zero messages for the entire 7-minute USV session, indicating the IMU publisher never came online (driver disabled, hardware disconnect, or misconfigured port).</p>
+</blockquote>
+<hr />
+<h2>Executive Summary</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>bug class</th>
+<th style="text-align: right;">confidence</th>
+<th>summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>other</code> <strong>[ROOT CAUSE]</strong></td>
+<td style="text-align: right;"><code>████████░░</code> 0.85</td>
+<td>The LIDAR companion IMU stream was declared with a QoS profile but published zero messages for the entire 7-minute USV session, indicating the IMU publisher never came online (driver disabled, hardware disconnect, or misconfigured port).</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>other</code></td>
+<td style="text-align: right;"><code>██████░░░░</code> 0.55</td>
+<td>The rosbag recorder was configured to capture /lidar_imu but the driver's parameter set (or a remap) disabled IMU publication, producing a topic registration with no traffic.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>other</code></td>
+<td style="text-align: right;"><code>███████░░░</code> 0.70</td>
+<td>With IMU silent and no GPS/odometry/camera, any downstream scan deskewing, ego-motion estimation, or LIDAR-inertial odometry was operating open-loop on pure point clouds, a dangerous configuration for an autonomous USV on open water.</td>
+</tr>
+</tbody>
+</table>
+<h2>Timeline</h2>
+<table>
+<thead>
+<tr>
+<th>t</th>
+<th>label</th>
+<th>source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>29281946:06.96</code></td>
+<td>Recording starts; /lidar_imu topic declared but silent from t=0</td>
+<td></td>
+</tr>
+<tr>
+<td><code>29281946:06.96</code></td>
+<td>/lidar_points begins streaming at ~10 Hz (nominal)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>29281953:03.72</code></td>
+<td>Recording ends after 416.76 s; /lidar_imu msg_count still 0</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>Hypotheses — Detail</h2>
+<h3>1. <code>other</code> — confidence 0.85</h3>
+<p>The LIDAR companion IMU stream was declared with a QoS profile but published zero messages for the entire 7-minute USV session, indicating the IMU publisher never came online (driver disabled, hardware disconnect, or misconfigured port).</p>
+<p><strong>Evidence</strong></p>
+<ul>
+<li><strong>telemetry</strong> · <code>/lidar_imu</code><blockquote>
+<p>topic /lidar_imu (sensor_msgs/msg/Imu) message_count=0 over 416.76 s; QoS profile advertised identically to /lidar_points, so the recorder subscribed but no publisher ever emitted.</p>
+</blockquote>
+</li>
+<li><strong>telemetry</strong> · <code>summary.json</code><blockquote>
+<p>'IMU topic declared but NEVER published during session' — platform is LIDAR-only with no GPS/encoder/camera fallback, so IMU silence removes the only inertial reference.</p>
+</blockquote>
+</li>
+<li><strong>telemetry</strong> · <code>/lidar_points</code><blockquote>
+<p>4168 PointCloud2 messages / 416.76 s = 10.00 Hz — LIDAR itself is healthy, which isolates the fault to the IMU branch rather than the sensor pod as a whole.</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>Patch hint:</strong> Enable IMU output in the LIDAR driver config (e.g., Ouster <code>imu_port</code>/<code>imu_topic</code>, Livox <code>publish_imu_data: true</code>) and add a liveness watchdog that aborts the mission if /lidar_imu goes silent &gt; 1 s.</p>
+<h3>2. <code>other</code> — confidence 0.55</h3>
+<p>The rosbag recorder was configured to capture /lidar_imu but the driver's parameter set (or a remap) disabled IMU publication, producing a topic registration with no traffic.</p>
+<p><strong>Evidence</strong></p>
+<ul>
+<li><strong>telemetry</strong> · <code>metadata.yaml</code><blockquote>
+<p>/lidar_imu advertises the same reliability/durability QoS as /lidar_points yet carries 0 messages — consistent with a recorder subscription racing an un-launched or misnamed IMU publisher.</p>
+</blockquote>
+</li>
+<li><strong>telemetry</strong> · <code>/rosout</code><blockquote>
+<p>Only 9 /rosout messages in ~7 min — too sparse to contain run-time warnings; a missing IMU node would typically log, but logging may have been suppressed or the node never started.</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>Patch hint:</strong> Audit launch file: verify the IMU-publishing node is actually started and that topic remaps resolve to /lidar_imu; add startup assertion on expected publisher count.</p>
+<h3>3. <code>other</code> — confidence 0.70</h3>
+<p>With IMU silent and no GPS/odometry/camera, any downstream scan deskewing, ego-motion estimation, or LIDAR-inertial odometry was operating open-loop on pure point clouds, a dangerous configuration for an autonomous USV on open water.</p>
+<p><strong>Evidence</strong></p>
+<ul>
+<li><strong>telemetry</strong> · <code>summary.json</code><blockquote>
+<p>'No GPS, no encoders, no camera' combined with zero IMU messages means the vessel had no inertial or absolute pose source for the whole session.</p>
+</blockquote>
+</li>
+<li><strong>telemetry</strong> · <code>/lidar_points</code><blockquote>
+<p>10 Hz PointCloud2 without synchronized IMU cannot be motion-compensated against wave-induced roll/pitch/yaw, biasing any obstacle localization.</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>Patch hint:</strong> Gate autonomy on IMU liveness; if /lidar_imu stays silent at mission start, refuse to arm or drop to safe-hold.</p>
+<h2>Proposed Patch</h2>
+<pre><code class="language-diff">Root cause: /lidar_imu publisher never ran during the 416.76 s session (msg_count=0) while /lidar_points was nominal at 10 Hz. Fix: (1) enable IMU publication in the LIDAR driver configuration and confirm the node is launched, (2) add a pre-arm check that verifies non-zero publication rate on every declared critical sensor topic, (3) add a runtime watchdog that faults autonomy if /lidar_imu Hz drops below threshold, and (4) refuse open-water autonomy on a LIDAR-only platform without at least one live inertial or absolute-pose source.
+</code></pre>
+<hr />
+<p><em>Black Box · inference-only · Opus 4.7</em></p></body></html>
