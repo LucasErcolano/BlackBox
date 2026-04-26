@@ -1,0 +1,33 @@
+{
+  "fps": 10,
+  "width": 1920,
+  "height": 1080,
+  "phases": {
+    "memory": {
+      "start": 0,
+      "end": 70,
+      "secs": 7.0
+    },
+    "steering": {
+      "start": 70,
+      "end": 180,
+      "secs": 11.0
+    },
+    "hitl_patch": {
+      "start": 180,
+      "end": 280,
+      "secs": 10.0
+    },
+    "rollback": {
+      "start": 280,
+      "end": 360,
+      "secs": 8.0
+    },
+    "evidence_trace": {
+      "start": 360,
+      "end": 440,
+      "secs": 8.0
+    }
+  },
+  "total_frames": 440
+}

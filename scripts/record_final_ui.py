@@ -27,6 +27,40 @@ BASE = "http://127.0.0.1:8765"
 FPS = 10
 WIDTH, HEIGHT = 1920, 1080
 
+DARK_CSS = """
+:root {
+  --bg: #0e0f0a !important;
+  --bg-2: #15170f !important;
+  --surface: #1d1f17 !important;
+  --ink: #e8e3d4 !important;
+  --ink-2: #cec9b8 !important;
+  --muted: #9a9786 !important;
+  --line: #2a2c22 !important;
+  --rule: #3a3c30 !important;
+  --accent-soft: #1f2e22 !important;
+  --console-bg: #0a0b07 !important;
+  --console-bg-2: #131509 !important;
+}
+html, body { background: #0e0f0a !important; color: #e8e3d4 !important; }
+input, select, textarea, button { background: #1d1f17 !important; color: #e8e3d4 !important; border-color: #3a3c30 !important; }
+table, th, td { border-color: #2a2c22 !important; }
+"""
+
+DARK_INIT_JS = """
+(() => {
+  const css = %s;
+  const apply = () => {
+    if (document.getElementById('bb-dark-style')) return;
+    const s = document.createElement('style');
+    s.id = 'bb-dark-style';
+    s.textContent = css;
+    (document.head || document.documentElement).appendChild(s);
+  };
+  if (document.readyState !== 'loading') apply();
+  else document.addEventListener('DOMContentLoaded', apply);
+})();
+""" % json.dumps(DARK_CSS)
+
 # Phase durations in seconds. Sum ~= 65s for the main clip.
 PHASES = [
     ("intake",          10),
@@ -74,6 +108,7 @@ def main() -> int:
         browser = p.chromium.launch(headless=True)
         ctx = browser.new_context(viewport={"width": WIDTH, "height": HEIGHT},
                                   device_scale_factor=1)
+        ctx.add_init_script(DARK_INIT_JS)
         page = ctx.new_page()
 
         # 1. Intake screen

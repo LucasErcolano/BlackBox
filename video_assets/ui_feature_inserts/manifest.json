@@ -1,0 +1,76 @@
+{
+  "name": "ui_feature_inserts",
+  "purpose": "Short reusable UI inserts for advanced BlackBox features (drop-in for the final 3-min cut). Not a full demo cut.",
+  "server_url": "http://127.0.0.1:8765",
+  "viewport": "1920x1080",
+  "fps": 10,
+  "model": "claude-opus-4-7",
+  "patch_job_id": "f748de9e40ca",
+  "inserts": {
+    "memory_insert.mp4": {
+      "feature": "Native Managed Agents memory mounts visible on intake",
+      "duration_s": 7.0,
+      "frames": "0..70",
+      "route": "GET /",
+      "mode": "live",
+      "ui_signals": [
+        "NATIVE CLAUDE MEMORY MOUNTED card with bb-platform-priors (READ_ONLY), bb-forensic-learnings-{case_key} (READ_WRITE), promotion gated by verification ledger",
+        "Right-rail MEMORY MOUNTS panel mirroring the same three mounts"
+      ]
+    },
+    "steering_insert.mp4": {
+      "feature": "Operator steering of running forensic agent (audit trail)",
+      "duration_s": 11.0,
+      "frames": "70..180",
+      "route": "GET /analyze?replay=sanfer_tunnel  ->  POST /steer/{job_id}  ->  GET /steer/{job_id}",
+      "mode": "replay (steer endpoint = live)",
+      "steer_message": "Focus on whether the operator's tunnel hypothesis is supported by telemetry.",
+      "caveat": "Replay path appends the steer to the durable audit JSONL but does not re-route the prerecorded stream. Live-pipeline path drains the same JSONL and incorporates it via session.steer(). The visible audit history at GET /steer/{job_id} is the real artifact."
+    },
+    "hitl_patch_insert.mp4": {
+      "feature": "Human-in-the-loop patch gate (proposed, not auto-applied)",
+      "duration_s": 10.0,
+      "frames": "180..280",
+      "route": "GET /diff/f748de9e40ca",
+      "mode": "live",
+      "ui_signals": [
+        "Side-by-side BEFORE/AFTER for src/controllers/pid_controller.cpp (clamp on integral_ + output_)",
+        "HUMAN APPROVAL REQUIRED gate with 'Patch will NOT be applied until an engineer decides below.'",
+        "APPROVE PATCH / REJECT PATCH buttons + optional note field"
+      ]
+    },
+    "rollback_insert.mp4": {
+      "feature": "Time-travel rollback over L1-L4 memory checkpoints",
+      "duration_s": 8.0,
+      "frames": "280..360",
+      "route": "GET /checkpoints",
+      "mode": "live (checkpoints seeded by scripts/seed_ui_inserts.py)",
+      "ui_signals": [
+        "memory timeline (2 checkpoints) — pre-ingest (ingestion), post-grounding-gate (analysis_turn)",
+        "ROLLBACK action button per row (POST /checkpoints/{id}/rollback)",
+        "Provenance column shows replay tag for both seeded checkpoints"
+      ],
+      "note": "Bare HTMX fragment — no _base.html wrapper. Editor: pair with B-roll narration explaining auditability."
+    },
+    "evidence_trace_insert.mp4": {
+      "feature": "Glass-box evidence trace — claim ↔ artifact wiring",
+      "duration_s": 8.0,
+      "frames": "360..440",
+      "route": "GET /trace/f748de9e40ca",
+      "mode": "live (trace_manifest.json seeded by scripts/seed_ui_inserts.py)",
+      "ui_signals": [
+        "Evidence used: telemetry_window (rtk_status.csv), frame (front_cam_0042.jpg), chrony_log (chrony.log) — each with source path + t_ns + snippet",
+        "Discarded hypotheses with confidence at drop (operator's tunnel hypothesis, GPS multipath canyon)",
+        "Grounding gate outcome=pass, min_evidence=2, rationale",
+        "Confidence calibration 0.91 with raises/lowers"
+      ]
+    },
+    "preview_contact_sheet.png": "3x2 tile of one representative frame per insert (last cell blank)"
+  },
+  "source_artifacts": {
+    "patch_artifact": "data/patches/f748de9e40ca.json",
+    "trace_manifest": "data/reports/f748de9e40ca/trace_manifest.json",
+    "checkpoints": "data/memory/checkpoints/",
+    "steer_audit": "data/jobs/{replay_job_id}.steer.jsonl"
+  }
+}
