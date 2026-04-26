@@ -810,12 +810,34 @@ def _index_context() -> dict:
     return {
         "recent_cases": demo_data.recent_cases(4),
         "active_stage": None,
+        "memory_status": _native_memory_status(),
     }
 
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(request, "index.html", _index_context())
+
+
+@app.get("/memory/native_status")
+async def memory_native_status() -> JSONResponse:
+    return JSONResponse(_native_memory_status())
+
+
+@app.get("/case/{slug}", response_class=HTMLResponse)
+async def case_fragment(request: Request, slug: str) -> HTMLResponse:
+    filename = HERO_CASES.get(slug)
+    if filename is None:
+        raise HTTPException(404, f"unknown case: {slug}")
+    md_path = CASES_DIR / filename
+    if not md_path.exists():
+        raise HTTPException(404, f"case markdown missing: {filename}")
+    markdown_source = md_path.read_text(encoding="utf-8")
+    return templates.TemplateResponse(
+        request,
+        "case_fragment.html",
+        {"slug": slug, "markdown_source": markdown_source},
+    )
 
 
 @app.get("/analyze", response_class=HTMLResponse)

@@ -1,0 +1,66 @@
+{
+  "block_id": "block_10_outro",
+  "duration_target": "8-10s",
+  "duration_actual": 9.5,
+  "fps": 30,
+  "resolution": "1920x1080",
+  "deliverable_mode": "FINAL_NOW",
+  "narration_optional": "Open benchmark. Open repo. Real forensic workflow.",
+  "works_silent": true,
+  "visual_language": {
+    "shared_with_blocks": ["block_01_hook", "block_02_problem", "block_05_first_moment", "block_06_second_moment", "block_07_grounding", "block_08_money_shot", "block_09_punchline"],
+    "shared_palette": {"bg": "#0a0c10", "fg": "#e6e8ec", "dim": "#78808c", "panel": "#12141a", "border": "#3c424e", "accent": "#ffb840", "muted_amber": "#c49648"},
+    "shared_system": ["DejaVu Sans / Sans Mono fonts", "80px grid backdrop (dimmer 0.55)", "4-dot beat indicator", "450ms smoothstep reveal easing"],
+    "outro_modifiers": {
+      "narrative_center": "pure closure + credibility — no new story, no investigation energy",
+      "motion_discipline": "single composition, layered reveal, no beat crossfades, no card shuffles",
+      "amber_discipline": "ACCENT used only on (a) hairline under brand, (b) underline beneath tagline, (c) final beat-dot; MUTED_AMBER for repo/benchmark label eyebrows",
+      "grid_alpha": "backdrop grid at 0.55 of prior blocks to feel quieter",
+      "locked_final_frame": "last 1.0s is motionless; beat-dot indicator fades out at t=8.5s to signal end-of-film",
+      "vignette": "subtle top/bottom ambient vignette added to reinforce final-card feel",
+      "no_beat_crossfades": "single scene, so no inter-beat crossfades"
+    }
+  },
+  "beats": [
+    {"t": "0.0-2.0s", "name": "brand fade-in",      "content": "Black Box hero at 104pt + 'forensic copilot for robots' subtitle + ACCENT amber hairline growing from center; beat-dot indicator fades in"},
+    {"t": "2.0-4.5s", "name": "repo + benchmark",   "content": "two-column reveal: 'repo  github.com/LucasErcolano/BlackBox' + 'benchmark  black-box-bench/ · MIT'; MUTED_AMBER label eyebrows; thin BORDER underlines; 'public · inspectable · MIT' mini-line"},
+    {"t": "4.5-7.5s", "name": "core tagline",       "content": "'real forensic workflow' at 56pt + ACCENT underline + 'open benchmark · open repo · grounded in real bags' subtitle"},
+    {"t": "7.5-9.5s", "name": "locked final hold",  "content": "composition holds motionless; beat-dot indicator fades out starting t=8.5s; frame remains readable on pause as thumbnail"}
+  ],
+  "source_assets_used": [
+    "README.md badge URL: github.com/LucasErcolano/BlackBox (real)",
+    "black-box-bench/ — real subdirectory of the repo (MIT, separate package per black-box-bench/README.md)",
+    "project tagline 'forensic copilot for robots' — from CLAUDE.md first line"
+  ],
+  "text_overlays_used": [
+    "Black Box",
+    "forensic copilot for robots",
+    "repo",
+    "github.com/LucasErcolano/BlackBox",
+    "benchmark",
+    "black-box-bench/ · MIT",
+    "public · inspectable · MIT",
+    "real forensic workflow",
+    "open benchmark  ·  open repo  ·  grounded in real bags",
+    "block 10 · outro"
+  ],
+  "edits_performed": [
+    "PIL compositing of one continuous scene at 30 fps, 285 frames total",
+    "layered reveal at t=0.2s brand / t=1.1s wordmark / t=2.1s repo / t=2.9s benchmark / t=3.7s license-line / t=4.7s tagline / t=5.2s ACCENT underline / t=5.9s subtitle",
+    "beat dots fade in t=0.2s, fade out t=8.5s",
+    "master fade-in from black over 0.4s; no fade-out (locked final frame)",
+    "top/bottom ambient vignette for final-card feel",
+    "ffmpeg libx264 CRF 18, yuv420p, +faststart"
+  ],
+  "ui_dependency_level": "none",
+  "final_frame_as_thumbnail": true,
+  "remaining_work": [
+    "optional: if final edit uses VO 'Open benchmark. Open repo. Real forensic workflow.', align tagline reveal to VO landing (currently VO-agnostic)",
+    "optional: swap grid backdrop for a subtle blurred frame from block_06 timeline if the editor wants more visual echo"
+  ],
+  "render_script": "scripts/render_block_10_outro.py",
+  "outputs": {
+    "clip": "video_assets/block_10_outro/clip.mp4",
+    "preview": "video_assets/block_10_outro/preview.png"
+  }
+}

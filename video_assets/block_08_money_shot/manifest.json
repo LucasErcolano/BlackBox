@@ -1,0 +1,40 @@
+{
+  "block_id": "block_08_money_shot",
+  "duration_target": "13-15s",
+  "duration_actual": 14.5,
+  "resolution": "1920x1080",
+  "fps": 30,
+  "deliverable_mode": "FINAL_NOW",
+  "source_assets_used": [
+    "demo_assets/analyses/sanfer_tunnel.json (patch_proposal, localization/engage_gate.py hunk)"
+  ],
+  "text_overlays_used": [
+    "BUG",
+    "engage silently gated on RTK heading",
+    "localization/engage_gate.py",
+    "evidence: rel_pos_heading_valid = 0 for 18,133 / 18,133 RTK samples",
+    "The fix",
+    "one scoped diff · targeted change · reviewable patch",
+    "scoped_patch.diff",
+    "1 file · +8 −1",
+    "FIX",
+    "scoped patch",
+    "engage_gate.py · surface why engage blocks",
+    "scoped diff.",
+    "not a redesign.",
+    "targeted change · tied to surfaced evidence · reviewable",
+    "BLACK  BOX  —  forensic copilot"
+  ],
+  "edits_performed": [
+    "4-beat structure: setup (2.0s), diff reveal (3.5s), zoom on adds (5.5s), lockup (3.5s)",
+    "crossfade 0.4s between beats",
+    "progressive line-by-line reveal in beat B",
+    "amber ACCENT (255,184,64) restored from block_07's MUTED_AMBER",
+    "amber strip on + lines in beat C to emphasize additions",
+    "shared grid_bg, drop shadows, 4-dot beat indicator from blocks 01/02/07"
+  ],
+  "ui_dependency_level": "none",
+  "remaining_work": [
+    "optional: bottom of zoom-beat card clips 'return True' line; if needed, shorten added-line content or extend beat C card height off-screen lower"
+  ]
+}
