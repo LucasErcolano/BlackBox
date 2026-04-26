@@ -1,12 +1,7 @@
-"""Render the OPUS 4.7 vs 4.6 'same accuracy, better judgment, more eyes' panel.
-
-Reads canonical bench JSONs and produces a 1920x1080 PNG suitable for a 16:9
-demo cut. Numbers come straight from data/bench_runs/*.json — no fabrication.
-"""
+"""OPUS 4.7 vs 4.6 — three hero stats. Less text, bigger numbers, faster read."""
 from __future__ import annotations
 import json, pathlib
 import matplotlib.pyplot as plt
-import matplotlib.patches as mp
 from matplotlib import rcParams
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -15,23 +10,11 @@ NONE = ROOT / "data/bench_runs/opus46_vs_opus47_20260425T182237Z.json"
 FALSE = ROOT / "data/bench_runs/opus46_vs_opus47_20260425T183141Z.json"
 VISION = ROOT / "data/bench_runs/opus_vision_d1_20260425T185628Z.json"
 
-BG = "#0a0c10"
-FG = "#e7eaee"
-MUTED = "#7a8290"
-AMBER = "#ffb840"
-TEAL = "#62d4c8"
-RED = "#e0625a"
+BG = "#0a0c10"; FG = "#e7eaee"; MUTED = "#7a8290"
+AMBER = "#ffb840"; TEAL = "#62d4c8"; RED = "#e0625a"
 
-rcParams.update({
-    "font.family": "DejaVu Sans",
-    "axes.edgecolor": MUTED,
-    "axes.labelcolor": FG,
-    "xtick.color": FG, "ytick.color": FG,
-    "axes.titlecolor": FG,
-    "savefig.facecolor": BG,
-    "figure.facecolor": BG,
-    "axes.facecolor": BG,
-})
+rcParams.update({"font.family": "DejaVu Sans",
+                 "savefig.facecolor": BG, "figure.facecolor": BG, "axes.facecolor": BG})
 
 def agg(path, model):
     d = json.loads(path.read_text())
@@ -44,80 +27,49 @@ v46 = next(a for a in v["aggregates"] if a["model"] == "claude-opus-4-6")
 v47 = next(a for a in v["aggregates"] if a["model"] == "claude-opus-4-7")
 
 fig = plt.figure(figsize=(19.2, 10.8), dpi=100)
-fig.text(0.5, 0.945, "Same accuracy. Better judgment. More eyes.",
-         ha="center", va="center", color=FG, fontsize=32, weight="bold")
-fig.text(0.5, 0.890, "Opus 4.7 vs 4.6  ·  closed-taxonomy bench  ·  n=9–12 runs/model",
-         ha="center", va="center", color=MUTED, fontsize=14)
+fig.text(0.5, 0.88, "Opus 4.7 — better judgment, sharper eyes",
+         ha="center", va="center", color=FG, fontsize=38, weight="bold")
+fig.text(0.5, 0.81, "Same accuracy on solvable bugs. Big wins where it matters.",
+         ha="center", va="center", color=MUTED, fontsize=18)
 
-def panel(ax, title, sub):
-    ax.set_facecolor(BG)
-    for s in ("top", "right"): ax.spines[s].set_visible(False)
-    ax.spines["left"].set_color(MUTED); ax.spines["bottom"].set_color(MUTED)
-    ax.text(0, 1.18, title, transform=ax.transAxes, color=FG, fontsize=15, weight="bold", ha="left", va="bottom")
-    ax.text(0, 1.04, sub, transform=ax.transAxes, color=MUTED, fontsize=10, ha="left", va="bottom")
+cards = [
+    ("Calibrated abstention", "under-specified bugs",
+     f"{int(a46_n['abstention_correctness']*100)}%", f"{int(a47_n['abstention_correctness']*100)}%",
+     "0% → 100%"),
+    ("Brier score (lower = better)", "wrong-operator framing",
+     f"{a46_f['brier_score']:.2f}", f"{a47_f['brier_score']:.2f}",
+     f"{(1 - a47_f['brier_score']/a46_f['brier_score'])*100:.0f}% better calibrated"),
+    ("Fine-grain vision", "10 pt token @ 3.84 MP",
+     f"{int(v46['detection_rate']*3)}/3", f"{int(v47['detection_rate']*3)}/3",
+     "0 → 3 detections"),
+]
 
-def bars(ax, vals, labels, fmts, colors, ymax=None):
-    x = list(range(len(vals)))
-    b = ax.bar(x, vals, color=colors, width=0.55, edgecolor=BG, linewidth=2)
-    ax.set_xticks(x); ax.set_xticklabels(labels, color=FG, fontsize=12)
-    if ymax: ax.set_ylim(0, ymax)
-    ax.tick_params(axis="y", labelsize=9)
-    ax.grid(axis="y", color=MUTED, alpha=0.15)
-    for rect, txt in zip(b, fmts):
-        ax.text(rect.get_x() + rect.get_width()/2, rect.get_height(),
-                txt, ha="center", va="bottom", color=FG, fontsize=13, weight="bold")
+g = fig.add_gridspec(1, 3, left=0.05, right=0.95, top=0.68, bottom=0.18, wspace=0.08)
 
-# Layout: 2x3 grid
-g = fig.add_gridspec(2, 3, left=0.05, right=0.97, top=0.80, bottom=0.07, hspace=0.65, wspace=0.28)
+for i, (title, sub, old, new, delta) in enumerate(cards):
+    ax = fig.add_subplot(g[0, i])
+    ax.set_facecolor("#11151b")
+    ax.set_xticks([]); ax.set_yticks([])
+    for s in ax.spines.values(): s.set_color(TEAL); s.set_linewidth(2)
+    ax.text(0.5, 0.92, title, color=FG, fontsize=18, weight="bold",
+            ha="center", va="top", transform=ax.transAxes)
+    ax.text(0.5, 0.83, sub, color=MUTED, fontsize=12,
+            ha="center", va="top", transform=ax.transAxes)
+    ax.text(0.22, 0.50, old, color=MUTED, fontsize=44, weight="bold",
+            ha="center", va="center", transform=ax.transAxes)
+    ax.text(0.5, 0.50, "→", color=FG, fontsize=36,
+            ha="center", va="center", transform=ax.transAxes)
+    ax.text(0.78, 0.50, new, color=TEAL, fontsize=52, weight="bold",
+            ha="center", va="center", transform=ax.transAxes)
+    ax.text(0.22, 0.22, "Opus 4.6", color=MUTED, fontsize=12,
+            ha="center", va="center", transform=ax.transAxes)
+    ax.text(0.78, 0.22, "Opus 4.7", color=TEAL, fontsize=12, weight="bold",
+            ha="center", va="center", transform=ax.transAxes)
+    ax.text(0.5, 0.08, delta, color=AMBER, fontsize=14, weight="bold",
+            ha="center", va="center", transform=ax.transAxes, style="italic")
 
-# 1 — Solvable accuracy (tied)
-ax = fig.add_subplot(g[0,0])
-panel(ax, "Solvable accuracy", "raw bug_class match · operator-mode none · n=12")
-bars(ax, [a46_n["solvable_accuracy"], a47_n["solvable_accuracy"]],
-     ["4.6","4.7"], ["67%","67%"], [MUTED, AMBER], ymax=1.0)
-
-# 2 — Abstention on under-specified
-ax = fig.add_subplot(g[0,1])
-panel(ax, "Calibrated abstention", "rtk_heading_break_01 (under-specified) · n=3 each")
-bars(ax, [a46_n["abstention_correctness"], a47_n["abstention_correctness"]],
-     ["4.6","4.7"], ["0%","100%"], [RED, TEAL], ymax=1.05)
-
-# 3 — Brier under wrong-operator pressure (lower better)
-ax = fig.add_subplot(g[0,2])
-panel(ax, "Brier ↓ under wrong-operator framing",
-      "operator-mode false (adversarial) · n=9 · lower = better calibrated")
-bars(ax, [a46_f["brier_score"], a47_f["brier_score"]],
-     ["4.6","4.7"], [f'{a46_f["brier_score"]:.3f}', f'{a47_f["brier_score"]:.3f}'],
-     [RED, TEAL], ymax=0.30)
-
-# 4 — Vision: detect 10pt token at 3.84 MP
-ax = fig.add_subplot(g[1,0])
-panel(ax, "Fine-grain vision (10 pt @ 3.84 MP)",
-      "D1 secret-token detection · n=3 each")
-bars(ax, [v46["detection_rate"], v47["detection_rate"]],
-     ["4.6","4.7"], [f'{int(v46["detection_rate"]*3)}/3', f'{int(v47["detection_rate"]*3)}/3'],
-     [RED, TEAL], ymax=1.05)
-
-# 5 — Wall time (lower better)
-ax = fig.add_subplot(g[1,1])
-panel(ax, "Latency ↓ (wall time, total)",
-      "operator-mode false · n=9 · ~30% faster")
-bars(ax, [a46_f["total_wall_time_s"], a47_f["total_wall_time_s"]],
-     ["4.6","4.7"], [f'{a46_f["total_wall_time_s"]:.0f}s', f'{a47_f["total_wall_time_s"]:.0f}s'],
-     [MUTED, AMBER], ymax=max(a46_f["total_wall_time_s"], a47_f["total_wall_time_s"])*1.2)
-
-# 6 — Cost (within bounds)
-ax = fig.add_subplot(g[1,2])
-panel(ax, "Total $ over bench",
-      "operator-mode false · n=9 · 4.7 cheaper at parity")
-bars(ax, [a46_f["total_cost_usd"], a47_f["total_cost_usd"]],
-     ["4.6","4.7"], [f'${a46_f["total_cost_usd"]:.2f}', f'${a47_f["total_cost_usd"]:.2f}'],
-     [MUTED, AMBER], ymax=max(a46_f["total_cost_usd"], a47_f["total_cost_usd"])*1.25)
-
-fig.text(0.5, 0.025,
-         "source: data/bench_runs/opus46_vs_opus47_*.json + opus_vision_d1_20260425T185628Z.json   ·   "
-         "scripts: compare_opus_models.py · compare_opus_vision.py",
-         ha="center", color=MUTED, fontsize=9)
+fig.text(0.5, 0.07, "n=9–12 runs/model  ·  data/bench_runs/opus46_vs_opus47_*.json",
+         ha="center", color=MUTED, fontsize=11)
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
 fig.savefig(OUT, dpi=100, facecolor=BG)
