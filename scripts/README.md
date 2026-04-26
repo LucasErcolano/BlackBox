@@ -65,6 +65,7 @@ Per #90: classify each script as **eval / demo / ops / dev** so evaluators can t
 | `render_block_08_money_shot.py` | demo | submission video block 08 — money shot. |
 | `render_block_09_punchline.py` | demo | submission video block 09 — punchline. |
 | `render_block_10_outro.py` | demo | submission video block 10 — outro. |
+| `render_block_credibility_opus47.py` | demo | credibility montage block: Opus 4.7 vs 4.6 delta + breadth + grounding + bench/cost outro (no UI dep). |
 | `render_diff.py` | demo | render a unified diff into the demo's HTML aesthetic. |
 | `render_rtk_diff.py` | demo | render the RTK diff for the hero-case money shot. |
 | `render_rtk_plots.py` | demo | render the RTK telemetry plots for the demo. |
