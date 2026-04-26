@@ -1,5 +1,5 @@
 {
-  "schema": "blackbox_demo_timeline/2.1-hybrid",
+  "schema": "blackbox_demo_timeline/2.0",
   "resolution": [
     1920,
     1080
@@ -9,7 +9,7 @@
   "pix_fmt": "yuv420p",
   "audio_codec": "aac",
   "xfade_seconds": 0.35,
-  "target_runtime_s": 178.1,
+  "target_runtime_s": 179.767,
   "segments": [
     {
       "i": 1,
@@ -84,17 +84,17 @@
     {
       "i": 8,
       "in_s": 103.967,
-      "out_s": 117.717,
-      "duration_s": 13.4,
+      "out_s": 115.817,
+      "duration_s": 11.5,
       "kind": "clip",
-      "asset": "demo_assets/editor_raw_footage_pack/clips/06_patch_diff_ui.mp4",
+      "asset": "demo_assets/final_demo_pack/trimmed_clips/block_08_money_shot.mp4",
       "beat": "patch_diff_human_gate",
       "intentional_static": false
     },
     {
       "i": 9,
-      "in_s": 117.017,
-      "out_s": 134.367,
+      "in_s": 115.117,
+      "out_s": 132.467,
       "duration_s": 17.0,
       "kind": "still",
       "asset": "demo_assets/final_demo_pack/panels/opus47_delta_panel.png",
@@ -103,18 +103,18 @@
     },
     {
       "i": 10,
-      "in_s": 133.667,
-      "out_s": 147.45,
-      "duration_s": 13.433,
-      "kind": "clip",
-      "asset": "demo_assets/editor_raw_footage_pack/clips/07_cases_archive_ui.mp4",
+      "in_s": 131.767,
+      "out_s": 149.117,
+      "duration_s": 17.0,
+      "kind": "still",
+      "asset": "demo_assets/final_demo_pack/panels/breadth_montage.png",
       "beat": "generalization",
-      "intentional_static": false
+      "intentional_static": true
     },
     {
       "i": 11,
-      "in_s": 146.75,
-      "out_s": 159.233,
+      "in_s": 148.417,
+      "out_s": 160.9,
       "duration_s": 12.133,
       "kind": "clip",
       "asset": "demo_assets/final_demo_pack/trimmed_clips/block_07_grounding.mp4",
@@ -123,8 +123,8 @@
     },
     {
       "i": 12,
-      "in_s": 158.533,
-      "out_s": 168.95,
+      "in_s": 160.2,
+      "out_s": 170.617,
       "duration_s": 10.067,
       "kind": "clip",
       "asset": "demo_assets/final_demo_pack/trimmed_clips/block_09_punchline.mp4",
@@ -133,8 +133,8 @@
     },
     {
       "i": 13,
-      "in_s": 168.25,
-      "out_s": 178.1,
+      "in_s": 169.917,
+      "out_s": 179.767,
       "duration_s": 9.5,
       "kind": "clip",
       "asset": "demo_assets/final_demo_pack/trimmed_clips/block_10_outro.mp4",
