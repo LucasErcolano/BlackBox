@@ -15,6 +15,28 @@
   </div>
 </div>
 
+{% if memory_status %}
+<aside class="memory-card" aria-label="Native managed-agents memory mounts">
+  <span class="memory-card-eyebrow">native claude memory mounted</span>
+  <ul class="memory-card-list">
+    <li>
+      <span class="memory-card-check" aria-hidden="true">&#10003;</span>
+      <code class="memory-card-name">{{ memory_status.platform_store.name }}</code>
+      <span class="memory-card-mode">{{ memory_status.platform_store.mode }}</span>
+    </li>
+    <li>
+      <span class="memory-card-check" aria-hidden="true">&#10003;</span>
+      <code class="memory-card-name">{{ memory_status.case_store_template }}</code>
+      <span class="memory-card-mode">read_write</span>
+    </li>
+    <li class="memory-card-gate">
+      <span class="memory-card-check" aria-hidden="true">&#10003;</span>
+      <span>promotion gated by {{ memory_status.gate.replace('_', ' ') }}</span>
+    </li>
+  </ul>
+</aside>
+{% endif %}
+
 <div class="intake-grid">
   <section id="main-panel" class="card" style="padding: 0; display: flex; flex-direction: column;">
     {% include "_intake_form.html" %}
