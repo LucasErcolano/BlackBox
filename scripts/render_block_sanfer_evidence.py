@@ -253,9 +253,8 @@ def make_beat_B(t: float) -> Image.Image:
     qd.rectangle([(0, 0), (qw - 1, qh - 1)], outline=BORDER, width=2)
     qd.rectangle([(0, 0), (8, qh)], fill=MUTED_AMBER)
     qd.text((48, 28), "operator note", font=fmb, fill=MUTED_AMBER)
-    qd.text((48, 70), "“el GPS falla cuando entramos al túnel.”", font=fquote, fill=FG)
-    qd.text((48, 180), "translation:  the GPS fails when we enter the tunnel.", font=fs, fill=DIM)
-    qd.text((48, 220), "implied class: GNSS outage during overhead occlusion", font=fm, fill=DIM)
+    qd.text((48, 70), "“the GPS fails when we enter the tunnel.”", font=fquote, fill=FG)
+    qd.text((48, 200), "implied class: GNSS outage during overhead occlusion", font=fm, fill=DIM)
     img.alpha_composite(qcard, (qx, qy))
 
     # Provisional triage card
