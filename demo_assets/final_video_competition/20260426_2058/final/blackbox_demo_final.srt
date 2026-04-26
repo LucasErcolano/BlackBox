@@ -1,0 +1,47 @@
+1
+00:00:00,000 --> 00:00:12,000
+The operator told me the GPS failed under a tunnel. Black Box checked the recording and said: that story is wrong.
+
+2
+00:00:12,000 --> 00:00:25,000
+Robotics teams collect hours of video, lidar, telemetry and controller logs. The evidence exists, but the forensic work is still manual.
+
+3
+00:00:25,000 --> 00:00:38,000
+I give Black Box one real driving session. No labels. No handcrafted rubric. Just the operator's note: check the tunnel.
+
+4
+00:00:38,000 --> 00:00:55,000
+This is not a one-shot summary. Opus 4.7 runs as a managed forensic agent: reading files, using tools, streaming events, checking memory from previous runs.
+
+5
+00:00:55,000 --> 00:01:08,000
+It does not send every frame. Telemetry selects suspicious windows, then high-resolution visual mining checks the relevant camera views.
+
+6
+00:01:08,000 --> 00:01:35,000
+Here is the key moment. The tunnel did mildly degrade GNSS. But the RTK heading failure was already present 43 minutes earlier, and drive-by-wire was never engaged. The tunnel could not have caused the reported behavior change.
+
+7
+00:01:35,000 --> 00:01:55,000
+The real failure is lower level. The moving-base antenna is healthy, but the rover never gets valid RTK heading. The correction path was broken before the car left the lot.
+
+8
+00:01:55,000 --> 00:02:12,000
+The output is not just a report. It gives a scoped patch: RTCM message IDs, a UART link check, and a human-review gate. Black Box proposes the diff; the engineer approves it.
+
+9
+00:02:12,000 --> 00:02:34,000
+This is why Black Box is built on Opus 4.7. Not because simple cases need a bigger model — 4.6 and 4.7 tie there. But robot forensics punishes confident wrong answers. In our benchmark, 4.6 committed on every under-specified case. 4.7 abstained every time.
+
+10
+00:02:34,000 --> 00:02:45,000
+It also sees fine visual details that 4.6 loses under downsampling, and runs about thirty percent faster on telemetry and text runs.
+
+11
+00:02:45,000 --> 00:02:53,000
+This is not a single-car demo. The same archive includes more car sessions, a robotic boat lidar case, clean recordings, and injected benchmark failures.
+
+12
+00:02:53,000 --> 00:02:58,100
+When there is no evidence, it makes no claim. Open benchmark. Reproducible runs. Robot forensics in minutes, for cents.
