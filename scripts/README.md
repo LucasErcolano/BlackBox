@@ -92,6 +92,13 @@ Per #90: classify each script as **eval / demo / ops / dev** so evaluators can t
 | `extract_sanfer_cam.py` | dev | extract sanfer cam frames (legacy). |
 | `extract_sanfer_cam_smart.py` | dev | extract sanfer cam frames with smart sub-sampling. |
 | `rtk.py` | dev | RTK debugging toolkit — interactive helpers used to author the hero finding. |
+| `render_block_sanfer_evidence.py` | demo | renders `video_assets/block_sanfer_evidence/clip.mp4` (Batch A — 70s sanfer evidence story). |
+| `render_intro_outro.py` | demo | renders `video_assets/final_intro_outro/intro_card.mp4` + `outro_card.mp4`; reads live cost from `data/costs.jsonl`. |
+| `record_final_ui.py` | demo | Playwright capture of the final UI clip (`video_assets/final_ui_capture/clip.mp4` + 4 subclips); 30 fps, dark mode via `_ui_dark`. |
+| `record_ui_inserts.py` | demo | Playwright capture of 5 short UI feature inserts (`video_assets/ui_feature_inserts/*.mp4`); same dark theme. |
+| `seed_ui_inserts.py` | demo | seeds memory checkpoints + trace manifest so the inserts capture renders populated UI. |
+| `build_final_demo.sh` | demo | assembles `video_assets/final_demo/final_demo_3min_visual_only.mp4` (3:00 silent) from existing blocks. |
+| `_ui_dark.py` | dev | shared dark-mode CSS / Playwright init script imported by both UI capture scripts. |
 
 ## Companion files
 
