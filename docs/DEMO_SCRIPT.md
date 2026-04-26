@@ -1,57 +1,124 @@
-# Demo video — beat sheet
 
-**Target length:** 2:50 to 3:00 (hard cap 3:00)
-**Format:** screen recording + voice-over + 1 to 2 webcam inserts (Lucas on camera for personal-narrative beats)
-**Climax:** the unified diff, not the PDF
+## Nuevo demo script — 3:00
 
-## Timing
+|      Time | Beat                   | Screen                                                             | Voice-over                                                                                                                                                                                                                                                              |
+| --------: | ---------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0:00–0:12 | Hook                   | Lucas / auto real / recording                                      | “The operator told me the GPS failed under a tunnel. Black Box checked the recording and said: that story is wrong.”                                                                                                                                                    |
+| 0:12–0:25 | Product problem        | Nueva intake UI, drag/drop, mode cards                             | “Robotics teams collect hours of video, lidar, telemetry and controller logs. The evidence exists, but the forensic work is still manual.”                                                                                                                              |
+| 0:25–0:38 | Setup                  | Upload `.bag`, mode card, job starts                               | “I give Black Box one real driving session. No labels. No handcrafted rubric. Just the operator’s note: check the tunnel.”                                                                                                                                              |
+| 0:38–0:55 | Live product surface   | Live job panel, stages, right rail memory mounts                   | “This is not a one-shot summary. Opus 4.7 runs as a managed forensic agent: reading files, using tools, streaming events, and checking memory from previous runs.”                                                                                                      |
+| 0:55–1:08 | Visual mining          | 5-camera grid / exhibit media / telemetry-selected window          | “It does not send every frame. Telemetry selects suspicious windows, then high-resolution visual mining checks the relevant camera views.”                                                                                                                              |
+| 1:08–1:35 | Refutation             | Verdict banner: “It wasn’t the tunnel”; operator quote vs evidence | “Here is the key moment. The tunnel did mildly degrade GNSS: fewer satellites, wider accuracy. But the RTK heading failure was already present 43 minutes earlier, and drive-by-wire was never engaged. The tunnel could not have caused the reported behavior change.” |
+| 1:35–1:55 | Root cause             | Plots: moving-base healthy, rover invalid, REL_POS_VALID flat      | “The real failure is lower level. The moving-base antenna is healthy, but the rover never gets valid RTK heading. The correction path was broken before the car left the lot.”                                                                                          |
+| 1:55–2:12 | Money shot             | Report page, 22-line diff, approve/reject, append ledger           | “And the output is not just a report. It gives a scoped patch: RTCM message IDs, a UART link check, and a human-review gate. Black Box proposes the diff; the engineer approves it.”                                                                                    |
+| 2:12–2:34 | Opus 4.7 delta         | One panel: “Same accuracy. Better judgment. More eyes.”            | “This is why Black Box is built on Opus 4.7. Not because simple cases need a bigger model — 4.6 and 4.7 tie there. But robot forensics punishes confident wrong answers. In our benchmark, 4.6 committed on every under-specified case. 4.7 abstained every time.”      |
+| 2:34–2:45 | Vision + speed proof   | Fine-grain image token: 4.6 0/3, 4.7 3/3; latency badge            | “It also sees fine visual details that 4.6 loses under downsampling, and runs about thirty percent faster on telemetry and text runs.”                                                                                                                                  |
+| 2:45–2:53 | Generalization montage | `/cases`: boat lidar, other car runs, clean case, injected bugs    | “And this is not a single-car demo. The same archive includes more car sessions, a robotic boat lidar case, clean recordings, and injected benchmark failures.”                                                                                                         |
+| 2:53–3:00 | Grounding + close      | Clean case: empty / insufficient evidence; repo + cost             | “When there is no evidence, it makes no claim. Open benchmark. Reproducible runs. Robot forensics in minutes, for cents.”                                                                                                                                               |
 
-Every beat has an explicit in-point and duration. Cumulative end-time stays at or under 3:00.
+## Continuous VO version
 
-| In | Out | Dur | Beat | Shot | VO |
-|----|-----|-----|------|------|-----|
-| 00:00 | 00:15 | 0:15 | **Hook** | Webcam Lucas in front of the autonomous car | *"Last week the operator told me the GPS failed when the car went under a tunnel. I gave the bag to Black Box. It said he was wrong."* |
-| 00:15 | 00:30 | 0:15 | **Problem** | Bag file icon, terminal showing 375 GB | *"AV labs process hundreds of bags per week. Nobody reads them end-to-end. Everybody has a theory. Most theories are wrong."* |
-| 00:30 | 00:45 | 0:15 | **The setup** | Upload UI, topic list for `sanfer_sanisidro` session | *"One hour of real driving. ROS1 bag. No labels. The operator gave me one sentence of prior: 'check the tunnel.'"* |
-| 00:45 | 01:15 | 0:30 | **Analysis live** | Streaming reasoning view, Claude working through carrier-phase timeline | *"Opus 4.7 reads the telemetry. Carrier-phase, fix quality, relative-position validity. It's checking whether the operator's theory survives the data."* |
-| 01:15 | 01:45 | 0:30 | **The counterfactual** | Side-by-side: operator's quote on the left, Claude's refutation card on the right | *"Here. The tunnel did mildly degrade GNSS — sat count drops from 29 to 16, h_acc widens — but the RTK heading break started 43 minutes earlier and drive-by-wire was never engaged. The tunnel didn't cause the failure the operator blamed on it. The operator is wrong about the cause."* |
-| 01:45 | 02:05 | 0:20 | **The real finding** | Two plots: moving-base carrier-phase (healthy) vs rover carrier-phase (flat zero). REL_POS_VALID flat zero. | *"Moving-base antenna: clean RTK, float and fixed 94% of the bag. Rover antenna: never locks. Once. The whole hour. REL_POS_VALID never sets. The dual-antenna heading pipeline is broken, and it was broken before the car left the lot."* |
-| 02:05 | 02:25 | 0:20 | **The money shot** | Report page opens to patch proposal: enable RTCM3 msgs 1077/1087/1097/1127/4072.0/4072.1, verify UART link | *"This is the fix. Specific message IDs. Specific checkpoint. It's a config diff, not a redesign."* |
-| 02:25 | 02:45 | 0:20 | **Grounding** | Clean synthetic window runs through the same pipeline; Claude returns empty moments | *"Same tool, clean bag. It says nothing anomalous. It will not fabricate a bug. That's the rule."* |
-| 02:45 | 02:55 | 0:10 | **Punchline + credibility** | Benchmark repo URL + cost ledger ($0.22 per run) | *"One hour of real driving, twenty-two cents. Benchmark open on GitHub."* |
-| 02:55 | 03:00 | 0:05 | **Outro** | Logo, hackathon tag | silent |
+```text
+The operator told me the GPS failed under a tunnel.
+Black Box checked the recording and said: that story is wrong.
 
-**Cumulative runtime check:** 15 + 15 + 15 + 30 + 30 + 20 + 20 + 20 + 10 + 5 = 180 s = 3:00 exactly.
+Robotics teams collect hours of video, lidar, telemetry and controller logs.
+The evidence exists, but the forensic work is still manual.
 
-## Non-negotiables
+I give Black Box one real driving session.
+No labels. No handcrafted rubric.
+Just the operator’s note: check the tunnel.
 
-1. **Disagreement as climax.** The tool rejecting the operator's own hypothesis is the money shot. Diff is the follow-up payoff. Everything else stops at explanation — we don't.
-2. **Grounding gate visible.** Show the clean-bag pass where Claude returns empty moments. Proves we don't hallucinate. Inoculates credibility before the counterfactual.
-3. **Real data, on camera.** Lucas in front of the actual car for the hook. Not a stock shot. Real session. Real operator quote.
-4. **Cost visible.** $0.22 per bag on screen at punchline. Judges care about token discipline.
-5. **URL visible.** `github.com/.../black-box-bench` on screen at punchline. Judges will look.
+This is not a one-shot summary.
+Opus 4.7 runs as a managed forensic agent: reading files, using tools, streaming events, and checking memory from previous runs.
 
-## What we do NOT show
+It does not send every frame.
+Telemetry selects suspicious windows, then high-resolution visual mining checks the relevant camera views.
 
-- Synthesis pipeline (Wan 2.2 / Nano Banana). Backend QA, not product pitch.
-- NAO6 beat. Real humanoid recordings not captured in time. Single-platform cut.
-- Any hypothesis we couldn't verify. Honesty beats drama.
-- The word *"multimodal."* Say *"heterogeneous artifact fusion"* or *"video + logs + code."*
+Here is the key moment.
+The tunnel did mildly degrade GNSS: fewer satellites, wider accuracy.
+But the RTK heading failure was already present 43 minutes earlier, and drive-by-wire was never engaged.
+The tunnel could not have caused the reported behavior change.
 
-## Required assets by Day 5
+The real failure is lower level.
+The moving-base antenna is healthy, but the rover never gets valid RTK heading.
+The correction path was broken before the car left the lot.
 
-- [ ] 1 recording of the RTK counterfactual pass on `sanfer_sanisidro` — streaming reasoning visible, operator-quote overlay on first card
-- [ ] 2 matplotlib plots rendered from `rtk_heading_break_01/telemetry.npz`: moving-base vs rover carrier-phase over time; REL_POS_VALID flag over time
-- [ ] 1 patch-proposal screenshot (RTCM3 message IDs + UART check) — readable at 1080p
-- [ ] 1 clean-window pass showing empty moments (grounding gate visible)
-- [ ] 1 webcam clip of Lucas at the car with operator-quote voice-over (15 s)
-- [ ] 3–5 real frames/short clips from the sanfer_sanisidro cam-lidar bag for the hook and counterfactual beat. Owners cleared public use, faces + plates unblurred OK. Do not ship the full session dump.
-- [ ] Benchmark repo public with README + 4 scoreable cases incl. `rtk_heading_break_01`
+And the output is not just a report.
+It gives a scoped patch: RTCM message IDs, a UART link check, and a human-review gate.
+Black Box proposes the diff; the engineer approves it.
 
-## Backup cut
+This is why Black Box is built on Opus 4.7.
+Not because simple cases need a bigger model — 4.6 and 4.7 tie there.
+But robot forensics punishes confident wrong answers.
+In our benchmark, 4.6 committed on every under-specified case.
+4.7 abstained every time.
 
-If any beat slips, collapse 1:45 – 2:05 and 2:05 – 2:25 into a single 30 s beat showing the plot + patch in one panel. Total comes in at 2:45 with room for the outro. Keep the counterfactual. Cut the grounding-gate beat first — its content is in the PITCH one-liner and the benchmark README.
+It also sees fine visual details that 4.6 loses under downsampling,
+and runs about thirty percent faster on telemetry and text runs.
 
-## Day-5 rehearsal
+And this is not a single-car demo.
+The same archive includes more car sessions, a robotic boat lidar case, clean recordings, and injected benchmark failures.
 
-One full voice-over dry run before recording. Time it. If over 3:05, cut the grounding-gate beat (keep the counterfactual + patch). Under no circumstances ship a 4-minute video.
+When there is no evidence, it makes no claim.
+Open benchmark.
+Reproducible runs.
+Robot forensics in minutes, for cents.
+```
+
+## Panel visual para Opus 4.7
+
+Usaría exactamente esto, grande y simple:
+
+```text
+Same accuracy. Better judgment. More eyes.
+
+Simple post-mortems
+4.6: 67%     4.7: 67%
+
+Under-specified cases
+4.6: 0% abstention     4.7: 100% abstention
+
+Wrong operator hypothesis
+4.6 Brier: 0.239     4.7 Brier: 0.162
+
+Fine-grain vision
+4.6: 0/3     4.7: 3/3
+
+Telemetry/text latency
+4.7: ~30% faster
+```
+
+Ese panel se sostiene muy bien porque Anthropic también posiciona Opus 4.7 como mejor en tareas largas, razonamiento sostenido, vision y verificación de outputs, y mantiene el mismo pricing que Opus 4.6. ([Anthropic][2]) Además, la documentación de Managed Agents calza con tu loop: agente, environment, session, events, tools, streaming, steering y estado persistente. ([Claude Platform][3])
+
+## Cómo aprovechar la nueva UI
+
+Con la UI nueva, el video no debería parecer “screen recording de terminal”. Mostrá:
+
+* **Intake** al principio: mode cards + drop zone.
+* **Live job panel** durante análisis: polling, stages, memory mounts, pipeline glyph.
+* **Report** para el payoff: verdict banner, exhibits, chips, trace rows, diff.
+* **Cases archive** para generalización: 8 filas, counts, bote + autos + clean/injected.
+* **Recco buttons** al cierre: Download report, Copy Linear ticket, Append ledger.
+
+El repo ya declara FastAPI + HTMX UI con upload → progress → diff, Managed Agents, grounding gate, memory, HITL approve/reject, steering, rollback, trace y visual mining shipped. ([GitHub][4]) La sección `visual_mining_v2` también respalda la parte de 5 cámaras en un prompt, thumbnails 800×600, escalamiento a 3.75MP y ventanas ancladas en telemetry. ([GitHub][4])
+
+## Corte si se pasa de 3 minutos
+
+Primero recortaría **generalización** de 8s a 4s.
+Después recortaría **visual mining** de 13s a 8s.
+No recortaría:
+
+* la refutación del túnel,
+* el root cause,
+* el diff,
+* el panel Opus 4.7.
+
+El orden de prioridad final es:
+
+1. **It wasn’t the tunnel.**
+2. **Here is the actual RTK failure.**
+3. **Here is the scoped patch.**
+4. **4.7 abstains where 4.6 commits wrong.**
+5. **The UI makes this feel like a product.**
+

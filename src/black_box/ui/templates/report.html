@@ -1,78 +1,333 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script>(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;})();</script>
-  <title>Black Box — Report {{ job_id }}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
-</head>
-<body>
-  <main>
-    <header class="report-head">
-      <div>
-        <h1>Black Box</h1>
-        <p class="sub">Forensic report · <code>{{ job_id }}</code></p>
-      </div>
-      <nav class="report-actions">
-        <a class="btn btn-primary" href="/">← New analysis</a>
-        <a class="btn btn-secondary" href="/report/{{ job_id }}?format=pdf">Download PDF</a>
-      </nav>
-    </header>
+{% extends "_base.html" %}
+{% set route = 'report' %}
+{% block title %}Report · {{ case.key }} — Black Box{% endblock %}
+{% block vol %}Report · case {{ case.key }}{% endblock %}
 
-    {% if hero %}
-    <section class="report-hero" data-case="{{ hero.case }}">
-      <p class="rh-eyebrow">forensic verdict · {{ hero.mode }}</p>
-      <p class="rh-case">{{ hero.case }}</p>
-      {% if hero.verdict %}<p class="rh-verdict">{{ hero.verdict }}</p>{% endif %}
-      <div class="rh-meta">
-        {% if hero.duration %}<span>duration <strong>{{ hero.duration }}</strong></span>{% endif %}
-        {% if hero.model %}<span>model <strong>{{ hero.model }}</strong></span>{% endif %}
-        {% if hero.generated %}<span>generated <strong>{{ hero.generated }}</strong></span>{% endif %}
-      </div>
-    </section>
+{% block content %}
+<div style="display: grid; grid-template-columns: 1fr auto; align-items: end; margin-bottom: 8px; gap: 24px;">
+  <div>
+    <div class="label">Case · {{ case.key }}</div>
+    <div class="meta" style="margin-top: 4px; font-family: var(--serif);">
+      Filed {{ case.date }} · Bag <span class="mono">{{ case.bag }}</span> ({{ case.bag_size }}, {{ case.duration_label }}) · {{ case.mode }}
+    </div>
+  </div>
+  <div class="meta" style="text-align: right; font-size: 0.78rem;">
+    <div>Signed · <span class="mono">opus-4.7</span></div>
+    <div>Receipt · <span class="mono">{{ case.id[-12:] }}</span></div>
+  </div>
+</div>
+
+{# Verdict banner #}
+<section class="verdict {% if case.verdict == 'REFUTED' %}is-refuted{% elif case.verdict == 'CONFIRMED' %}is-confirmed{% else %}is-inconclusive{% endif %}">
+  <div class="stamp">
+    {% if case.verdict == 'REFUTED' %}
+      <svg class="glyph" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 5 L19 19 M19 5 L5 19"/></svg>
+    {% elif case.verdict == 'CONFIRMED' %}
+      <svg class="glyph" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 L10 17 L19 7"/></svg>
+    {% else %}
+      <svg class="glyph" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 13 q3 -5 6 0 t6 0 t6 0"/></svg>
     {% endif %}
+    {{ case.verdict }}
+  </div>
+  <div>
+    <h1>{{ case.hypothesis_model }}</h1>
+    <div class="meta" style="margin-top: 6px;">
+      <span style="color: var(--ink);">Operator hypothesis</span> · {{ case.hypothesis_operator }}<br>
+      <span style="color: var(--accent);">Verdict</span> · {{ case.verdict_body }}
+    </div>
+  </div>
+  <div class="meta">
+    <div>{{ case.runtime }}</div>
+    <div style="color: var(--ink);">{{ case.cost }}</div>
+  </div>
+</section>
 
-    <article
-      id="report-body"
-      class="report-body"
-      aria-live="polite"
-      data-markdown="{{ markdown_source }}"
-    >
-      <noscript><pre>{{ markdown_source }}</pre></noscript>
+{# Tabs #}
+<div class="tabs" style="margin-top: 24px;">
+  <button class="tab is-on" data-tab="exhibits">Exhibits</button>
+  <button class="tab" data-tab="patch">Recommended patch</button>
+  <button class="tab" data-tab="trace">Replayable trace</button>
+</div>
+
+<div id="tab-exhibits">
+  {# Findings prose + vertical timeline #}
+  <section style="display: grid; grid-template-columns: 1fr 320px; gap: 28px; margin-bottom: 24px; align-items: start;">
+    <div>
+      <h2>Findings</h2>
+      <p style="margin-top: 10px; font-size: 1.04rem; color: var(--ink-2); max-width: 720px; font-family: var(--serif);">
+        The operator's hypothesis blames the tunnel at <span class="mono">t=02:57:11</span>. The recording shows otherwise.
+        RTK fix quality collapsed <a href="#E1" class="chip is-accent">E1</a> at <span class="mono">t=02:14:32</span>,
+        forty-three minutes before tunnel entry, while the robot was still in open lot with clear sky <a href="#E3" class="chip">E3</a>.
+        For the ninety seconds preceding that collapse, the EKF heading covariance silently widened from
+        <span class="mono">0.018</span> to <span class="mono">0.21 rad</span> <a href="#E2" class="chip is-accent">E2</a> without
+        triggering <span class="mono">/diagnostics_agg</span>; a single rate-limited warning <a href="#E5" class="chip">E5</a> was the only signal,
+        and it was suppressed. A secondary GNSS receiver was already disagreeing with the primary by more than 0.40m for 280 seconds prior <a href="#E8" class="chip is-accent">E8</a>,
+        but no code path consumed that signal <a href="#E6" class="chip">E6</a>.
+      </p>
+      <p style="margin-top: 12px; font-size: 1.04rem; color: var(--ink-2); max-width: 720px; font-family: var(--serif);">
+        By the time the robot reached the tunnel <a href="#E4" class="chip">E4</a>, it was already operating on a degraded estimator that
+        self-reported nominal. The tunnel revealed the fault. It did not cause it.
+      </p>
+
+      {# Causal chain SVG #}
+      <div class="card" style="margin-top: 18px; padding: 14px 16px;">
+        <div class="label" style="margin-bottom: 8px;">Causal chain · operator vs. model</div>
+        <svg viewBox="0 0 640 180" width="100%" height="180" preserveAspectRatio="xMidYMid meet" style="display: block;">
+          <defs><marker id="arr2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L9 5 L0 10 Z" fill="var(--ink)"/></marker></defs>
+          <g font-family="var(--mono)" font-size="9" fill="var(--ink)" text-anchor="middle">
+            <text x="20" y="42" text-anchor="start" fill="var(--muted)" font-size="8">OPERATOR</text>
+            <g fill="none" stroke="var(--muted)" stroke-width="1.2">
+              <rect x="80"  y="28" width="120" height="28"/>
+              <rect x="260" y="28" width="120" height="28"/>
+              <rect x="440" y="28" width="120" height="28"/>
+              <path d="M200 42 H260 M380 42 H440" marker-end="url(#arr2)"/>
+            </g>
+            <text x="140" y="46" fill="var(--muted)">tunnel ingress</text>
+            <text x="320" y="46" fill="var(--muted)">vision loss</text>
+            <text x="500" y="46" fill="var(--muted)">localization fail</text>
+            <line x1="80" y1="64" x2="560" y2="64" stroke="var(--signal-red)" stroke-width="1" stroke-dasharray="3 3"/>
+            <text x="610" y="68" text-anchor="end" fill="var(--signal-red)" font-size="8">refuted</text>
+
+            <text x="20" y="118" text-anchor="start" fill="var(--accent)" font-size="8">MODEL</text>
+            <g fill="none" stroke="var(--accent)" stroke-width="1.2">
+              <rect x="20"  y="104" width="100" height="28"/>
+              <rect x="160" y="104" width="120" height="28"/>
+              <rect x="320" y="104" width="120" height="28"/>
+              <rect x="480" y="104" width="100" height="28"/>
+              <path d="M120 118 H160 M280 118 H320 M440 118 H480" marker-end="url(#arr2)"/>
+            </g>
+            <text x="70"  y="122">dual-rcv Δ</text>
+            <text x="220" y="122">σ_yaw drift</text>
+            <text x="380" y="122">RTK collapse</text>
+            <text x="530" y="122">tunnel entry</text>
+            <g font-family="var(--mono)" font-size="7" fill="var(--muted)">
+              <text x="70"  y="148">−47m</text>
+              <text x="220" y="148">−90s</text>
+              <text x="380" y="148">t=02:14:32</text>
+              <text x="530" y="148">+42m38s</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div style="position: sticky; top: 16px; max-height: calc(100vh - 48px); overflow-y: auto;">
+      <aside class="tlv">
+        <div class="label" style="margin-bottom: 10px;">Timeline</div>
+        {% for ex in case.exhibits if ex.t %}
+        <a href="#{{ ex.n }}" class="tlv-row is-evidence" style="text-decoration: none; color: inherit;">
+          <span class="t">{{ ex.t|fmt_time }}</span>
+          <span class="dot"></span>
+          <span class="body">
+            <span style="color: var(--accent); font-family: var(--mono); font-size: 0.78rem;">{{ ex.n }}</span>
+            · {{ ex.title }}
+            <span class="cap">{{ ex.cap[:90] }}{% if ex.cap|length > 90 %}…{% endif %}</span>
+          </span>
+        </a>
+        {% endfor %}
+      </aside>
+    </div>
+  </section>
+
+  {# Horizontal timeline #}
+  <div class="timeline" style="margin-bottom: 22px;">
+    <div class="tl-head">
+      <span class="label">Run timeline · {{ case.duration|fmt_time }}</span>
+      <span class="meta mono">{{ case.exhibits|selectattr('t')|list|length }} exhibits anchored</span>
+    </div>
+    <div class="tl-track">
+      <div class="tl-window" style="left: {{ (case.window_start / case.duration * 100)|round(1) }}%; width: {{ ((case.window_end - case.window_start) / case.duration * 100)|round(1) }}%;" title="RTK fault window"></div>
+      {% if case.tunnel_start %}
+      <div class="tl-window is-tunnel" style="left: {{ (case.tunnel_start / case.duration * 100)|round(1) }}%; width: {{ ((case.tunnel_end - case.tunnel_start) / case.duration * 100)|round(1) }}%;" title="Tunnel ingress"></div>
+      {% endif %}
+      {% for ex in case.exhibits if ex.t %}
+      <div class="tl-mark is-evidence" style="left: {{ (ex.t / case.duration * 100)|round(2) }}%;" title="{{ ex.n }} · {{ ex.title }}"></div>
+      {% endfor %}
+      <div class="tl-axis">
+        {% for tick in [0, 1, 2, 3, 4, 5, 6] %}
+        <span>{{ ((tick / 6) * case.duration)|int|fmt_time }}</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {# Exhibits grid #}
+  <h2 style="margin-bottom: 12px;">Exhibits</h2>
+  <div class="exhibits">
+    {% for ex in case.exhibits %}
+    <article class="exhibit" id="{{ ex.n }}">
+      <div class="ex-num">
+        <span>Exhibit · {{ ex.n }}</span>
+        {% if ex.t %}<span>t={{ ex.t|fmt_time }}</span>{% endif %}
+      </div>
+      <h3 class="ex-title">{{ ex.title }}</h3>
+      <div class="ex-media">
+        {% include "_exhibit_media.html" %}
+      </div>
+      <p class="ex-cap">{{ ex.cap }}</p>
+      <div class="ex-foot">
+        <span class="tchip">{{ ex.type_label }}</span>
+        <span class="meta mono" style="font-size: 0.74rem;">{{ ex.source }}</span>
+      </div>
     </article>
+    {% endfor %}
+  </div>
 
-    <footer>
-      <small>Opus 4.7 · Managed Agents · hackathon build</small>
-    </footer>
-  </main>
-  <script>
-    (function () {
-      var target = document.getElementById('report-body');
-      var src = target.getAttribute('data-markdown') || '';
-      if (window.marked && typeof window.marked.parse === 'function') {
-        window.marked.setOptions({ gfm: true, breaks: false, headerIds: true });
-        var rawHtml = window.marked.parse(src);
-        if (window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
-          target.innerHTML = window.DOMPurify.sanitize(rawHtml);
-        } else {
-          var pre = document.createElement('pre');
-          pre.textContent = src;
-          target.innerHTML = '';
-          target.appendChild(pre);
-        }
-      } else {
-        var pre = document.createElement('pre');
-        pre.textContent = src;
-        target.innerHTML = '';
-        target.appendChild(pre);
-      }
-    })();
-  </script>
-</body>
-</html>
+  {# Recommended action #}
+  <section class="recco">
+    <span class="label">Recommended corrective action</span>
+    <p class="body">{{ case.recco }}</p>
+    <div style="margin-top: 14px; display: flex; gap: 10px; align-items: center;">
+      <a class="btn-ghost btn" href="/case-md/{{ case.id }}" download>Download report</a>
+      <button id="copy-ticket" class="btn-ghost btn" type="button" data-case-key="{{ case.key }}" data-verdict="{{ case.verdict }}" data-hypothesis="{{ case.hypothesis_model }}" data-recco="{{ case.recco }}">Copy as Linear ticket</button>
+      <button id="append-ledger" class="btn-ghost btn" type="button"
+              hx-post="/ledger/{{ case.id }}" hx-target="#ledger-flash" hx-swap="innerHTML">
+        Append to ledger
+      </button>
+      <span id="ledger-flash" class="meta" style="font-size: 0.78rem;"></span>
+    </div>
+  </section>
+</div>
+
+<div id="tab-patch" style="display: none;">
+  <div style="display: grid; grid-template-columns: 1fr auto; align-items: end; margin-bottom: 16px; gap: 16px;">
+    <div>
+      <h2>Recommended patch · scoped to root cause</h2>
+      <p class="meta" style="margin-top: 6px; font-size: 0.92rem; max-width: 660px;">
+        Three files, twenty-eight lines. Black Box is opinionated about the smallest viable fix; broader refactors are deferred to a separate ticket.
+      </p>
+    </div>
+    <div class="meta mono" style="text-align: right;">3 files changed · +18 −10</div>
+  </div>
+
+  <div class="diff">
+    <div class="diff-head">
+      <span class="file">perception/src/ekf_node.cpp</span>
+      <span class="stats">+9 −4 · escalates heading covariance to a fault source</span>
+    </div>
+    <div class="diff-grid">
+      <div class="diff-side l">
+        <div class="lbl">Before · @ 7c4f2b</div>
+        {% for line in patch.before %}
+        <div class="diff-line {% if loop.index0 in patch.del_lines %}del{% endif %}">
+          <span class="ln">{{ loop.index0 + 410 }}</span>
+          <span class="tx">{% if loop.index0 in patch.del_lines %}− {% else %}  {% endif %}{{ line }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="diff-side r">
+        <div class="lbl">After · @ proposed</div>
+        {% for line in patch.after %}
+        <div class="diff-line {% if loop.index0 in patch.add_lines %}add{% endif %}">
+          <span class="ln">{{ loop.index0 + 410 }}</span>
+          <span class="tx">{% if loop.index0 in patch.add_lines %}+ {% else %}  {% endif %}{{ line }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+    <div class="card" style="padding: 16px;">
+      <span class="label">Tests added</span>
+      <ul class="mono" style="margin-top: 8px; padding-left: 18px; font-size: 0.84rem; line-height: 1.7;">
+        <li>test_ekf_escalates_on_rtk_float</li>
+        <li>test_ekf_consumes_dual_disagree</li>
+        <li>test_ekf_fault_above_yaw_sigma_0_15</li>
+      </ul>
+    </div>
+    <div class="card" style="padding: 16px;">
+      <span class="label">Files touched</span>
+      <ul class="mono" style="margin-top: 8px; padding-left: 18px; font-size: 0.84rem; line-height: 1.7;">
+        <li>perception/src/ekf_node.cpp</li>
+        <li>perception/include/ekf_node.h</li>
+        <li>perception/test/test_ekf_node.cpp</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div id="tab-trace" style="display: none;">
+  <div style="display: grid; grid-template-columns: 1fr auto; align-items: end; margin-bottom: 16px;">
+    <div>
+      <h2>Replayable evidence trace</h2>
+      <p class="meta" style="margin-top: 6px; font-size: 0.92rem; max-width: 660px;">
+        Every claim above resolves to a deterministic call into the recording. Click any row to seek; the ledger ships as JSON at <span class="mono">/trace/{{ case.id[-8:] }}</span>.
+      </p>
+    </div>
+  </div>
+
+  <table class="cases">
+    <thead>
+      <tr>
+        <th style="width: 76px;">Step</th>
+        <th>Tool · arguments</th>
+        <th style="width: 120px;">Cited as</th>
+        <th class="num" style="width: 110px;">Bytes</th>
+        <th class="num" style="width: 100px;">Cost</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in case.tool_calls %}
+      <tr>
+        <td class="mono">{{ r.t }}</td>
+        <td class="mono">{{ r.tool }}</td>
+        <td class="mono">{{ "E" ~ loop.index if loop.index <= 8 else "—" }}</td>
+        <td class="num">{{ r.out_b|bytes_fmt }}</td>
+        <td class="num">${{ "%.4f"|format(r.usd) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('is-on'));
+    this.classList.add('is-on');
+    ['exhibits', 'patch', 'trace'].forEach(id => {
+      document.getElementById('tab-' + id).style.display = (id === this.dataset.tab ? 'block' : 'none');
+    });
+  });
+});
+
+// Copy as Linear ticket → clipboard
+document.getElementById('copy-ticket')?.addEventListener('click', async function() {
+  const d = this.dataset;
+  const ticket = [
+    `[${d.verdict}] ${d.hypothesis}`,
+    '',
+    `Case: ${d.caseKey}`,
+    `Verdict: ${d.verdict}`,
+    '',
+    'Recommended action:',
+    d.recco,
+    '',
+    `Source: Black Box · ${location.origin}${location.pathname}${location.search}`,
+  ].join('\n');
+  try {
+    await navigator.clipboard.writeText(ticket);
+    const original = this.textContent;
+    this.textContent = 'Copied ✓';
+    setTimeout(() => { this.textContent = original; }, 1400);
+  } catch (e) {
+    this.textContent = 'Copy failed';
+  }
+});
+
+// Chip → exhibit highlight
+document.querySelectorAll('.chip').forEach(c => {
+  c.addEventListener('mouseenter', function() {
+    const id = this.getAttribute('href').slice(1);
+    const ex = document.getElementById(id);
+    if (ex) ex.classList.add('is-pinned');
+  });
+  c.addEventListener('mouseleave', function() {
+    const id = this.getAttribute('href').slice(1);
+    const ex = document.getElementById(id);
+    if (ex) ex.classList.remove('is-pinned');
+  });
+});
+</script>
+{% endblock %}

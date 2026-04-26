@@ -1,0 +1,44 @@
+{
+  "schema": "blackbox_demo_timeline/1.0",
+  "target_runtime_s": 179.5,
+  "resolution": [1920, 1080],
+  "fps": 30,
+  "video_codec": "libx264",
+  "pix_fmt": "yuv420p",
+  "audio_codec": "aac",
+  "audio_present": "silent_track",
+  "spine_case": "sanfer_tunnel",
+  "renderer": "scripts/build_final_video.sh",
+  "segments": [
+    {"i": 1,  "in": 0.0,    "out": 11.0,   "dur": 11.0, "kind": "clip",  "asset": "clips/block_01_hook.mp4",                 "beat": "hook"},
+    {"i": 2,  "in": 11.0,   "out": 25.5,   "dur": 14.5, "kind": "clip",  "asset": "clips/block_02_problem.mp4",              "beat": "problem"},
+    {"i": 3,  "in": 25.5,   "out": 44.1,   "dur": 18.6, "kind": "clip",  "asset": "clips/block_03_setup.mp4",                "beat": "setup"},
+    {"i": 4,  "in": 44.1,   "out": 65.1,   "dur": 21.0, "kind": "clip",  "asset": "clips/block_04_analysis_live_v2.mp4",     "beat": "managed_agent_loop_live_ui"},
+    {"i": 5,  "in": 65.1,   "out": 84.5,   "dur": 19.4, "kind": "clip",  "asset": "clips/block_06_second_moment.mp4",        "beat": "true_root_cause_evidence"},
+    {"i": 6,  "in": 84.5,   "out": 98.5,   "dur": 14.0, "kind": "still", "asset": "panels/operator_vs_blackbox.png",         "beat": "refutation_climax", "motion": "static"},
+    {"i": 7,  "in": 98.5,   "out": 113.0,  "dur": 14.5, "kind": "clip",  "asset": "clips/block_08_money_shot.mp4",           "beat": "patch_diff_human_gate"},
+    {"i": 8,  "in": 113.0,  "out": 127.0,  "dur": 14.0, "kind": "still", "asset": "panels/opus47_delta_panel.png",           "beat": "opus47_vs_46_delta", "motion": "static"},
+    {"i": 9,  "in": 127.0,  "out": 140.0,  "dur": 13.0, "kind": "still", "asset": "panels/breadth_montage.png",              "beat": "generalization", "motion": "static"},
+    {"i": 10, "in": 140.0,  "out": 157.5,  "dur": 17.5, "kind": "clip",  "asset": "clips/block_07_grounding.mp4",            "beat": "grounding_gate_abstention"},
+    {"i": 11, "in": 157.5,  "out": 170.0,  "dur": 12.5, "kind": "clip",  "asset": "clips/block_09_punchline.mp4",            "beat": "cost_and_repo"},
+    {"i": 12, "in": 170.0,  "out": 179.5,  "dur": 9.5,  "kind": "clip",  "asset": "clips/block_10_outro.mp4",                "beat": "outro"}
+  ],
+  "dropped_blocks": [
+    {"asset": "clips/block_05_first_moment.mp4", "reason": "boat content covered by panels/breadth_montage.png; trim required to fit 3:00 cap"}
+  ],
+  "captions_file": "subtitles.srt",
+  "constraints_satisfied": {
+    "duration_between_2_50_and_3_00": true,
+    "resolution_1920x1080": true,
+    "h264": true,
+    "no_placeholder_clips": "block_01_hook.mp4 is stylistic stand-in for missing webcam; flagged in render notes",
+    "includes_opus47_delta_panel": true,
+    "includes_operator_vs_blackbox": true,
+    "includes_breadth_montage": true,
+    "includes_money_shot_diff": true,
+    "includes_grounding_gate": true,
+    "no_NAO6": true,
+    "no_unsupported_claims": true,
+    "silent_with_captions": true
+  }
+}

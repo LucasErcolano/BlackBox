@@ -1,0 +1,153 @@
+{# Live/Done phase fragment. Polls /status/{job_id} every second while running. #}
+{% set is_done = status.stage == 'done' or status.progress >= 1.0 %}
+{% set polling = not is_done and status.stage != 'failed' %}
+<section id="main-panel"
+         class="card"
+         data-phase="{{ 'done' if is_done else 'live' }}"
+         data-filename="{{ status.upload }}"
+         style="padding: 0; display: flex; flex-direction: column;"
+         {% if polling %}hx-get="/status/{{ job_id }}" hx-trigger="load delay:900ms" hx-swap="outerHTML"{% endif %}>
+
+  <div class="live-head">
+    <div>
+      <div class="label" style="font-size: 0.62rem;">Recording</div>
+      <div class="mono" style="font-size: 0.84rem; margin-top: 2px;">{{ status.upload or "uploading…" }}</div>
+      <div class="meta" style="font-size: 0.72rem; margin-top: 2px;">{{ status.bag_size or "—" }} · {{ status.adapter or "auto" }} · {{ status.mode_label or status.mode or "post_mortem" }}</div>
+    </div>
+    <div class="cost-meter" tabindex="0">
+      <span class="lbl">Cost · live</span>
+      ${{ "%.4f"|format(status.cost_usd or 0.0) }}
+      <div class="breakdown">
+        cached tokens · {{ status.cached_tokens or 0 }}<br>
+        uncached tokens · {{ status.uncached_tokens or 0 }}<br>
+        memory r/w · {{ status.memory_rw or "—" }}<br>
+        vision frames · {{ status.frames or 0 }}
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="ph">
+      <span class="label" style="font-size: 0.66rem;">{{ "Complete" if is_done else (status.stage_label or status.label or "Working") }}</span>
+      <span class="mono meta" style="font-size: 0.74rem;">{{ ((status.progress or 0) * 100)|round|int }}%</span>
+    </div>
+    <div class="bar"><i style="width: {{ ((status.progress or 0) * 100)|round|int }}%;"></i></div>
+  </div>
+
+  <div class="stages" style="margin: 0 20px 14px;">
+    {% set s_idx = status.stage_idx if status.stage_idx is defined else 0 %}
+    {% for s in stage_names %}
+    <div class="stg {% if loop.index0 < s_idx %}is-done{% elif loop.index0 == s_idx %}is-now{% else %}is-todo{% endif %}">
+      <span class="n">{{ '%02d' % loop.index }}</span>
+      <span class="name">{{ s }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <section class="console" aria-live="polite" style="margin: 0 20px 14px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+      <span class="live">
+        {% if is_done %}
+          ▌ stream closed
+        {% else %}
+          <span class="dot"></span> Reasoning stream · live
+        {% endif %}
+      </span>
+      <span class="live" style="color: var(--console-muted);">opus-4.7 · job {{ job_id[:8] }}</span>
+    </div>
+    <div class="stream" id="console-stream" style="max-height: 220px; overflow-y: auto;">
+      {% for line in (status.reasoning_buffer or [])[-40:] %}
+      <div class="ln">
+        <span class="ts">{{ "%.1f"|format(loop.index0 * 0.7 + 0.4) }}</span>
+        <span>
+          {% set parsed = line|parse_log_line %}
+          <span class="tag">{{ parsed.tag }}</span>{{ "  " }}<span class="{{ parsed.kind }}">{{ parsed.text }}</span>
+        </span>
+      </div>
+      {% endfor %}
+      {% if not is_done %}
+      <div class="ln"><span class="ts">…</span><span><span class="cursor">&nbsp;</span></span></div>
+      {% endif %}
+    </div>
+  </section>
+
+  <details class="ledger" style="margin: 0 20px 14px;">
+    <summary>
+      <span class="lhead">Tool-call ledger · {{ ledger_rows|length }} calls</span>
+      <span class="lcount">{{ ledger_in_total }} in · {{ ledger_out_total }} out · ${{ "%.4f"|format(status.cost_usd or 0.0) }}</span>
+    </summary>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 80px;">t-offset</th>
+          <th>tool</th>
+          <th class="num" style="width: 100px;">input</th>
+          <th class="num" style="width: 100px;">output</th>
+          <th class="num" style="width: 100px;">cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in ledger_rows %}
+        <tr>
+          <td>{{ r.t }}</td>
+          <td>{{ r.tool }}</td>
+          <td class="num">{{ r.in_b|bytes_fmt }}</td>
+          <td class="num">{{ r.out_b|bytes_fmt }}</td>
+          <td class="num">${{ "%.4f"|format(r.usd) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </details>
+
+  <div class="live-foot {% if is_done %}is-done{% endif %}">
+    {% if not is_done %}
+      <span class="meta" style="font-size: 0.78rem;">Streaming · auto-scroll on</span>
+      <span style="display: flex; gap: 12px; align-items: center;">
+        <button type="button" class="btn-link" style="font-size: 0.84rem; background: none; border: 0; cursor: pointer; padding: 0; color: var(--ink-2); text-decoration: underline;"
+                hx-post="/cancel/{{ job_id }}"
+                hx-target="#main-panel"
+                hx-swap="outerHTML"
+                hx-confirm="Cancel this run? Partial results will be discarded.">cancel</button>
+      </span>
+    {% else %}
+      <div>
+        <div class="label" style="font-size: 0.62rem;">Verdict</div>
+        <div style="font-family: var(--serif); font-size: 1rem; margin-top: 2px;">
+          <span class="verdict-pill">Refuted</span>
+          12 exhibits · {{ status.duration_label or "43s" }} · ${{ "%.2f"|format(status.cost_usd or 0.46) }}
+        </div>
+      </div>
+      <span style="display: flex; gap: 12px; align-items: center;">
+        <a href="/" class="btn-link" style="font-size: 0.84rem;">new case</a>
+        <a href="/report?case=sanfer&amp;job={{ job_id }}" class="btn">Read the report →</a>
+      </span>
+    {% endif %}
+  </div>
+</section>
+
+{% if is_done %}
+<script>
+  // Update hero copy to "case closed"
+  (function() {
+    const hero = document.getElementById('hero-row');
+    if (!hero) return;
+    hero.querySelector('.label').textContent = 'Case · closed';
+    hero.querySelector('h1').textContent = "It wasn't the tunnel.";
+    hero.querySelector('.h1-sub').textContent = 'Refuted in 12 exhibits. The vision pipeline reports nothing unusual; the operator’s tunnel hypothesis is contradicted by the evidence.';
+  })();
+</script>
+{% else %}
+<script>
+  (function() {
+    const hero = document.getElementById('hero-row');
+    if (!hero) return;
+    hero.querySelector('.label').textContent = 'Case · in flight';
+    hero.querySelector('h1').textContent = 'Working the case…';
+    const fn = '{{ status.upload or "" }}';
+    hero.querySelector('.h1-sub').innerHTML = (fn ? '<span class="mono">' + fn + '</span> · ' : '') + 'streaming reasoning, tool calls, and exhibits.';
+    const stream = document.getElementById('console-stream');
+    if (stream) stream.scrollTop = stream.scrollHeight;
+  })();
+</script>
+{% endif %}

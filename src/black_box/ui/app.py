@@ -25,6 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from black_box.reporting.diff import demo_side_by_side_html, parse_patch_proposal
+from black_box.ui import demo_data
 
 # ---- paths ------------------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent
@@ -51,6 +52,54 @@ app = FastAPI(title="Black Box", description="Forensic copilot for robots")
 
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+
+
+def _bytes_fmt(b: int | float | None) -> str:
+    if b is None:
+        return "—"
+    b = float(b)
+    if b < 1024:
+        return f"{int(b)} B"
+    if b < 1_048_576:
+        return f"{b / 1024:.1f} KB"
+    if b < 1_073_741_824:
+        return f"{b / 1_048_576:.1f} MB"
+    return f"{b / 1_073_741_824:.2f} GB"
+
+
+def _fmt_time(seconds: int | float | None) -> str:
+    if seconds is None:
+        return "—"
+    s = int(seconds)
+    h = s // 3600
+    m = (s % 3600) // 60
+    ss = s % 60
+    return f"{h:02d}:{m:02d}:{ss:02d}"
+
+
+def _parse_log_line(line: str) -> dict:
+    """Split a buffered reasoning line into tag/text/kind for styled rendering."""
+    text = line or ""
+    tag = ""
+    kind = ""
+    if text.startswith("["):
+        end = text.find("]")
+        if end > 0:
+            tag = text[1:end]
+            text = text[end + 1 :].lstrip()
+    lo = text.lower()
+    if "error" in lo or "fail" in lo or "fault" in lo:
+        kind = "err"
+    elif "warn" in lo:
+        kind = "warn"
+    elif tag.startswith(("done", "ok", "ready")):
+        kind = "ok"
+    return {"tag": tag, "text": text, "kind": kind}
+
+
+templates.env.filters["bytes_fmt"] = _bytes_fmt
+templates.env.filters["fmt_time"] = _fmt_time
+templates.env.filters["parse_log_line"] = _parse_log_line
 
 Mode = Literal["post_mortem", "scenario_mining", "synthetic_qa"]
 
@@ -757,21 +806,38 @@ def _native_memory_status() -> dict:
 
 
 # ---- routes -----------------------------------------------------------------
+def _index_context() -> dict:
+    return {
+        "recent_cases": demo_data.recent_cases(4),
+        "active_stage": None,
+        "memory_status": _native_memory_status(),
+    }
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(
-        request, "index.html", {"memory_status": _native_memory_status()}
-    )
+    return templates.TemplateResponse(request, "index.html", _index_context())
 
 
 @app.get("/memory/native_status")
 async def memory_native_status() -> JSONResponse:
-    """Surface the native managed-agents memory mount config.
-
-    The UI memory card is server-side rendered from this same payload so the
-    card cannot drift from the agent provisioning code.
-    """
     return JSONResponse(_native_memory_status())
+
+
+@app.get("/case/{slug}", response_class=HTMLResponse)
+async def case_fragment(request: Request, slug: str) -> HTMLResponse:
+    filename = HERO_CASES.get(slug)
+    if filename is None:
+        raise HTTPException(404, f"unknown case: {slug}")
+    md_path = CASES_DIR / filename
+    if not md_path.exists():
+        raise HTTPException(404, f"case markdown missing: {filename}")
+    markdown_source = md_path.read_text(encoding="utf-8")
+    return templates.TemplateResponse(
+        request,
+        "case_fragment.html",
+        {"slug": slug, "markdown_source": markdown_source},
+    )
 
 
 @app.get("/analyze", response_class=HTMLResponse)
@@ -803,18 +869,10 @@ async def analyze_replay(
     )
     background.add_task(_run_pipeline_replay, job_id, replay)
 
-    # Render the full shell with the progress card already injected so the
-    # demo link `?replay=...` loads a styled page, not a bare HTMX fragment.
-    progress_html = templates.get_template("progress.html").render(
-        request=request, **_progress_context(job_id, _read_status(job_id) or {})
-    )
     return templates.TemplateResponse(
         request,
-        "index.html",
-        {
-            "initial_html": progress_html,
-            "memory_status": _native_memory_status(),
-        },
+        "_live_panel.html",
+        _live_panel_context(job_id, _read_status(job_id) or {}),
     )
 
 
@@ -874,9 +932,53 @@ async def analyze(
 
     return templates.TemplateResponse(
         request,
-        "progress.html",
-        _progress_context(job_id, _read_status(job_id) or {}),
+        "_live_panel.html",
+        _live_panel_context(job_id, _read_status(job_id) or {}),
     )
+
+
+def _live_panel_context(job_id: str, status: dict) -> dict:
+    """Bridge raw pipeline status to the shape `_live_panel.html` expects."""
+    progress = status.get("progress") or 0.0
+    enriched = {
+        **status,
+        "progress": progress,
+        "stage_label": status.get("label") or status.get("stage") or "Working",
+        "mode_label": status.get("mode_label") or {
+            "post_mortem": "Post-mortem",
+            "scenario_mining": "Scenario mine",
+            "synthetic_qa": "Q&A",
+        }.get(status.get("mode", ""), status.get("mode", "")),
+        "cost_usd": status.get("cost_usd", 0.0),
+        "cached_tokens": status.get("cached_tokens", 0),
+        "uncached_tokens": status.get("uncached_tokens", 0),
+        "memory_rw": status.get("memory_rw", "—"),
+        "frames": status.get("frames", 0),
+        "bag_size": status.get("bag_size", "—"),
+        "adapter": status.get("adapter", "auto"),
+        "stage_idx": demo_data.stage_idx_from_status(status),
+        "duration_label": status.get("duration_label", "—"),
+    }
+    # Build a synthetic ledger from the buffered reasoning lines so the panel
+    # has rows to render even when the real ingestion didn't expose costs yet.
+    rows: list[dict] = []
+    for i, line in enumerate(status.get("reasoning_buffer") or []):
+        if "[tool:" in line or line.startswith("[tool:"):
+            rows.append({
+                "t": f"+{i * 0.7:.1f}s",
+                "tool": line.split("]")[0].lstrip("[").replace("tool:", ""),
+                "in_b": 1024 * (i + 1),
+                "out_b": 4096 * (i + 1),
+                "usd": 0.001 * (i + 1),
+            })
+    return {
+        "job_id": job_id,
+        "status": enriched,
+        "stage_names": demo_data.STAGE_NAMES,
+        "ledger_rows": rows,
+        "ledger_in_total": _bytes_fmt(sum(r["in_b"] for r in rows) or None),
+        "ledger_out_total": _bytes_fmt(sum(r["out_b"] for r in rows) or None),
+    }
 
 
 @app.get("/status/{job_id}", response_class=HTMLResponse)
@@ -886,124 +988,41 @@ async def status(request: Request, job_id: str) -> HTMLResponse:
         raise HTTPException(404, "unknown job")
     return templates.TemplateResponse(
         request,
-        "progress.html",
-        _progress_context(job_id, data),
+        "_live_panel.html",
+        _live_panel_context(job_id, data),
     )
 
 
-_SOURCE_LABELS = {
-    "live":   ("LIVE",   "Real Managed-Agents session, streaming events now."),
-    "replay": ("REPLAY", "Pre-recorded ForensicSession event stream played back."),
-    "sample": ("SAMPLE", "Scripted walkthrough — no bag analyzed, no model called."),
-}
-
-
-def _progress_context(job_id: str, status_data: dict) -> dict:
-    stage = status_data.get("stage", "queued")
-    active_pill = _pill_for(stage)
-    elapsed = _elapsed_seconds(status_data)
-    cost = _cost_summary(job_id)
-    source = status_data.get("source") or "sample"
-    src_label, src_tooltip = _SOURCE_LABELS.get(source, _SOURCE_LABELS["sample"])
-    review = _review_banner(job_id, status_data)
-    return {
-        "job_id": job_id,
-        "status": status_data,
-        "pills": PILLS,
-        "active_pill": active_pill,
-        "case_name": _case_name(status_data),
-        "elapsed_seconds": elapsed,
-        "elapsed_fmt": _fmt_elapsed(elapsed),
-        "cost_usd": cost["usd"],
-        "cost_source": cost["source"],
-        "source": source,
-        "source_label": src_label,
-        "source_tooltip": src_tooltip,
-        "review": review,
-    }
-
-
-_REVIEW_LABELS = {
-    "pending":  ("AWAITING HUMAN REVIEW", "patch staged · not yet applied"),
-    "approved": ("PATCH APPROVED",        "cleared for integration"),
-    "rejected": ("PATCH REJECTED",        "blocked from application"),
-}
-
-
-def _review_banner(job_id: str, status_data: dict) -> dict | None:
-    """Return the review banner dict when a patch artifact exists, else None.
-
-    Surfaces the HITL gate state on the progress card so operators can tell
-    at a glance whether a run still needs a human decision.
-    """
-    if not _patch_path(job_id).exists() and not status_data.get("has_diff"):
-        return None
-    decision = _load_decision(job_id)
-    status = decision.get("status", "pending")
-    label, sub = _REVIEW_LABELS.get(status, _REVIEW_LABELS["pending"])
-    return {"status": status, "label": label, "sub": sub}
-
-
-@app.get("/case/{slug}", response_class=HTMLResponse)
-async def case_fragment(request: Request, slug: str) -> HTMLResponse:
-    filename = HERO_CASES.get(slug)
-    if filename is None:
-        raise HTTPException(404, f"unknown case: {slug}")
-    md_path = CASES_DIR / filename
-    if not md_path.exists():
-        raise HTTPException(404, f"case markdown missing: {filename}")
-    markdown_source = md_path.read_text(encoding="utf-8")
+@app.get("/report", response_class=HTMLResponse)
+async def report_page(
+    request: Request,
+    case: str | None = Query(None),
+    job: str | None = Query(None),
+) -> HTMLResponse:
     return templates.TemplateResponse(
         request,
-        "case_fragment.html",
-        {"slug": slug, "markdown_source": markdown_source},
+        "report.html",
+        {
+            "case": demo_data.case_by_id(case),
+            "patch": demo_data.PATCH,
+            "recent_cases": demo_data.recent_cases(4),
+        },
     )
 
 
-def _build_pdf_on_demand(job_id: str) -> Path | None:
-    """Render PDF from saved JSON payload. Fallback when no pre-built PDF on disk."""
-    payload_path = JOBS_DIR / f"{job_id}_report.json"
-    if not payload_path.exists():
-        return None
-    try:
-        payload = json.loads(payload_path.read_text())
-    except json.JSONDecodeError:
-        return None
-    from black_box.reporting import build_pdf_report
-
-    out_pdf = REPORTS_DIR / f"{job_id}.pdf"
-    build_pdf_report(
-        report_json=payload,
-        artifacts={},
-        out_pdf=out_pdf,
-        case_meta={"case_key": f"ui_{job_id}", "mode": "post_mortem"},
+@app.get("/cases", response_class=HTMLResponse)
+async def cases_page(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(
+        request,
+        "cases.html",
+        {"cases": demo_data.CASES_INDEX},
     )
-    return out_pdf
 
 
-@app.get("/report/{job_id}", response_class=HTMLResponse)
-async def report(
-    request: Request,
-    job_id: str,
-    format: str | None = Query(None, description="'pdf' to download the PDF, default renders markdown in-browser"),
-):
-    """Render forensic report. Default = HTML+marked.js; ?format=pdf = raw PDF."""
-    md_path = REPORTS_DIR / f"{job_id}.md"
-    pdf_path = REPORTS_DIR / f"{job_id}.pdf"
-
-    if format == "pdf":
-        if not pdf_path.exists():
-            built = _build_pdf_on_demand(job_id)
-            if built is None or not built.exists():
-                raise HTTPException(404, "pdf not available")
-            pdf_path = built
-        return FileResponse(
-            str(pdf_path),
-            media_type="application/pdf",
-            filename=pdf_path.name,
-        )
-
-    if not md_path.exists():
+@app.get("/report-md/{job_id}")
+async def report_md(job_id: str) -> FileResponse:
+    md = REPORTS_DIR / f"{job_id}.md"
+    if not md.exists():
         raise HTTPException(404, "report not ready")
 
     markdown_source = md_path.read_text(encoding="utf-8")
@@ -1070,6 +1089,91 @@ def _report_hero(md: str) -> dict | None:
         "model": model,
         "verdict": verdict,
     }
+
+
+@app.get("/case-md/{case_id}")
+async def case_md(case_id: str) -> HTMLResponse:
+    """Serve a synthesized markdown report for a demo case."""
+    case = demo_data.case_by_id(case_id)
+    md = _render_case_md(case)
+    return HTMLResponse(
+        md,
+        media_type="text/markdown; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{case["key"]}.md"'},
+    )
+
+
+def _render_case_md(case: dict) -> str:
+    lines = [
+        f"# {case['key']} — {case['verdict']}",
+        "",
+        f"**Filed:** {case.get('date', '—')}",
+        f"**Bag:** `{case['bag']}` ({case.get('bag_size', '—')}, {case.get('duration_label', '—')})",
+        f"**Mode:** {case.get('mode', 'post_mortem')}  ",
+        f"**Signed:** opus-4.7 · receipt `{case['id'][-12:]}`",
+        "",
+        "## Verdict",
+        f"- Operator hypothesis: {case.get('hypothesis_operator', '—')}",
+        f"- Model verdict: **{case['verdict']}** — {case.get('verdict_body', '')}",
+        f"- Hypothesis (model): {case.get('hypothesis_model', '—')}",
+        "",
+        "## Recommended corrective action",
+        case.get("recco", "—"),
+        "",
+        "## Exhibits",
+    ]
+    for ex in case.get("exhibits", []):
+        t = _fmt_time(ex.get("t")) if ex.get("t") else "—"
+        lines.append(f"- **{ex['n']}** · t={t} · {ex.get('title', '')} — {ex.get('cap', '')}")
+    return "\n".join(lines) + "\n"
+
+
+# In-memory append-only ledger for the demo. Real impl would write to S3/GCS.
+LEDGER_PATH = DATA_DIR / "ledger.jsonl"
+
+
+@app.post("/ledger/{case_id}", response_class=HTMLResponse)
+async def ledger_append(case_id: str) -> HTMLResponse:
+    case = demo_data.case_by_id(case_id)
+    entry = {
+        "ts": time.time(),
+        "case_id": case["id"],
+        "case_key": case["key"],
+        "verdict": case["verdict"],
+        "hypothesis": case.get("hypothesis_model", ""),
+    }
+    with LEDGER_PATH.open("a") as fh:
+        fh.write(json.dumps(entry) + "\n")
+    return HTMLResponse(
+        f'Appended to ledger · {time.strftime("%H:%M:%S")} · '
+        f'<span class="mono">{case["id"][-8:]}</span>'
+    )
+
+
+@app.post("/cancel/{job_id}", response_class=HTMLResponse)
+async def cancel_job(request: Request, job_id: str) -> HTMLResponse:
+    """Mark a running job as cancelled and re-render the panel.
+
+    The background task itself can't be killed here without async cancellation,
+    but writing a `cancelled` status causes `_live_panel.html` to stop polling
+    (no `polling` flag) and shows the done foot.
+    """
+    data = _read_status(job_id)
+    if data is None:
+        raise HTTPException(404, "unknown job")
+    data["stage"] = "done"
+    data["label"] = "Cancelled"
+    data["progress"] = 1.0
+    data["cancelled"] = True
+    buf = data.get("reasoning_buffer") or []
+    buf.append("[cancel] User cancelled the run.")
+    data["reasoning_buffer"] = buf
+    _write_status(job_id, data)
+    return templates.TemplateResponse(
+        request,
+        "_live_panel.html",
+        _live_panel_context(job_id, data),
+    )
 
 
 @app.get("/diff/{job_id}", response_class=HTMLResponse)

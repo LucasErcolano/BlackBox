@@ -1,0 +1,71 @@
+{# Intake form fragment — shown in `intake` phase. Submit swaps panel to live. #}
+<form id="intake-form"
+      hx-post="/analyze"
+      hx-encoding="multipart/form-data"
+      hx-target="#main-panel"
+      hx-swap="outerHTML"
+      hx-indicator="#submit-btn"
+      style="display: contents;">
+<div class="form-head">
+  <div class="label">Form · /analyze</div>
+</div>
+
+<div class="form-section">
+  <div class="label" style="margin-bottom: 8px;">Mode</div>
+  <div class="mode-grid">
+    <div class="mode is-on" data-mode="post_mortem" data-label="Post-mortem" role="radio" aria-checked="true">
+      <div class="glyph">
+        <svg class="glyph" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16"/><path d="M9 9 H15 M9 13 H15 M9 17 H13"/></svg>
+      </div>
+      <div class="name">Post-mortem</div>
+      <div class="pact">One incident. Cited verdict. Scoped patch.</div>
+    </div>
+    <div class="mode" data-mode="scenario_mining" data-label="Scenario mine" role="radio" aria-checked="false">
+      <div class="glyph">
+        <svg class="glyph" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 L21 8 L12 13 L3 8 Z M3 13 L12 18 L21 13 M3 18 L12 23 L21 18"/></svg>
+      </div>
+      <div class="name">Scenario mine</div>
+      <div class="pact">Sweep the bag. Surface near-misses.</div>
+    </div>
+    <div class="mode" data-mode="synthetic_qa" data-label="Q&amp;A" role="radio" aria-checked="false">
+      <div class="glyph">
+        <svg class="glyph" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9 a2.5 2.5 0 0 1 5 0 c0 2 -2.5 2 -2.5 4 M12 17 v.01"/></svg>
+      </div>
+      <div class="name">Q&amp;A</div>
+      <div class="pact">Open-ended. Grounded answers, no verdict.</div>
+    </div>
+  </div>
+  <input type="hidden" name="mode" id="mode-input" value="post_mortem">
+</div>
+
+<div class="form-section">
+  <div class="label" style="margin-bottom: 8px;">Recording</div>
+  <div id="drop" class="drop" tabindex="0" role="button" aria-label="Drop a recording or browse">
+    <div id="drop-glyph" class="glyph">
+      <svg class="glyph" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16 V4 M6 10 L12 4 L18 10 M4 20 H20"/></svg>
+    </div>
+    <div>
+      <div id="drop-prim" class="prim">Drop a bag · MCAP · zip</div>
+      <div id="drop-meta" class="file-meta">click to browse</div>
+    </div>
+    <div>
+      <button type="button" id="drop-action" class="btn-ghost btn">Browse</button>
+    </div>
+    <input id="file-input" name="file" type="file" accept=".bag,.mcap,.zip" style="display: none;">
+  </div>
+  <div class="meta" style="font-size: 0.74rem; margin-top: 6px; font-family: var(--mono);">
+    accepts .bag · .mcap · .zip · max 8 GB · we keep nothing
+  </div>
+</div>
+
+<div class="form-foot">
+  <span id="form-meta" class="meta" style="font-size: 0.78rem;">Drop a recording to begin.</span>
+  <button type="submit" id="submit-btn" class="btn" disabled>Open the case →</button>
+</div>
+
+<div class="stats-strip">
+  <div class="stat"><div class="label k">Verdicts/wk</div><div class="v">12</div><div class="s">↗ +3</div></div>
+  <div class="stat"><div class="label k">Median run</div><div class="v">41s</div><div class="s">p95 · 78s</div></div>
+  <div class="stat"><div class="label k">Median cost</div><div class="v">$0.39</div><div class="s">min $0.18</div></div>
+</div>
+</form>

@@ -105,38 +105,84 @@ def _capture(video_dir: Path) -> Path:
             color_scheme="dark",
         )
         page = context.new_page()
-        url = f"http://{HOST}:{PORT}/analyze?replay={REPLAY_NAME}&theme=dark"
-        page.goto(url, wait_until="domcontentloaded")
-        # Wait until the progress card has rendered at least once.
-        page.wait_for_selector("#progress-card", timeout=5000)
+        # The shipped /analyze?replay= endpoint returns a bare HTML fragment
+        # (#main-panel <section>) without <head>, stylesheet, htmx, or theme.
+        # We write a wrapper page into the FastAPI static dir so the browser
+        # navigates to a same-origin URL (about:blank → localhost would be
+        # cross-origin and HTMX would be blocked). The wrapper loads the real
+        # stylesheet, htmx, applies the demo dark palette, fetches the
+        # fragment, and lets HTMX continue polling /status/{job_id}.
+        wrapper = f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>block_04 capture</title>
+<link rel="stylesheet" href="/static/style.css" />
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<style>
+  :root {{
+    --bg: #0a0c10; --bg-2: #12141a; --surface: #161922;
+    --ink: #e7eaee; --ink-2: #c8cdd6; --muted: #7a8090;
+    --line: #262a33; --rule: #303642;
+    --accent: #ffb840; --accent-deep: #d99220; --accent-soft: #2a221a;
+    --signal-amber: #ffb840; --signal-green: #5fb27a; --signal-red: #d56565;
+    --console-bg: #0c0e13; --console-bg-2: #11141a; --console-line: #1d2029;
+    --console-text: #e7eaee; --console-muted: #7a8090;
+  }}
+  html, body {{
+    background: var(--bg) !important; background-image: none !important;
+    color: var(--ink); margin: 0; padding: 0;
+  }}
+  body {{ display: flex; flex-direction: column; align-items: center; }}
+  main {{
+    width: 1760px; max-width: 1760px;
+    padding: 2.2rem 0; margin: 0 auto;
+  }}
+  .card, #main-panel {{
+    background: var(--bg-2) !important;
+    border: 1px solid var(--line) !important;
+    color: var(--ink) !important;
+  }}
+  .live-head, .live-foot, .stages, .progress-wrap, .console, .ledger {{
+    color: var(--ink) !important;
+  }}
+  .console, .stream {{ background: var(--console-bg) !important; }}
+  .stream {{ max-height: 640px !important; min-height: 640px; }}
+  .stream pre, .stream code, #main-panel pre, #main-panel code {{
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }}
+  .ln {{ color: var(--console-text) !important; }}
+  .meta, .label, .lcount {{ color: var(--muted) !important; }}
+</style>
+</head>
+<body>
+<main>
+  <div id="root"
+       hx-get="/analyze?replay={REPLAY_NAME}"
+       hx-trigger="load"
+       hx-swap="innerHTML"></div>
+</main>
+</body>
+</html>
+"""
+        wrap_path = REPO / "src/black_box/ui/static/_block04_wrap.html"
+        wrap_path.write_text(wrapper)
+        try:
+            page.goto(
+                f"http://{HOST}:{PORT}/static/_block04_wrap.html",
+                wait_until="domcontentloaded",
+            )
+            # HTMX fetches /analyze and polls /status. Wait for the live panel.
+            page.wait_for_selector("#main-panel", timeout=15000)
+        finally:
+            try:
+                wrap_path.unlink()
+            except Exception:
+                pass
         page.mouse.move(1, 1)
-        # Collapse upload form + hero-cases + site header so the real progress
-        # card dominates the 1920x1080 frame. We keep the footer hidden too.
-        page.evaluate(
-            """
-            () => {
-              const hide = sel => document.querySelectorAll(sel).forEach(n => n.remove());
-              hide('main > header');
-              hide('main > .intro');
-              hide('main > .upload');
-              hide('main > .hero-cases');
-              hide('main > footer');
-              const r = document.getElementById('result');
-              if (r) { r.style.marginTop = '0'; }
-              const m = document.querySelector('main');
-              if (m) {
-                m.style.paddingTop = '2.2rem';
-                m.style.paddingBottom = '2.2rem';
-                m.style.maxWidth = '1400px';
-                m.style.width = '1400px';
-              }
-              const st = document.createElement('style');
-              st.textContent = '.progress-card .reasoning { max-height: 600px !important; font-size: 1.02rem !important; } .progress-card .reasoning-stream { min-height: 600px; }';
-              document.head.appendChild(st);
-              window.scrollTo(0, 0);
-            }
-            """
-        )
         time.sleep(record_seconds)
         # Closing the context finalises the webm.
         context.close()

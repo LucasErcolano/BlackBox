@@ -1,0 +1,55 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Cap,Inter,42,&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,3,2.4,1,2,100,100,72,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.20,0:00:05.95,Cap,,0,0,0,,Operator: "GPS failed under the tunnel."
+Dialogue: 0,0:00:06.00,0:00:08.35,Cap,,0,0,0,,Black Box checked the recording.
+Dialogue: 0,0:00:08.40,0:00:10.95,Cap,,0,0,0,,That story is wrong.
+Dialogue: 0,0:00:10.75,0:00:16.70,Cap,,0,0,0,,Hours of video\, lidar\, telemetry\, controller logs.
+Dialogue: 0,0:00:16.75,0:00:23.70,Cap,,0,0,0,,Evidence exists. Forensic review is still manual.
+Dialogue: 0,0:00:23.75,0:00:28.70,Cap,,0,0,0,,One real driving session. No labels.
+Dialogue: 0,0:00:28.75,0:00:34.70,Cap,,0,0,0,,Operator's note: check the tunnel.
+Dialogue: 0,0:00:34.75,0:00:37.70,Cap,,0,0,0,,Not a one-shot summary.
+Dialogue: 0,0:00:37.75,0:00:40.70,Cap,,0,0,0,,Opus 4.7 runs as a managed forensic agent.
+Dialogue: 0,0:00:40.75,0:00:43.70,Cap,,0,0,0,,Tools\, memory\, streaming events.
+Dialogue: 0,0:00:43.75,0:00:51.70,Cap,,0,0,0,,Project memory carries forward across runs.
+Dialogue: 0,0:00:51.75,0:00:54.70,Cap,,0,0,0,,Doesn't send every frame.
+Dialogue: 0,0:00:54.75,0:00:57.70,Cap,,0,0,0,,Telemetry selects suspicious windows.
+Dialogue: 0,0:00:57.75,0:01:05.70,Cap,,0,0,0,,High-res visual mining checks relevant cameras.
+Dialogue: 0,0:01:05.50,0:01:08.95,Cap,,0,0,0,,The tunnel mildly degraded GNSS.
+Dialogue: 0,0:01:09.00,0:01:10.95,Cap,,0,0,0,,But the RTK heading failure started
+Dialogue: 0,0:01:11.00,0:01:13.45,Cap,,0,0,0,,43 minutes earlier.
+Dialogue: 0,0:01:13.50,0:01:16.45,Cap,,0,0,0,,Drive-by-wire was never engaged.
+Dialogue: 0,0:01:16.50,0:01:20.45,Cap,,0,0,0,,The tunnel could not have caused this.
+Dialogue: 0,0:01:20.50,0:01:24.95,Cap,,0,0,0,,Verdict: operator hypothesis refuted.
+Dialogue: 0,0:01:25.00,0:01:29.45,Cap,,0,0,0,,Cause sits lower in the stack.
+Dialogue: 0,0:01:29.50,0:01:32.45,Cap,,0,0,0,,Operator hypothesis: refuted.
+Dialogue: 0,0:01:32.50,0:01:36.45,Cap,,0,0,0,,Moving-base antenna: healthy.
+Dialogue: 0,0:01:36.50,0:01:40.45,Cap,,0,0,0,,Rover: never receives valid RTK heading.
+Dialogue: 0,0:01:40.50,0:01:44.45,Cap,,0,0,0,,Correction path broken before leaving the lot.
+Dialogue: 0,0:01:44.50,0:01:47.45,Cap,,0,0,0,,carr=NONE 100%. REL_POS_VALID never set.
+Dialogue: 0,0:01:47.50,0:01:52.45,Cap,,0,0,0,,Findings written to a forensic report.
+Dialogue: 0,0:01:52.50,0:01:56.95,Cap,,0,0,0,,Output isn't a report — it's a scoped patch.
+Dialogue: 0,0:01:57.00,0:02:01.45,Cap,,0,0,0,,RTCM message IDs. UART link check.
+Dialogue: 0,0:02:01.50,0:02:05.45,Cap,,0,0,0,,Plus a human-review gate.
+Dialogue: 0,0:02:05.50,0:02:08.45,Cap,,0,0,0,,Black Box proposes. Engineer approves.
+Dialogue: 0,0:02:10.15,0:02:13.10,Cap,,0,0,0,,Opus 4.7 vs 4.6\, same benchmark slice.
+Dialogue: 0,0:02:13.15,0:02:16.10,Cap,,0,0,0,,Same accuracy. Better judgment.
+Dialogue: 0,0:02:16.15,0:02:22.10,Cap,,0,0,0,,4.7 sees fine visual details 4.6 loses.
+Dialogue: 0,0:02:22.15,0:02:26.10,Cap,,0,0,0,,On under-specified cases\, 4.7 abstains.
+Dialogue: 0,0:02:26.15,0:02:32.10,Cap,,0,0,0,,Not a single-car demo.
+Dialogue: 0,0:02:32.15,0:02:36.10,Cap,,0,0,0,,More cars. A robotic boat.
+Dialogue: 0,0:02:36.15,0:02:40.10,Cap,,0,0,0,,Clean recordings and injected failures.
+Dialogue: 0,0:02:40.15,0:02:44.60,Cap,,0,0,0,,When evidence is weak\, it refuses to invent a bug.
+Dialogue: 0,0:02:44.65,0:02:49.10,Cap,,0,0,0,,No evidence. No claim.
+Dialogue: 0,0:02:48.90,0:02:51.85,Cap,,0,0,0,,Open benchmark. Reproducible runs.
+Dialogue: 0,0:02:51.90,0:02:54.85,Cap,,0,0,0,,Robot forensics in minutes\, for cents.

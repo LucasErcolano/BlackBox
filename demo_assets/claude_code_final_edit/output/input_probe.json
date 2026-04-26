@@ -1,0 +1,224 @@
+{
+  "clips": [
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/01_intake_upload_ui.mp4",
+      "filename": "01_intake_upload_ui.mp4",
+      "duration_s": 11.133333,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 1541245
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/02_live_analysis_ui.mp4",
+      "filename": "02_live_analysis_ui.mp4",
+      "duration_s": 21.533333,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 354260
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/03_managed_agent_stream_ui.mp4",
+      "filename": "03_managed_agent_stream_ui.mp4",
+      "duration_s": 16.0,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 11755822
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/04_report_overview_ui.mp4",
+      "filename": "04_report_overview_ui.mp4",
+      "duration_s": 15.133008,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 3375735
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/05_report_exhibits_ui.mp4",
+      "filename": "05_report_exhibits_ui.mp4",
+      "duration_s": 19.166667,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 5225949
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/06_patch_diff_ui.mp4",
+      "filename": "06_patch_diff_ui.mp4",
+      "duration_s": 13.4,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 8154526
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/07_cases_archive_ui.mp4",
+      "filename": "07_cases_archive_ui.mp4",
+      "duration_s": 13.433333,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 2065595
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/08_grounding_gate_ui.mp4",
+      "filename": "08_grounding_gate_ui.mp4",
+      "duration_s": 11.366667,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 5865959
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/09_operator_refutation_report.mp4",
+      "filename": "09_operator_refutation_report.mp4",
+      "duration_s": 11.666667,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 8178248
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/10_rtk_root_cause_charts.mp4",
+      "filename": "10_rtk_root_cause_charts.mp4",
+      "duration_s": 13.333333,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 1612609
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/11_sanfer_pdf_scroll.mp4",
+      "filename": "11_sanfer_pdf_scroll.mp4",
+      "duration_s": 10.5,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 3182474
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/12_telemetry_files_broll.mp4",
+      "filename": "12_telemetry_files_broll.mp4",
+      "duration_s": 8.366667,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 2013743
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/13_sanfer_real_camera_broll.mp4",
+      "filename": "13_sanfer_real_camera_broll.mp4",
+      "duration_s": 11.0,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 2295315
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/14_multicam_composite_real.mp4",
+      "filename": "14_multicam_composite_real.mp4",
+      "duration_s": 10.0,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 901800
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/15_boat_report_broll.mp4",
+      "filename": "15_boat_report_broll.mp4",
+      "duration_s": 11.433333,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 2867101
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/16_other_car_run_broll.mp4",
+      "filename": "16_other_car_run_broll.mp4",
+      "duration_s": 11.433333,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 2838687
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/17_opus47_delta_doc_scroll.mp4",
+      "filename": "17_opus47_delta_doc_scroll.mp4",
+      "duration_s": 21.433333,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 8778503
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/18_opus47_delta_artifacts_folder.mp4",
+      "filename": "18_opus47_delta_artifacts_folder.mp4",
+      "duration_s": 10.366667,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 619289
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/19_opus47_delta_panel_real_capture.mp4",
+      "filename": "19_opus47_delta_panel_real_capture.mp4",
+      "duration_s": 6.666667,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 518279
+    },
+    {
+      "path": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/20_vision_ab_artifact.mp4",
+      "filename": "20_vision_ab_artifact.mp4",
+      "duration_s": 8.333333,
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "codec": "h264",
+      "pix_fmt": "yuv420p",
+      "size_bytes": 914629
+    }
+  ]
+}

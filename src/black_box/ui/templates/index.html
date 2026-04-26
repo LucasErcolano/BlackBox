@@ -1,194 +1,180 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script>(function(){var t=new URLSearchParams(location.search).get('theme');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t;})();</script>
-  <title>Black Box — forensic copilot for robots</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:wght@400;600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css" />
-  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
-</head>
-<body>
-  <main>
-    <header>
-      <p class="kicker">NTSB-style forensic report · built on Opus 4.7</p>
-      <h1>Black Box</h1>
-      <p class="sub">A forensic copilot for robots.</p>
-    </header>
+{% extends "_base.html" %}
+{% set route = 'intake' %}
+{% block title %}Intake — Black Box{% endblock %}
 
-    <section class="intro">
-      <p>
-        Upload a ROS bag, MCAP, or zipped run directory. Black Box decodes the
-        telemetry, replays the incident through a vision-capable model, and
-        produces a signed post-mortem with timeline, hypotheses, and evidence.
-      </p>
-    </section>
+{% block content %}
+<div class="hero-row" id="hero-row">
+  <div>
+    <div class="label">Intake</div>
+    <h1 style="margin-top: 6px;">A forensic copilot for robots.</h1>
+    <p class="h1-sub">Hand it a recording. Get a cited post-mortem and a scoped patch.</p>
+  </div>
+  <div class="last-case">
+    <div>Last case</div>
+    <a href="/report">refuted · 43s · $0.46</a>
+  </div>
+</div>
 
-    {% if memory_status %}
-    <aside class="memory-card" aria-label="Native managed-agents memory mounts">
-      <span class="memory-card-eyebrow">native claude memory mounted</span>
-      <ul class="memory-card-list">
-        <li>
-          <span class="memory-card-check" aria-hidden="true">&#10003;</span>
-          <code class="memory-card-name">{{ memory_status.platform_store.name }}</code>
-          <span class="memory-card-mode">{{ memory_status.platform_store.mode }}</span>
-        </li>
-        <li>
-          <span class="memory-card-check" aria-hidden="true">&#10003;</span>
-          <code class="memory-card-name">{{ memory_status.case_store_template }}</code>
-          <span class="memory-card-mode">read_write</span>
-        </li>
-        <li class="memory-card-gate">
-          <span class="memory-card-check" aria-hidden="true">&#10003;</span>
-          <span>promotion gated by {{ memory_status.gate.replace('_', ' ') }}</span>
-        </li>
-      </ul>
-    </aside>
-    {% endif %}
+{% if memory_status %}
+<aside class="memory-card" aria-label="Native managed-agents memory mounts">
+  <span class="memory-card-eyebrow">native claude memory mounted</span>
+  <ul class="memory-card-list">
+    <li>
+      <span class="memory-card-check" aria-hidden="true">&#10003;</span>
+      <code class="memory-card-name">{{ memory_status.platform_store.name }}</code>
+      <span class="memory-card-mode">{{ memory_status.platform_store.mode }}</span>
+    </li>
+    <li>
+      <span class="memory-card-check" aria-hidden="true">&#10003;</span>
+      <code class="memory-card-name">{{ memory_status.case_store_template }}</code>
+      <span class="memory-card-mode">read_write</span>
+    </li>
+    <li class="memory-card-gate">
+      <span class="memory-card-check" aria-hidden="true">&#10003;</span>
+      <span>promotion gated by {{ memory_status.gate.replace('_', ' ') }}</span>
+    </li>
+  </ul>
+</aside>
+{% endif %}
 
-    <form
-      class="upload"
-      id="upload-form"
-      hx-post="/analyze"
-      hx-encoding="multipart/form-data"
-      hx-target="#result"
-      hx-swap="innerHTML"
-    >
-      <label class="dropzone" id="dropzone" for="upload-input">
-        <span class="dropzone-eyebrow">evidence upload</span>
-        <span class="dropzone-title">Drop a bag folder, MCAP, or zipped run</span>
-        <span class="dropzone-hint">Click or drag a file here. Accepts .bag, .db3, .mcap, .zip.</span>
-        <span class="dropzone-filename" id="dropzone-filename">no file selected</span>
-        <input
-          type="file"
-          id="upload-input"
-          name="file"
-          accept=".bag,.db3,.mcap,.zip"
-          required
-        />
-      </label>
+<div class="intake-grid">
+  <section id="main-panel" class="card" style="padding: 0; display: flex; flex-direction: column;">
+    {% include "_intake_form.html" %}
+  </section>
 
-      <div class="upload-row">
-        <label class="field">
-          <span>Mode</span>
-          <select name="mode">
-            <option value="post_mortem">Post-mortem</option>
-            <option value="scenario_mining">Scenario mining</option>
-            <option value="synthetic_qa">Synthetic Q&amp;A</option>
-          </select>
-        </label>
-        <button type="submit">Analyze</button>
-      </div>
-    </form>
+  {% include "_right_rail.html" %}
+</div>
 
-    <section class="hero-cases" aria-label="Hero cases">
-      <div class="hero-cases-head">
-        <span class="hero-cases-eyebrow">hero cases</span>
-        <h2 class="hero-cases-title">Pre-analyzed incidents</h2>
-        <p class="hero-cases-sub">
-          Three reports Black Box already produced on real recordings. Open one
-          to read the full forensic write-up inline.
-        </p>
-      </div>
-      <ul class="case-grid">
-        <li>
-          <button
-            type="button"
-            class="case-card"
-            hx-get="/case/sanfer_tunnel"
-            hx-target="#result"
-            hx-swap="innerHTML"
-            hx-push-url="false"
-          >
-            <span class="case-card-slug">sanfer_tunnel</span>
-            <span class="case-card-mode">post_mortem · 3626 s</span>
-            <span class="case-card-headline">RTCM uplink silently dead; carr_soln never leaves 'none'.</span>
-            <span class="case-card-cta">Read case file</span>
-          </button>
-        </li>
-        <li>
-          <button
-            type="button"
-            class="case-card"
-            hx-get="/case/car_1"
-            hx-target="#result"
-            hx-swap="innerHTML"
-            hx-push-url="false"
-          >
-            <span class="case-card-slug">car_1</span>
-            <span class="case-card-mode">scenario_mining · 970 s</span>
-            <span class="case-card-headline">Ego vehicle stuck ~130 s at a parking-lot barrier; suspected state deadlock.</span>
-            <span class="case-card-cta">Read case file</span>
-          </button>
-        </li>
-        <li>
-          <button
-            type="button"
-            class="case-card"
-            hx-get="/case/boat_lidar"
-            hx-target="#result"
-            hx-swap="innerHTML"
-            hx-push-url="false"
-          >
-            <span class="case-card-slug">boat_lidar</span>
-            <span class="case-card-mode">scenario_mining · 416 s</span>
-            <span class="case-card-headline">LIDAR companion IMU declared but silent the entire USV session.</span>
-            <span class="case-card-cta">Read case file</span>
-          </button>
-        </li>
-      </ul>
-    </section>
+<script>
+(function() {
+  // Mode card selection
+  document.addEventListener('click', function(e) {
+    const m = e.target.closest('.mode');
+    if (!m) return;
+    document.querySelectorAll('.mode').forEach(x => x.classList.remove('is-on'));
+    m.classList.add('is-on');
+    const inp = document.getElementById('mode-input');
+    if (inp) inp.value = m.dataset.mode;
+    const meta = document.getElementById('form-meta');
+    const f = document.getElementById('file-input');
+    if (meta && f && f.files && f.files.length) {
+      meta.textContent = 'Ready · ' + m.dataset.label.toLowerCase() + ' mode';
+    }
+  });
 
-    <div id="result" aria-live="polite">{% if initial_html %}{{ initial_html | safe }}{% endif %}</div>
+  function bytesFmt(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+    if (b < 1073741824) return (b/1048576).toFixed(1) + ' MB';
+    return (b/1073741824).toFixed(2) + ' GB';
+  }
+  function adapter(name) {
+    const n = name.toLowerCase();
+    if (n.endsWith('.mcap')) return 'mcap_v1';
+    if (n.endsWith('.bag')) return 'rosbag1';
+    if (n.endsWith('.zip')) return 'session_zip';
+    return 'auto';
+  }
+  function setFile(file) {
+    const drop = document.getElementById('drop');
+    const prim = document.getElementById('drop-prim');
+    const meta = document.getElementById('drop-meta');
+    const glyphWrap = document.getElementById('drop-glyph');
+    const browseBtn = document.getElementById('drop-action');
+    const submit = document.getElementById('submit-btn');
+    const formMeta = document.getElementById('form-meta');
+    const activeMode = document.querySelector('.mode.is-on');
+    if (!drop) return;
+    if (file) {
+      drop.classList.add('is-loaded');
+      prim.textContent = file.name;
+      meta.textContent = bytesFmt(file.size) + ' · ' + adapter(file.name);
+      glyphWrap.innerHTML = '<svg class="glyph" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3 H15 L19 7 V21 H6 Z M15 3 V7 H19 M9 12 H16 M9 16 H16"/></svg>';
+      browseBtn.textContent = 'Replace';
+      submit.disabled = false;
+      if (activeMode && formMeta) formMeta.textContent = 'Ready · ' + activeMode.dataset.label.toLowerCase() + ' mode';
+    } else {
+      drop.classList.remove('is-loaded');
+      prim.textContent = 'Drop a bag · MCAP · zip';
+      meta.textContent = 'click to browse';
+      glyphWrap.innerHTML = '<svg class="glyph" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16 V4 M6 10 L12 4 L18 10 M4 20 H20"/></svg>';
+      browseBtn.textContent = 'Browse';
+      submit.disabled = true;
+      if (formMeta) formMeta.textContent = 'Drop a recording to begin.';
+      const f = document.getElementById('file-input');
+      if (f) f.value = '';
+    }
+  }
 
-    <footer>
-      <small>Opus 4.7 · Managed Agents · hackathon build</small>
-    </footer>
-  </main>
-  <script>
-    (function () {
-      var input = document.getElementById('upload-input');
-      var zone = document.getElementById('dropzone');
-      var nameEl = document.getElementById('dropzone-filename');
-      if (!input || !zone || !nameEl) { return; }
+  document.addEventListener('change', function(e) {
+    if (e.target.id === 'file-input') {
+      const file = e.target.files[0];
+      if (file) setFile(file);
+    }
+  });
 
-      function setName() {
-        if (input.files && input.files.length > 0) {
-          nameEl.textContent = input.files[0].name;
-          zone.classList.add('has-file');
-        } else {
-          nameEl.textContent = 'no file selected';
-          zone.classList.remove('has-file');
-        }
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('#drop-action')) {
+      e.preventDefault(); e.stopPropagation();
+      const drop = document.getElementById('drop');
+      if (drop && drop.classList.contains('is-loaded')) {
+        setFile(null);
+      } else {
+        document.getElementById('file-input').click();
       }
-      input.addEventListener('change', setName);
+      return;
+    }
+    if (e.target.closest('#drop') && !e.target.closest('#drop-action')) {
+      const drop = document.getElementById('drop');
+      if (drop && !drop.classList.contains('is-loaded')) {
+        document.getElementById('file-input').click();
+      }
+    }
+  });
 
-      ['dragenter', 'dragover'].forEach(function (evt) {
-        zone.addEventListener(evt, function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          zone.classList.add('is-dragging');
-        });
-      });
-      ['dragleave', 'drop'].forEach(function (evt) {
-        zone.addEventListener(evt, function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-          zone.classList.remove('is-dragging');
-        });
-      });
-      zone.addEventListener('drop', function (e) {
-        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-          input.files = e.dataTransfer.files;
-          setName();
-        }
-      });
-    })();
-  </script>
-</body>
-</html>
+  document.addEventListener('dragover', function(e) {
+    if (e.target.closest('#drop')) {
+      e.preventDefault();
+      document.getElementById('drop').classList.add('is-drag');
+    }
+  });
+  document.addEventListener('dragleave', function(e) {
+    if (e.target.closest('#drop')) {
+      document.getElementById('drop').classList.remove('is-drag');
+    }
+  });
+  document.addEventListener('drop', function(e) {
+    if (e.target.closest('#drop')) {
+      e.preventDefault();
+      document.getElementById('drop').classList.remove('is-drag');
+      const f = e.dataTransfer.files[0];
+      if (f) {
+        const inp = document.getElementById('file-input');
+        const dt = new DataTransfer();
+        dt.items.add(f);
+        inp.files = dt.files;
+        setFile(f);
+      }
+    }
+  });
+
+  // After HTMX swaps in the live panel, update hero copy.
+  document.body.addEventListener('htmx:afterSwap', function(e) {
+    const hero = document.getElementById('hero-row');
+    if (!hero) return;
+    const phase = document.getElementById('main-panel') && document.getElementById('main-panel').dataset.phase;
+    if (phase === 'live') {
+      hero.querySelector('.label').textContent = 'Case · in flight';
+      hero.querySelector('h1').textContent = 'Working the case…';
+      const sub = hero.querySelector('.h1-sub');
+      const fn = document.getElementById('main-panel').dataset.filename || 'recording';
+      sub.innerHTML = '<span class="mono">' + fn + '</span> · streaming reasoning, tool calls, and exhibits.';
+    } else if (phase === 'done') {
+      hero.querySelector('.label').textContent = 'Case · closed';
+      hero.querySelector('h1').textContent = "It wasn't the tunnel.";
+      hero.querySelector('.h1-sub').textContent = 'Refuted in 12 exhibits. The vision pipeline reports nothing unusual; the operator\u2019s tunnel hypothesis is contradicted by the evidence.';
+    }
+  });
+})();
+</script>
+{% endblock %}

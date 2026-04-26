@@ -1,0 +1,22 @@
+[
+  {
+    "bug_class": "pid_saturation",
+    "confidence": 0.72,
+    "reason_dropped": "only 1 evidence row(s) (need >= 2)"
+  },
+  {
+    "bug_class": "calibration_drift",
+    "confidence": 0.6,
+    "reason_dropped": "only 1 source (camera) \u2014 need >= 2"
+  },
+  {
+    "bug_class": "bad_gain_tuning",
+    "confidence": 0.55,
+    "reason_dropped": "only 1 source (telemetry) \u2014 need >= 2"
+  },
+  {
+    "bug_class": "latency_spike",
+    "confidence": 0.22,
+    "reason_dropped": "confidence 0.22 < 0.4"
+  }
+]

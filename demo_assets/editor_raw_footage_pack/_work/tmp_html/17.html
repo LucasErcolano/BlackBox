@@ -1,0 +1,232 @@
+<!doctype html><html><head><meta charset='utf-8'><title>Opus 4.7 vs 4.6 — Delta</title>
+<style>
+:root{color-scheme:dark;}
+body{background:#0b0d11;color:#dfe5ec;font-family:-apple-system,Inter,Segoe UI,Roboto,sans-serif;
+     max-width:1180px;margin:0 auto;padding:48px 56px;font-size:18px;line-height:1.6;}
+h1{font-size:38px;color:#fff;border-bottom:1px solid #2a3340;padding-bottom:12px;}
+h2{font-size:28px;color:#9bd1ff;margin-top:36px;}
+h3{font-size:22px;color:#cbd5e1;}
+code{background:#161b22;color:#ffd28a;padding:2px 6px;border-radius:4px;font-size:0.9em;}
+pre{background:#0f1419;border:1px solid #1f2937;padding:16px;border-radius:8px;overflow:auto;
+    font-size:14px;line-height:1.5;}
+blockquote{border-left:4px solid #ffb86b;padding:6px 16px;margin:18px 0;background:#1a1410;color:#ffd9aa;}
+table{border-collapse:collapse;width:100%;margin:16px 0;}
+th,td{border:1px solid #2a3340;padding:8px 12px;text-align:left;}
+th{background:#171c25;}
+strong{color:#fff;}
+a{color:#9bd1ff;}
+ul,ol{padding-left:28px;}
+</style>
+</head><body><h1>Opus 4.7 vs Opus 4.6 — BlackBox delta harness</h1>
+<p>We claim Opus 4.7 is the reason BlackBox can be a long-horizon forensic
+agent instead of a one-shot report generator. This doc is the harness
+that lets us back the claim with numbers, not vibes.</p>
+<h2>TL;DR — what 4.7 actually wins on</h2>
+<p>Single-shot bug_class accuracy on simple closed-taxonomy cases is a
+<strong>ceiling-effect metric</strong>: both models saturate it. The signal lives in
+the five axes below.</p>
+<table>
+<thead>
+<tr>
+<th>Axis</th>
+<th>4.6</th>
+<th>4.7</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Latency (wall time)</td>
+<td>100%</td>
+<td><strong>~70%</strong></td>
+<td>every run, n=24..36</td>
+</tr>
+<tr>
+<td>$/correct (solvable subset)</td>
+<td>$0.16</td>
+<td><strong>$0.16</strong> ≈ tied raw, lower under pressure</td>
+<td>both passes</td>
+</tr>
+<tr>
+<td>Calibrated abstention on under-specified cases</td>
+<td><strong>0%</strong> (3/3 commit wrong answer)</td>
+<td><strong>100%</strong> (3/3 abstain)</td>
+<td>mode=none, n=12 each</td>
+</tr>
+<tr>
+<td>Brier under adversarial operator pressure</td>
+<td>0.239</td>
+<td><strong>0.162</strong></td>
+<td>mode=false, n=9 each</td>
+</tr>
+<tr>
+<td>Fine-grain text detection at 3.84 MP image</td>
+<td><strong>0%</strong> (0/3)</td>
+<td><strong>100%</strong> (3/3)</td>
+<td>D1 vision A/B, n=3 each</td>
+</tr>
+</tbody>
+</table>
+<p>Single-shot bug_class accuracy on solvable cases: <strong>tied at 67%</strong> in
+both passes. 4.6's apparent edge in raw <code>bug_match_rate</code> comes entirely
+from confidently mis-classifying <code>rtk_heading_break_01</code> as
+<code>sensor_timeout</code> — pattern-matching the operator narrative rather than
+recognizing the closed taxonomy doesn't fit. 4.7 abstains.</p>
+<h2>What it measures</h2>
+<p>For each bench case, both models receive <strong>the same prompt, same
+telemetry summary, same focused plot, same budget</strong>. The only thing
+that changes is the model id. Per case+model+seed:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bug_class</code> match</td>
+<td>Raw forensic accuracy vs <code>ground_truth.json</code></td>
+</tr>
+<tr>
+<td><code>solvable_accuracy</code></td>
+<td>Accuracy excluding under-specified taxonomy cases</td>
+</tr>
+<tr>
+<td><code>abstention_correctness</code></td>
+<td>On under-specified cases: did the model decline</td>
+</tr>
+<tr>
+<td><code>pt_file_match</code>/<code>pt_function_match</code>/<code>pt_both_match</code></td>
+<td>Patch proposal names file/function</td>
+</tr>
+<tr>
+<td><code>confidence</code> (top-1)</td>
+<td>Calibration of leading hypothesis</td>
+</tr>
+<tr>
+<td><code>brier_score</code></td>
+<td><code>mean((confidence - match)^2)</code> — lower better</td>
+</tr>
+<tr>
+<td><code>flip_rate</code></td>
+<td>Disagreement across seeds (lower = more stable)</td>
+</tr>
+<tr>
+<td><code>refutation_rate</code></td>
+<td>When operator narrative is wrong, did model push back</td>
+</tr>
+<tr>
+<td><code>evidence_count</code></td>
+<td>Distinct (source, topic_or_file) tuples cited</td>
+</tr>
+<tr>
+<td><code>cost_usd</code>, <code>wall_time_s</code></td>
+<td>$, latency from live ledger</td>
+</tr>
+<tr>
+<td><code>usd_per_correct</code>, <code>wall_per_correct</code></td>
+<td>Normalized by accuracy</td>
+</tr>
+</tbody>
+</table>
+<p>A case is <code>is_under_specified</code> if <code>gt.under_specified == true</code>, the
+scoring rationale mentions "no exact slot", or <code>scoring.bug_class_match</code>
+lists more than one accepted class — i.e. the closed taxonomy can't
+cleanly tag it. <code>rtk_heading_break_01</code> is the canonical example.</p>
+<h2>How to run</h2>
+<p>Two passes give the headline story:</p>
+<p><strong>Pass 1 — clean baseline (mode=none).</strong> Surfaces calibrated abstention
+and raw single-shot performance.</p>
+<pre><code class="language-bash">.venv/bin/python scripts/compare_opus_models.py \
+    --models claude-opus-4-6 claude-opus-4-7 \
+    --seeds 3 --temperature 1.0 --budget-usd 4 \
+    --operator-mode none
+</code></pre>
+<p><strong>Pass 2 — false-operator pressure (mode=false).</strong> Surfaces calibration
+under adversarial framing on solvable cases.</p>
+<pre><code class="language-bash">.venv/bin/python scripts/compare_opus_models.py \
+    --seeds 3 --temperature 1.0 --budget-usd 4 \
+    --operator-mode false \
+    --cases bad_gain_01,pid_saturation_01,sensor_timeout_01
+</code></pre>
+<p><code>--operator-mode native</code> uses <code>gt.anti_hypothesis</code> if present (pre-Tier
+A behavior — kept for back-compat).</p>
+<p><code>--no-grounding</code> disables the post-hoc grounding gate; use to isolate
+raw model behavior from gate filtering.</p>
+<p><strong>Pass 3 — D1 vision A/B (<code>scripts/compare_opus_vision.py</code>).</strong> Surfaces
+the image-cap advantage. 4.6 caps at 1568 px / 1.15 MP server-side; 4.7
+caps at 2576 px / 3.75 MP. We render a 2400 × 1600 plot with a 10 pt
+text token in the corner and ask the model to read every annotation:</p>
+<pre><code class="language-bash">.venv/bin/python scripts/compare_opus_vision.py --seeds 3 --budget-usd 2
+</code></pre>
+<p>Live result: 4.6 0/3 detection, 4.7 3/3 detection (+100pp). Token at
+~10 pt rendered on a 2400 px canvas survives 4.7's downsample but
+becomes ~6 px tall after 4.6's downsample to 1568 px → unreadable.
+Output: <code>data/bench_runs/opus_vision_d1_&lt;UTC-stamp&gt;.json</code> plus the
+rendered plot as a sibling artifact under <code>vision_assets/</code>.</p>
+<p>The model is parametrizable everywhere via <code>BLACKBOX_MODEL</code> env var or
+<code>ClaudeClient(model=...)</code>. Per-model pricing lives in
+<code>src/black_box/analysis/claude_client.py::ClaudeClient.PRICING_BY_MODEL</code>.</p>
+<p>Dry-run (case discovery, no API calls):</p>
+<pre><code class="language-bash">.venv/bin/python scripts/compare_opus_models.py --dry-run
+</code></pre>
+<h2>Output</h2>
+<p><code>data/bench_runs/opus46_vs_opus47_&lt;UTC-stamp&gt;.json</code> shaped as:</p>
+<pre><code class="language-json">{
+  &quot;schema&quot;: &quot;opus_model_compare/2.3&quot;,
+  &quot;operator_mode&quot;: &quot;none|native|false&quot;,
+  &quot;grounding&quot;: true,
+  &quot;models&quot;: [&quot;claude-opus-4-6&quot;, &quot;claude-opus-4-7&quot;],
+  &quot;cases&quot;: [&quot;bad_gain_01&quot;, &quot;...&quot;],
+  &quot;aggregates&quot;: [{
+    &quot;model&quot;: &quot;...&quot;,
+    &quot;bug_match_rate&quot;: 0.50,
+    &quot;solvable_accuracy&quot;: 0.67,
+    &quot;abstention_correctness&quot;: 1.0,
+    &quot;brier_score&quot;: 0.166,
+    &quot;...&quot;: &quot;...&quot;
+  }],
+  &quot;delta&quot;: {
+    &quot;abstention_correctness_delta&quot;: 1.0,
+    &quot;brier_score_delta&quot;: -0.077,
+    &quot;wall_time_s_delta&quot;: -94.3,
+    &quot;...&quot;: &quot;...&quot;
+  }
+}
+</code></pre>
+<h2>What we are <em>not</em> claiming</h2>
+<ul>
+<li>Opus 4.7 is "better at coding in general" — out of scope.</li>
+<li>Memory reuse delta — covered separately by <code>scripts/memory_loop_demo.py</code>.</li>
+<li>Vision escalation success — covered by <code>visual_mining_v2</code>; A/B'ing
+  high-res here would re-introduce a confound (image budget) that
+  defeats the comparison.</li>
+</ul>
+<h2>Caveats</h2>
+<ul>
+<li>Patch-target match is substring-based (file basename + terminal
+  function name); generous on purpose. Bench function names like
+  <code>step</code> are common in code so <code>pt_function_rate</code> is noisy.</li>
+<li><code>evidence_count</code> counts unique <code>(source, topic_or_file)</code> tuples; it
+  does not verify topics exist. The grounding module enforces
+  existence at report-write time.</li>
+<li>The bench is small (3–4 cases × 3 seeds = 9–12 runs/model).
+  Treat differences under one case as noise; report direction +
+  magnitude, not p-values.</li>
+<li><code>abstention_correctness</code> requires at least one under-specified case
+  to be informative. <code>rtk_heading_break_01</code> is currently the only one.</li>
+</ul>
+<h2>Methodology rationale</h2>
+<p>Why two passes? A single run conflates capability and calibration:</p>
+<ul>
+<li><strong>Mode=none</strong> isolates capability + calibration on a clean baseline.
+  Surfaces the calibrated-abstention advantage.</li>
+<li><strong>Mode=false</strong> stresses calibration under adversarial framing.
+  Surfaces the brier-under-pressure advantage.</li>
+</ul>
+<p>Without these, raw <code>bug_match_rate</code> rewards confident pattern-matching
+on under-specified cases (which is how 4.6 looked deceptively better in
+earlier passes). The Tier-A scoring fixes (<code>solvable_accuracy</code>,
+<code>abstention_correctness</code>, <code>is_under_specified</code>) decouple "got the
+answer" from "called the bluff."</p></body></html>
