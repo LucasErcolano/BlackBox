@@ -1,16 +1,38 @@
-# Black Box
+# Black Box — forensic copilot for robots
 
 [![ci](https://github.com/LucasErcolano/BlackBox/actions/workflows/ci.yml/badge.svg)](https://github.com/LucasErcolano/BlackBox/actions/workflows/ci.yml)
+**Built with Claude Opus 4.7** · `claude-opus-4-7` · vision + reasoning + Managed Agents · no downgrades.
 
-**Built with Claude Opus 4.7** — vision + reasoning + Managed Agents (long-horizon session replay). Model ID: `claude-opus-4-7`. No downgrades.
-
-Forensic copilot for robots. Feed it a robot recording, get back a root-cause hypothesis, cross-modal evidence, and a scoped code patch.
+Feed it a robot recording — ROS1/ROS2 bag, telemetry, multi-camera video, LiDAR/IMU, plus repo context — and get back a grounded post-mortem: ranked root-cause hypotheses, timestamped multimodal evidence, an NTSB-style PDF, and a scoped code patch.
 
 > When a robot crashes, the flight data recorder tells you *what* happened. Black Box tells you *why*, and hands you the diff.
 
-## Hero case
+## Demo (3 min)
 
-The one finding the demo is built around: **`sanfer_sanisidro` RTK-heading break.** Real operator recording. Operator tagged the bag "tunnel caused the anomaly." Black Box's grounding gate promoted a ranked **refutation**: RTK `carr_soln=none` was already present 43 min pre-tunnel, DBW never engaged, so the tunnel could not have caused the reported behavior change. Proof: [`demo_assets/grounding_gate/README.md`](demo_assets/grounding_gate/README.md) (tag: `replay`). Scope boundaries: [`SCOPE_FREEZE.md`](SCOPE_FREEZE.md).
+▶ **[Watch the demo](https://github.com/LucasErcolano/BlackBox/blob/master/demo_assets/streaming/replay_sanfer_tunnel.mp4)** — full 3-min walkthrough of the hero case, the grounding gate refutation, and the scoped patch hand-off.
+
+Try it locally in 60 seconds:
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -e .
+export ANTHROPIC_API_KEY=...
+python scripts/run_opus_bench.py --budget-usd 20    # writes data/bench_runs/opus47_<UTC>.json
+```
+
+Reference run committed for audit: [`data/bench_runs/opus47_20260423T140758Z.json`](data/bench_runs/opus47_20260423T140758Z.json) — **2 of 3 non-skeleton cases match on Opus 4.7 at $0.46 total spend**. Every benchmark number in this README traces back to that file.
+
+## Hero case — operator said "tunnel," telemetry said otherwise
+
+`sanfer_sanisidro` RTK-heading break. Real operator recording. The operator tagged the bag *"tunnel caused the anomaly."* Black Box's grounding gate cross-checked telemetry, video, and source — and **refuted** the operator: RTK `carr_soln=none` was already present 43 min pre-tunnel, drive-by-wire never engaged, so the tunnel could not plausibly be the cause. The refutation ships as a ranked hypothesis with its own confidence and patch hint, not as agreement.
+
+- Refutation narrative: [`demo_assets/grounding_gate/README.md`](demo_assets/grounding_gate/README.md) (tag: `replay`)
+- Regenerate live: `python scripts/run_rtk_heading_case.py` (telemetry-only one-shot, no frames, no vision)
+- Scope boundaries for the judged beat: [`SCOPE_FREEZE.md`](SCOPE_FREEZE.md)
+
+## Why this is hard
+
+Robotics failures are rarely obvious from one log or one operator's account. The hard part isn't summarizing logs — it's connecting partial, contradictory evidence (telemetry timestamps, camera frames, missing topics, source paths, system assumptions) into a defensible conclusion. Black Box is designed around that: every hypothesis must anchor to **at least two independent sources**, weakly-supported claims are dropped at the gate, and the operator's narrative gets no special weight.
 
 ## What is live vs replay
 
@@ -43,9 +65,22 @@ Hero-case telemetry-only one-shot (no frames, no vision):
 python scripts/run_rtk_heading_case.py   # tag: live, requires ANTHROPIC_API_KEY
 ```
 
-## Status — shipped vs partial vs roadmap
+## What we shipped
 
-Every claim in this README ties to one of three states:
+- **Long-horizon agentic investigation** built on Claude Managed Agents — ingest, sample windows, densify suspicious frames cross-camera, refute weak hypotheses, write the report, propose a scoped patch.
+- **Deterministic grounding gate** (`src/black_box/analysis/grounding.py`) — every hypothesis needs ≥2 independent evidence rows from ≥2 distinct sources. Two visible exits: refutation, or `"nothing anomalous detected"`.
+- **Frozen 7-class bug taxonomy** enforced at parse time by a Pydantic `Literal` — no silent label invention.
+- **4-layer append-only memory stack** (case → platform → taxonomy → eval) plus Managed Agents native memory stores with a human-gated promotion ledger.
+- **HITL approve/reject gate** before any patch is applied + writable verification ledger so wrong calls can be challenged in place without rewriting history.
+- **FastAPI + HTMX UI** with streaming reasoning, live operator steering (`POST /steer/{job_id}`), and time-travel rollback (`POST /checkpoints/{id}/rollback`).
+- **Token discipline** — prompt caching on system + taxonomy + few-shot block, adaptive resolution budgeter, per-call cost ledger in `data/costs.jsonl`.
+
+## Capability matrix
+
+Every claim in this README ties to one of three states. Click to expand.
+
+<details>
+<summary><strong>Shipped vs Partial vs Roadmap (full table)</strong></summary>
 
 | State | Meaning |
 |-------|---------|
@@ -88,6 +123,8 @@ Every claim in this README ties to one of three states:
 | `scripts/` taxonomy split (eval/demo/ops/dev) | ✅ | `scripts/README.md` | — |
 | pytest-cov gates + reproducible release packaging | ✅ | `.github/workflows/ci.yml`, release tag flow | — |
 | NAO6 platform adapter (synthetic fixture only) | ✅ | `src/black_box/platforms/nao6/` | — |
+
+</details>
 
 ## Mode taxonomy
 
