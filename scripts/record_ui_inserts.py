@@ -26,39 +26,7 @@ FPS = 30
 WIDTH, HEIGHT = 1920, 1080
 PATCH_JOB = "f748de9e40ca"
 
-DARK_CSS = """
-:root {
-  --bg: #0e0f0a !important;
-  --bg-2: #15170f !important;
-  --surface: #1d1f17 !important;
-  --ink: #e8e3d4 !important;
-  --ink-2: #cec9b8 !important;
-  --muted: #9a9786 !important;
-  --line: #2a2c22 !important;
-  --rule: #3a3c30 !important;
-  --accent-soft: #1f2e22 !important;
-  --console-bg: #0a0b07 !important;
-  --console-bg-2: #131509 !important;
-}
-html, body { background: #0e0f0a !important; color: #e8e3d4 !important; }
-input, select, textarea, button { background: #1d1f17 !important; color: #e8e3d4 !important; border-color: #3a3c30 !important; }
-table, th, td { border-color: #2a2c22 !important; }
-"""
-
-DARK_INIT_JS = """
-(() => {
-  const css = %s;
-  const apply = () => {
-    if (document.getElementById('bb-dark-style')) return;
-    const s = document.createElement('style');
-    s.id = 'bb-dark-style';
-    s.textContent = css;
-    (document.head || document.documentElement).appendChild(s);
-  };
-  if (document.readyState !== 'loading') apply();
-  else document.addEventListener('DOMContentLoaded', apply);
-})();
-""" % json.dumps(DARK_CSS)
+from _ui_dark import DARK_INIT_JS
 
 PHASES = [
     ("memory",          7),
