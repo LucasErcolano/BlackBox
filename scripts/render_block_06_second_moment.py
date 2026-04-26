@@ -41,10 +41,17 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "video_assets" / "block_06_second_moment"
 OUT.mkdir(parents=True, exist_ok=True)
 
-FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-FONT_REG = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-FONT_MONO = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
-FONT_MONO_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"
+def _font_dir() -> str:
+    linux = "/usr/share/fonts/truetype/dejavu"
+    if Path(linux).exists():
+        return linux
+    import matplotlib
+    return str(Path(matplotlib.__file__).parent / "mpl-data/fonts/ttf")
+_FD = _font_dir()
+FONT_BOLD = f"{_FD}/DejaVuSans-Bold.ttf"
+FONT_REG = f"{_FD}/DejaVuSans.ttf"
+FONT_MONO = f"{_FD}/DejaVuSansMono.ttf"
+FONT_MONO_BOLD = f"{_FD}/DejaVuSansMono-Bold.ttf"
 
 W, H = 1920, 1080
 FPS = 30
@@ -225,9 +232,9 @@ def make_earliest_beat(t: float) -> Image.Image:
     cd.text((card_w - tag_w - 24, 16), tag, font=fm_b, fill=MUTED_RED)
 
     # huge timestamp
-    fb_huge = font(FONT_BOLD, 200)
-    draw_text_centered(cd, (card_w // 2, 200), "t = 0.24 s", fb_huge, ACCENT)
-    draw_text_centered(cd, (card_w // 2, 320),
+    fb_huge = font(FONT_BOLD, 160)
+    draw_text_centered(cd, (card_w // 2, 180), "t = 0.24 s", fb_huge, ACCENT)
+    draw_text_centered(cd, (card_w // 2, 310),
                        "before the vehicle first moved (17.54 s)", fs, DIM)
 
     # three parallel status rows
@@ -413,7 +420,7 @@ def make_lockup_beat(t: float) -> Image.Image:
     # horizontal timeline
     tl_x0 = 200
     tl_x1 = W - 200
-    tl_y = 330
+    tl_y = 410
     # axis
     d.rectangle([(tl_x0, tl_y), (tl_x1, tl_y + 4)], fill=BORDER)
 

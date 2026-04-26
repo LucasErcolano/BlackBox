@@ -28,12 +28,19 @@ OUT = ROOT / "video_assets" / "block_01_hook"
 OUT.mkdir(parents=True, exist_ok=True)
 
 FRAME = ROOT / "demo_assets/bag_footage/sanfer_tunnel/frame_00133.4s_dense.jpg"
-PLOT = ROOT / "demo_assets/diff_viewer/moving_base_rover.png"
-PATCH = ROOT / "data/patches/054061f2c1f9.json"
+PLOT = ROOT / "demo_assets/diff_viewer/moving_base_rover_dark.png"
+PATCH = ROOT / "data/patches/11822a5bc424.json"
 
-FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-FONT_REG = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-FONT_MONO = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+def _font_dir() -> str:
+    linux = "/usr/share/fonts/truetype/dejavu"
+    if Path(linux).exists():
+        return linux
+    import matplotlib
+    return str(Path(matplotlib.__file__).parent / "mpl-data/fonts/ttf")
+_FD = _font_dir()
+FONT_BOLD = f"{_FD}/DejaVuSans-Bold.ttf"
+FONT_REG = f"{_FD}/DejaVuSans.ttf"
+FONT_MONO = f"{_FD}/DejaVuSansMono.ttf"
 
 W, H = 1920, 1080
 FPS = 30
@@ -208,8 +215,8 @@ def make_plot_beat(t: float) -> Image.Image:
     shadow = shadow.filter(ImageFilter.GaussianBlur(14))
     img.alpha_composite(shadow, (px - 20, py - 20))
 
-    # white plate under plot (png may have transparency)
-    plate = Image.new("RGBA", (fw, fh), (250, 250, 250, 255))
+    # dark plate under plot (matches the rest of the cut)
+    plate = Image.new("RGBA", (fw, fh), (17, 21, 27, 255))
     img.alpha_composite(plate, (px, py))
     img.alpha_composite(fitted, (px, py))
 
