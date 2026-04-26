@@ -1,0 +1,49 @@
+{
+  "name": "final_ui_capture",
+  "purpose": "Polished UI flow for the Black Box 3-minute demo (UI-dependent footage only; Batch A and Batch B already recorded).",
+  "case": "sanfer_tunnel",
+  "mode": "replay",
+  "source_route": "GET /analyze?replay=sanfer_tunnel  (recorded job_id=f748de9e40ca)",
+  "server_url": "http://127.0.0.1:8765",
+  "viewport": "1920x1080",
+  "fps": 10,
+  "model": "claude-opus-4-7",
+  "files": {
+    "clip.mp4": {
+      "duration_s": 65.0,
+      "frames": "0..650",
+      "phases": [
+        {"name": "intake",          "start_s":  0.0, "end_s": 10.0},
+        {"name": "analysis_start",  "start_s": 10.0, "end_s": 16.0},
+        {"name": "agent_stream",    "start_s": 16.0, "end_s": 38.0},
+        {"name": "report",          "start_s": 38.0, "end_s": 53.0},
+        {"name": "patch_review",    "start_s": 53.0, "end_s": 65.0}
+      ]
+    },
+    "intake_ui.mp4":               {"duration_s": 10.0, "frames": "0..100"},
+    "managed_agent_stream_ui.mp4": {"duration_s": 20.0, "frames": "100..300"},
+    "report_overview_ui.mp4":      {"duration_s": 15.0, "frames": "380..530"},
+    "patch_human_review_ui.mp4":   {"duration_s": 12.0, "frames": "530..650"},
+    "preview.png":                 "frame f_00120.png — live agent stream phase"
+  },
+  "source_artifacts": {
+    "stream_events": "data/final_runs/sanfer_tunnel/stream_events.jsonl",
+    "report_md":     "data/final_runs/sanfer_tunnel/report.md",
+    "report_pdf":    "data/final_runs/sanfer_tunnel/report.pdf",
+    "cost":          "data/final_runs/sanfer_tunnel/cost.json",
+    "patch_artifact": "data/patches/f748de9e40ca.json"
+  },
+  "ui_signals_visible": [
+    "Black Box header + INTAKE/REPORT/CASES nav",
+    "intake form: post-mortem mode + bag/MCAP/zip drop zone + verdicts/wk + median run/cost stats",
+    "native Claude memory mounts (bb-platform-priors RO, bb-forensic-learnings RW, promotion-ledger gated)",
+    "live reasoning stream with tool:bash / tool:read calls and result frames (job B18CAFAA / F748DE9E in this take)",
+    "stage progress chips: Decoding bag -> Sampling frames -> Running cross-camera analysis -> Grounding hypothesis -> Writing report",
+    "pipeline graph (decode -> sample -> ground -> write, with memory + priors)",
+    "tool-call ledger with token in/out + USD cost",
+    "report page: causal chain (operator vs model), 10 anchored exhibits, run timeline scrubber",
+    "exhibits cards (RTK fix quality collapse, heading covariance, front-cam open sky)",
+    "proposed fix diff: pid_controller.cpp clamp on integral_ + output_, before/after side-by-side",
+    "HUMAN APPROVAL REQUIRED gate with APPROVE PATCH / REJECT PATCH buttons (not auto-applied)"
+  ]
+}
