@@ -1,0 +1,59 @@
+{
+  "block_id": "block_01_hook",
+  "duration_target": "10-12s",
+  "duration_actual": "11.0s",
+  "fps": 30,
+  "resolution": "1920x1080",
+  "deliverable_mode": "FINAL_NOW",
+  "narration": "When a robot fails, the recorder tells you what happened. Black Box tells you why — and gives you the diff.",
+  "beats": [
+    {"t": "0.0-2.6s", "name": "title",    "content": "dark card: 'When a robot fails, the recorder tells you what happened.'"},
+    {"t": "2.6-5.2s", "name": "evidence", "content": "real rosbag frame (sanfer_tunnel t=133.4s), ken-burns, right-side label 'RAW EVIDENCE'"},
+    {"t": "5.2-7.8s", "name": "why",      "content": "real RTK moving-base rover plot (wipe-in), right-side 'BLACK BOX tells you why' + RTK finding"},
+    {"t": "7.8-11.0s","name": "diff",     "content": "side-by-side before/after of pid_controller.cpp patch, highlight sweep on clamp line"}
+  ],
+  "source_assets_used": [
+    "demo_assets/bag_footage/sanfer_tunnel/frame_00133.4s_dense.jpg",
+    "demo_assets/diff_viewer/moving_base_rover.png",
+    "data/patches/054061f2c1f9.json"
+  ],
+  "text_overlays_used": [
+    "When a robot fails,",
+    "the recorder tells you what happened.",
+    "BLACK BOX — forensic copilot",
+    "RAW EVIDENCE",
+    "rosbag frame",
+    "sanfer_tunnel / t=133.4s",
+    "cam0  133.4s",
+    "BLACK BOX",
+    "tells you why.",
+    "RTK heading gone.",
+    "carrSoln = NONE  100%",
+    "relPosValid never set",
+    "…and gives you the diff.",
+    "scoped patch · data/patches/054061f2c1f9.json",
+    "block 01 · hook",
+    "progress dots: title / evidence / why / diff"
+  ],
+  "edits_performed": [
+    "PIL compositing of 4 beats at 30fps",
+    "ken-burns zoom on evidence frame",
+    "wipe-in reveal on RTK plot",
+    "per-line diff highlighting computed from patch JSON",
+    "amber spotlight sweep on integral-clamp line",
+    "eased crossfade (350ms) between beats",
+    "drop shadows + subtle grid backdrop",
+    "ffmpeg libx264 CRF 18, yuv420p, +faststart"
+  ],
+  "ui_dependency_level": "none",
+  "remaining_work": [
+    "optional: swap title card for motion-typed variant once brand kit lands",
+    "optional: replace sanfer_tunnel frame with hero bag frame if editorial picks another case",
+    "final edit should pair this clip with voiceover track"
+  ],
+  "render_script": "scripts/render_block_01_hook.py",
+  "outputs": {
+    "clip": "video_assets/block_01_hook/clip.mp4",
+    "preview": "video_assets/block_01_hook/preview.png"
+  }
+}

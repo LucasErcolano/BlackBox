@@ -1,0 +1,86 @@
+{
+  "block_id": "block_09_punchline",
+  "duration_target": "12-13s",
+  "duration_actual": 12.5,
+  "fps": 30,
+  "resolution": "1920x1080",
+  "deliverable_mode": "FINAL_NOW",
+  "narration": "So the output is not just a summary. It is a forensic report, ranked hypotheses, and a patch a human can review immediately.",
+  "visual_language": {
+    "shared_with_blocks": ["block_01_hook", "block_02_problem", "block_05_first_moment", "block_06_second_moment", "block_07_grounding", "block_08_money_shot"],
+    "shared_palette": {"bg": "#0a0c10", "fg": "#e6e8ec", "dim": "#78808c", "panel": "#12141a", "border": "#3c424e", "accent": "#ffb840", "muted_amber": "#c49648"},
+    "shared_system": ["DejaVu Sans / Sans Mono fonts", "80px grid backdrop", "drop-shadow recipe", "4-dot beat indicator"],
+    "closure_modifiers": {
+      "narrative_center": "product closure — three-output bundle, not a second climax",
+      "diff_weight": "patch card slightly heavier than report/ranked: full ACCENT label + amber strip on add-lines; report/ranked use MUTED_AMBER labels",
+      "dimming_rule": "beat C dims report + ranked (card alpha 0.55) to foreground the patch without hiding the other two",
+      "amber_discipline": "ACCENT only on (a) patch label + add-line strip in beat C, (b) lockup second line, (c) hairline dividers; block_08 keeps the diff-hero payoff",
+      "no_new_evidence": "no timeline, no artifact grid, no moment spike — investigation is closed",
+      "reviewability_cue": "explicit annotation 'human reviews · system does not auto-apply' under patch in beat C"
+    }
+  },
+  "beats": [
+    {"t": "0.0-2.5s",  "name": "bundle intro",   "content": "DELIVERABLE eyebrow, 'not just a summary' hero, bundle path data/final_runs/sanfer_tunnel/, three staggered empty slot placeholders"},
+    {"t": "2.5-6.0s",  "name": "three outputs",  "content": "staggered reveal (0.2/0.7/1.2s) of forensic report card (title + exec summary prose + counts), ranked outcome card (5 confidence bars from real hypotheses), scoped patch card (real engage_gate.py hunk)"},
+    {"t": "6.0-9.5s",  "name": "reviewability",  "content": "report + ranked dimmed to 0.55 alpha; patch card full ACCENT strip + 'human reviews · applies / system does not auto-apply' annotation"},
+    {"t": "9.5-12.5s", "name": "lockup",         "content": "'not just a summary.' (FG) / 'ready for review.' (ACCENT) + 'forensic report · ranked outcome · scoped patch' subtitle + brand lockup"}
+  ],
+  "source_assets_used": [
+    "data/final_runs/sanfer_tunnel/report.md (real post-mortem: case sanfer_tunnel, duration 3626.70s, model claude-opus-4-7, 5-row executive summary with confidences 0.60 / 0.55 / 0.35 / 0.15 / 0.05)",
+    "ranked hypotheses verbatim: #1 sensor_timeout ROOT 0.60, #2 missing_null_check 0.55, #3 other 0.35, #4 latency_spike 0.15, #5 other REFUTED 0.05",
+    "report prose excerpt: 'Moving-baseline RTCM uplink... carr_soln never leaves none · 18,133/18,133 NAV-RELPOSNED'",
+    "patch hunk: localization/engage_gate.py can_engage guard (trimmed from the full hunk used in block_08 to fit the card at 540px wide)"
+  ],
+  "text_overlays_used": [
+    "DELIVERABLE",
+    "not just a summary",
+    "the system hands over a bundle an engineer can open and act on",
+    "bundle  data/final_runs/sanfer_tunnel/",
+    "forensic report", "ranked outcome", "scoped patch",
+    "the deliverable",
+    "one bundle · three outputs · human-reviewable",
+    "report.md · 12.7 KB · md",
+    "Black Box — Forensic Report",
+    "Case  sanfer_tunnel · post_mortem",
+    "Duration  3626.70 s · model  claude-opus-4-7",
+    "Executive Summary · Timeline · 13 rows · Hypotheses · 5 ranked · Patch proposal · 1 hunk",
+    "hypotheses · ranked · 5 of 5",
+    "#1 sensor_timeout 0.60 ROOT",
+    "#2 missing_null_check 0.55 supporting",
+    "#3 other 0.35 partial",
+    "#4 latency_spike 0.15 symptom",
+    "#5 other 0.05 REFUTED",
+    "root cause ranked · alternates retained · one refuted",
+    "scoped_patch.diff · 1 file · +8 −1",
+    "--- a/localization/engage_gate.py",
+    "+++ b/localization/engage_gate.py",
+    "@@ def can_engage(self):",
+    "ready for review",
+    "grounded report · ranked reasoning · patch a human applies",
+    "human reviews · applies",
+    "system does not auto-apply",
+    "not just a summary.",
+    "ready for review.",
+    "forensic report · ranked outcome · scoped patch",
+    "BLACK  BOX  —  forensic copilot",
+    "block 09 · deliverable"
+  ],
+  "edits_performed": [
+    "PIL compositing of 4 beats at 30 fps, 375 frames total",
+    "three hand-built output cards (report page crop, ranked-hypothesis bar list, scoped-diff hunk) — no product UI screenshots",
+    "staggered reveal in beat B (0.2/0.7/1.2s per card), DIM in beat C (report+ranked alpha 0.55, patch full)",
+    "accent strip on patch add-lines in beat C; reviewability annotation appears at t≈0.8s",
+    "450ms smoothstep crossfades between beats (matches block_05/06/07/08 cadence)",
+    "ffmpeg libx264 CRF 18, yuv420p, +faststart"
+  ],
+  "ui_dependency_level": "none",
+  "remaining_work": [
+    "optional: swap in a real PDF crop of report.pdf (14.7 KB exists in bundle/) for the report card if we want literal repo-ground over hand-built summary",
+    "optional: adjust beat D hold if VO lands after 12.5s"
+  ],
+  "render_script": "scripts/render_block_09_punchline.py",
+  "outputs": {
+    "clip": "video_assets/block_09_punchline/clip.mp4",
+    "preview": "video_assets/block_09_punchline/preview.png"
+  }
+}

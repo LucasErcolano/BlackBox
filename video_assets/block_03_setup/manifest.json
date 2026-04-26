@@ -1,0 +1,91 @@
+{
+  "block_id": "block_03_setup",
+  "duration_target": "14-15s",
+  "duration_actual": 14.5,
+  "resolution": "1920x1080",
+  "fps": 30,
+  "deliverable_mode": "FINAL_NOW",
+  "narration": "I give Black Box sessions it has never seen. No labels. No handcrafted rubric. Just raw evidence. Its job is simple: find what matters, reject what doesn't, and return a grounded hypothesis.",
+  "visual_language": {
+    "shared_with_blocks": ["block_01_hook", "block_02_problem", "block_05_first_moment", "block_06_second_moment", "block_07_grounding", "block_08_money_shot", "block_09_punchline", "block_10_outro"],
+    "shared_palette": {"bg": "#0a0c10", "fg": "#e6e8ec", "dim": "#78808c", "panel": "#12141a", "border": "#3c424e", "accent": "#ffb840", "muted_amber": "#c49648"},
+    "shared_system": ["DejaVu Sans / Sans Mono fonts", "80px grid backdrop", "drop-shadow recipe", "4-dot beat indicator"],
+    "setup_modifiers": {
+      "narrative_center": "multi-session intake — plural unseen sessions, no labels, no rubric, raw evidence only",
+      "plurality": "two real sessions (boat_lidar + sanfer_tunnel) carried side-by-side through beats A-C",
+      "amber_discipline": "ACCENT on hairlines / UNSEEN tag / final lockup underline; MUTED_AMBER for column eyebrows; MUTED_RED strip only on the silent /lidar_imu pill and negation strike-throughs",
+      "no_findings_reveal": "beat C stops at artifact inventory — no RTK carr_soln analysis, no anomalies, no ranked hypotheses; only what the sessions carry",
+      "xfade": "0.40s smoothstep between beats (between block_02 0.35 and block_07 0.45)"
+    }
+  },
+  "beats": [
+    {"t": "0.0-3.0s",   "name": "unseen sessions",   "content": "directory listing 'ls data/final_runs/' reveals two real intake folders: boat_lidar/ (USV · LIDAR-only · 7m) and sanfer_tunnel/ (Lincoln MKZ · RTK · 60m); UNSEEN tag with 'no prior labels'"},
+    {"t": "3.0-6.4s",   "name": "two sessions in",   "content": "two side-by-side session_manifest.json cards: boat_lidar (duration 6m 56s, USV LIDAR-only, /lidar_points + /lidar_imu, prior labels none, prior rubric none) and sanfer_tunnel (60m 26s, Lincoln MKZ RTK, u-blox · IMU · cameras, prior labels none, prior rubric none); 'two cases · unseen · no prior analysis' eyebrow"},
+    {"t": "6.4-10.4s",  "name": "raw evidence",      "content": "two-column raw-evidence layout. boat: pills for metadata.yaml, /lidar_points 4168 msgs, /lidar_imu 0 msgs (red strip, silent stream), bag_recovery_note. sanfer: 3 real dense-frame tiles (00000.0s, 01036.3s, 02072.5s) + pills for ublox_rover_navrelposned.csv, ublox_rover_navpvt.csv, diagnostics_nonzero_unique.csv. Footer 'raw artifacts · per session · nothing merged, nothing curated'"},
+    {"t": "10.4-14.5s", "name": "negation + lockup", "content": "'no labels' and 'no handcrafted rubric' appear in STRIKE gray then get struck through in MUTED_RED with 'the system starts from raw evidence' dim subtitle; dissolves into final 'find what matters.' 96pt lockup with ACCENT underline + 'reject what doesn't · return a grounded hypothesis' + brand"}
+  ],
+  "source_assets_used": [
+    "data/final_runs/boat_lidar/bundle/summary.json (case, duration_s=416.76, platform, sensor counts including /lidar_imu 0-msg silence)",
+    "data/final_runs/sanfer_tunnel/bundle/summary.json (case, session_duration_s=3626.8, vehicle_platform, artifact list)",
+    "data/final_runs/sanfer_tunnel/bundle/frames/frame_00000.0s_dense.jpg",
+    "data/final_runs/sanfer_tunnel/bundle/frames/frame_01036.3s_base.jpg",
+    "data/final_runs/sanfer_tunnel/bundle/frames/frame_02072.5s_base.jpg"
+  ],
+  "text_overlays_used": [
+    "Unseen sessions",
+    "real recordings handed in · not previously analyzed",
+    "$ ls data/final_runs/",
+    "drwxr-xr-x  boat_lidar/",
+    "USV · LIDAR-only · 7m",
+    "drwxr-xr-x  sanfer_tunnel/",
+    "Lincoln MKZ · RTK · 60m",
+    "UNSEEN",
+    "no prior labels",
+    "Two sessions in",
+    "different platforms · different sensors · same intake",
+    "session_manifest.json",
+    "boat_lidar", "unmanned surface vessel",
+    "sanfer_tunnel", "autonomous vehicle · dual-antenna RTK",
+    "case / duration / platform / sensors / prior labels / prior rubric",
+    "two cases · unseen · no prior analysis",
+    "Raw evidence",
+    "no curation · no pre-sorting · only what the sessions carry",
+    "LIDAR-only · metadata recovery",
+    "RTK · IMU · cameras",
+    "metadata.yaml  topics · counts · recovery",
+    "/lidar_points  4168 msgs · 10 Hz",
+    "/lidar_imu  0 msgs · silent stream",
+    "bag_recovery_note  sqlite3 malformed · reason from metadata",
+    "ublox_rover_navrelposned.csv  RTK rel-pos · 18,133 rows",
+    "ublox_rover_navpvt.csv  fix_type history",
+    "diagnostics_nonzero_unique.csv  non-OK diagnostics",
+    "raw artifacts · per session · nothing merged, nothing curated",
+    "no labels",
+    "no handcrafted rubric",
+    "the system starts from raw evidence",
+    "find what matters.",
+    "reject what doesn't · return a grounded hypothesis",
+    "BLACK  BOX  —  forensic copilot",
+    "block 03 · setup"
+  ],
+  "edits_performed": [
+    "PIL compositing of 4 beats at 30 fps, 435 frames total",
+    "beat A terminal-style `ls data/final_runs/` with staggered 2-row reveal (boat 0.7s, sanfer 1.2s)",
+    "beat B dual session_manifest.json cards revealed 0.15s / 0.55s apart; identical schema, different values",
+    "beat C two-column evidence view: boat pills only (LIDAR-only session has no cam frames); sanfer 3 real dense-frame thumbnails + RTK/diagnostics pills",
+    "red-strip treatment on /lidar_imu 0-msg pill to signal the silent stream (evidence, not a finding)",
+    "beat D strike-through on 'no labels' / 'no handcrafted rubric' then dissolve into 'find what matters.' lockup at t=12.5s",
+    "0.40s smoothstep crossfades between beats",
+    "ffmpeg libx264 CRF 18, yuv420p, +faststart"
+  ],
+  "ui_dependency_level": "none",
+  "remaining_work": [
+    "optional: if final edit wants boat represented with a LIDAR-pointcloud still instead of pills-only, generate one from /lidar_points via rosbags + matplotlib",
+    "optional: if VO lands earlier/later than 14.5s, compress/expand beat D hold (the easiest knob)"
+  ],
+  "render_script": "scripts/render_block_03_setup.py",
+  "outputs": {
+    "clip": "video_assets/block_03_setup/clip.mp4",
+    "preview": "video_assets/block_03_setup/preview.png"
+  }
+}
