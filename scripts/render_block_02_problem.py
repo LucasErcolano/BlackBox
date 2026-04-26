@@ -236,15 +236,16 @@ def log_snippet_lines() -> list[str]:
 
 
 def trace_snippet_lines() -> list[str]:
+    # Lines kept ≤ 40 mono chars so they fit a 560-px tile at FONT_MONO 14.
     return [
-        "topic                                     msgs   type",
-        "/cam_front/image_raw/compressed          18324   sensor_msgs/CompressedImage",
-        "/cam_rear/image_raw/compressed           18312   sensor_msgs/CompressedImage",
-        "/velodyne_points                          7233   sensor_msgs/PointCloud2",
-        "/imu/data                                91566   sensor_msgs/Imu",
-        "/ublox/navrelposned                       1833   ublox_msgs/NavRELPOSNED9",
-        "/cmd_vel                                  6105   geometry_msgs/Twist",
-        "duration: 305.5s   size: 55.8 GB   topics: 42",
+        "topic                msgs    type",
+        "/cam_front/raw      18324   CompressedImage",
+        "/cam_rear/raw       18312   CompressedImage",
+        "/velodyne_points     7233   PointCloud2",
+        "/imu/data           91566   Imu",
+        "/ublox/navrelposned  1833   NavRELPOSNED9",
+        "/cmd_vel             6105   Twist",
+        "305.5s · 55.8 GB · 42 topics",
     ]
 
 
@@ -454,7 +455,7 @@ def make_trace_tile() -> Image.Image:
     d = ImageDraw.Draw(tile)
     d.rectangle([(0, 0), (w, 40)], fill=(28, 30, 36))
     fm_h = font(FONT_MONO_BOLD, 18)
-    fm = font(FONT_MONO, 15)
+    fm = font(FONT_MONO, 14)
     d.text((14, 10), "rosbag info 1_cam-lidar.bag", font=fm_h, fill=FG)
     y = 58
     for ln in trace_snippet_lines():
@@ -547,12 +548,15 @@ def make_lockup_beat(t: float, dim_tiles_img: Image.Image) -> Image.Image:
     img = Image.new("RGBA", (W, H), BG + (255,))
     grid_bg(img)
 
-    # dim the tile composite behind
+    # Solid panel behind centered lockup text — no translucent prior tiles
+    # peeking through (those caused text to overlap video/code/log artifacts).
     dim = dim_tiles_img.copy()
     r, g, b, al = dim.split()
-    al = al.point(lambda v: int(v * 0.22))
+    al = al.point(lambda v: int(v * 0.06))
     dim = Image.merge("RGBA", (r, g, b, al))
     img.alpha_composite(dim)
+    veil = Image.new("RGBA", (W, H), BG + (215,))
+    img.alpha_composite(veil)
 
     # vignette
     vg = Image.new("RGBA", (W, H), (0, 0, 0, 0))

@@ -1,0 +1,534 @@
+{
+  "total_duration_s": 175.9,
+  "segments": [
+    {
+      "id": "h1",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/13_sanfer_real_camera_broll.mp4",
+      "in_s": 0.0,
+      "out_s": 6.0,
+      "duration_s": 6.0,
+      "start_s": 0.0,
+      "end_s": 6.0
+    },
+    {
+      "id": "h2",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/09_operator_refutation_report.mp4",
+      "in_s": 0.0,
+      "out_s": 5.0,
+      "duration_s": 5.0,
+      "start_s": 6.0,
+      "end_s": 11.0
+    },
+    {
+      "id": "p1",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/12_telemetry_files_broll.mp4",
+      "in_s": 0.0,
+      "out_s": 6.0,
+      "duration_s": 6.0,
+      "start_s": 11.0,
+      "end_s": 17.0
+    },
+    {
+      "id": "p2",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/14_multicam_composite_real.mp4",
+      "in_s": 0.0,
+      "out_s": 7.0,
+      "duration_s": 7.0,
+      "start_s": 17.0,
+      "end_s": 24.0
+    },
+    {
+      "id": "s1",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/01_intake_upload_ui.mp4",
+      "in_s": 0.0,
+      "out_s": 11.0,
+      "duration_s": 11.0,
+      "start_s": 24.0,
+      "end_s": 35.0
+    },
+    {
+      "id": "a1",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/03_managed_agent_stream_ui.mp4",
+      "in_s": 0.0,
+      "out_s": 9.0,
+      "duration_s": 9.0,
+      "start_s": 35.0,
+      "end_s": 44.0
+    },
+    {
+      "id": "a2",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/02_live_analysis_ui.mp4",
+      "in_s": 4.0,
+      "out_s": 12.0,
+      "duration_s": 8.0,
+      "start_s": 44.0,
+      "end_s": 52.0
+    },
+    {
+      "id": "v1",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/14_multicam_composite_real.mp4",
+      "in_s": 2.0,
+      "out_s": 8.0,
+      "duration_s": 6.0,
+      "start_s": 52.0,
+      "end_s": 58.0
+    },
+    {
+      "id": "v2",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/05_report_exhibits_ui.mp4",
+      "in_s": 0.0,
+      "out_s": 8.0,
+      "duration_s": 8.0,
+      "start_s": 58.0,
+      "end_s": 66.0
+    },
+    {
+      "id": "r1",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/09_operator_refutation_report.mp4",
+      "in_s": 0.0,
+      "out_s": 11.0,
+      "duration_s": 11.0,
+      "start_s": 66.0,
+      "end_s": 77.0
+    },
+    {
+      "id": "r2",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/04_report_overview_ui.mp4",
+      "in_s": 0.0,
+      "out_s": 13.0,
+      "duration_s": 13.0,
+      "start_s": 77.0,
+      "end_s": 90.0
+    },
+    {
+      "id": "r3",
+      "kind": "still",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/stills/operator_refutation.png",
+      "duration_s": 3.0,
+      "start_s": 90.0,
+      "end_s": 93.0,
+      "zoom": true
+    },
+    {
+      "id": "rc1",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/10_rtk_root_cause_charts.mp4",
+      "in_s": 0.0,
+      "out_s": 12.0,
+      "duration_s": 12.0,
+      "start_s": 93.0,
+      "end_s": 105.0
+    },
+    {
+      "id": "rc2",
+      "kind": "still",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/stills/rtk_root_cause_chart.png",
+      "duration_s": 3.0,
+      "start_s": 105.0,
+      "end_s": 108.0,
+      "zoom": true
+    },
+    {
+      "id": "rc3",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/11_sanfer_pdf_scroll.mp4",
+      "in_s": 0.0,
+      "out_s": 5.0,
+      "duration_s": 5.0,
+      "start_s": 108.0,
+      "end_s": 113.0
+    },
+    {
+      "id": "px1",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/06_patch_diff_ui.mp4",
+      "in_s": 0.0,
+      "out_s": 13.0,
+      "duration_s": 13.0,
+      "start_s": 113.0,
+      "end_s": 126.0
+    },
+    {
+      "id": "px2",
+      "kind": "still",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/stills/patch_diff.png",
+      "duration_s": 3.0,
+      "start_s": 126.0,
+      "end_s": 129.0,
+      "zoom": true
+    },
+    {
+      "id": "px3",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/06_patch_diff_ui.mp4",
+      "in_s": 11.5,
+      "out_s": 13.4,
+      "duration_s": 1.9000000000000004,
+      "start_s": 129.0,
+      "end_s": 130.9
+    },
+    {
+      "id": "o1",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/19_opus47_delta_panel_real_capture.mp4",
+      "in_s": 0.0,
+      "out_s": 6.0,
+      "duration_s": 6.0,
+      "start_s": 130.9,
+      "end_s": 136.9
+    },
+    {
+      "id": "o2",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/20_vision_ab_artifact.mp4",
+      "in_s": 0.0,
+      "out_s": 6.0,
+      "duration_s": 6.0,
+      "start_s": 136.9,
+      "end_s": 142.9
+    },
+    {
+      "id": "o3",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/17_opus47_delta_doc_scroll.mp4",
+      "in_s": 6.0,
+      "out_s": 10.0,
+      "duration_s": 4.0,
+      "start_s": 142.9,
+      "end_s": 146.9
+    },
+    {
+      "id": "b1",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/07_cases_archive_ui.mp4",
+      "in_s": 0.0,
+      "out_s": 6.0,
+      "duration_s": 6.0,
+      "start_s": 146.9,
+      "end_s": 152.9
+    },
+    {
+      "id": "b2",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/15_boat_report_broll.mp4",
+      "in_s": 0.0,
+      "out_s": 4.0,
+      "duration_s": 4.0,
+      "start_s": 152.9,
+      "end_s": 156.9
+    },
+    {
+      "id": "b3",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/16_other_car_run_broll.mp4",
+      "in_s": 0.0,
+      "out_s": 4.0,
+      "duration_s": 4.0,
+      "start_s": 156.9,
+      "end_s": 160.9
+    },
+    {
+      "id": "g1",
+      "kind": "video",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/clips/08_grounding_gate_ui.mp4",
+      "in_s": 0.0,
+      "out_s": 9.0,
+      "duration_s": 9.0,
+      "start_s": 160.9,
+      "end_s": 169.9
+    },
+    {
+      "id": "out1",
+      "kind": "still",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/stills/breadth_cases_archive.png",
+      "duration_s": 3.0,
+      "start_s": 169.9,
+      "end_s": 172.9,
+      "zoom": true
+    },
+    {
+      "id": "out2",
+      "kind": "still",
+      "src": "/home/hz/Desktop/BlackBox/demo_assets/editor_raw_footage_pack/stills/hero_report_top.png",
+      "duration_s": 3.0,
+      "start_s": 172.9,
+      "end_s": 175.9,
+      "zoom": true
+    }
+  ],
+  "captions": [
+    {
+      "start_s": 0.2,
+      "text": "Operator: \"GPS failed under the tunnel.\"",
+      "seg_id": "h1",
+      "end_s": 5.95
+    },
+    {
+      "start_s": 6.0,
+      "text": "Black Box checked the recording.",
+      "seg_id": "h2",
+      "end_s": 8.35
+    },
+    {
+      "start_s": 8.4,
+      "text": "That story is wrong.",
+      "seg_id": "h2",
+      "end_s": 10.95
+    },
+    {
+      "start_s": 11.0,
+      "text": "Hours of video, lidar, telemetry, controller logs.",
+      "seg_id": "p1",
+      "end_s": 16.95
+    },
+    {
+      "start_s": 17.0,
+      "text": "Evidence exists. Forensic review is still manual.",
+      "seg_id": "p2",
+      "end_s": 23.95
+    },
+    {
+      "start_s": 24.0,
+      "text": "One real driving session. No labels.",
+      "seg_id": "s1",
+      "end_s": 28.95
+    },
+    {
+      "start_s": 29.0,
+      "text": "Operator's note: check the tunnel.",
+      "seg_id": "s1",
+      "end_s": 34.95
+    },
+    {
+      "start_s": 35.0,
+      "text": "Not a one-shot summary.",
+      "seg_id": "a1",
+      "end_s": 37.95
+    },
+    {
+      "start_s": 38.0,
+      "text": "Opus 4.7 runs as a managed forensic agent.",
+      "seg_id": "a1",
+      "end_s": 40.95
+    },
+    {
+      "start_s": 41.0,
+      "text": "Tools, memory, streaming events.",
+      "seg_id": "a1",
+      "end_s": 43.95
+    },
+    {
+      "start_s": 44.0,
+      "text": "Project memory carries forward across runs.",
+      "seg_id": "a2",
+      "end_s": 51.95
+    },
+    {
+      "start_s": 52.0,
+      "text": "Doesn't send every frame.",
+      "seg_id": "v1",
+      "end_s": 54.95
+    },
+    {
+      "start_s": 55.0,
+      "text": "Telemetry selects suspicious windows.",
+      "seg_id": "v1",
+      "end_s": 57.95
+    },
+    {
+      "start_s": 58.0,
+      "text": "High-res visual mining checks relevant cameras.",
+      "seg_id": "v2",
+      "end_s": 65.95
+    },
+    {
+      "start_s": 66.0,
+      "text": "The tunnel mildly degraded GNSS.",
+      "seg_id": "r1",
+      "end_s": 69.45
+    },
+    {
+      "start_s": 69.5,
+      "text": "But the RTK heading failure started",
+      "seg_id": "r1",
+      "end_s": 71.45
+    },
+    {
+      "start_s": 71.5,
+      "text": "43 minutes earlier.",
+      "seg_id": "r1",
+      "end_s": 73.95
+    },
+    {
+      "start_s": 74.0,
+      "text": "Drive-by-wire was never engaged.",
+      "seg_id": "r1",
+      "end_s": 76.95
+    },
+    {
+      "start_s": 77.0,
+      "text": "The tunnel could not have caused this.",
+      "seg_id": "r2",
+      "end_s": 80.95
+    },
+    {
+      "start_s": 81.0,
+      "text": "Verdict: operator hypothesis refuted.",
+      "seg_id": "r2",
+      "end_s": 85.45
+    },
+    {
+      "start_s": 85.5,
+      "text": "Cause sits lower in the stack.",
+      "seg_id": "r2",
+      "end_s": 89.95
+    },
+    {
+      "start_s": 90.0,
+      "text": "Operator hypothesis: refuted.",
+      "seg_id": "r3",
+      "end_s": 92.95
+    },
+    {
+      "start_s": 93.0,
+      "text": "Moving-base antenna: healthy.",
+      "seg_id": "rc1",
+      "end_s": 96.95
+    },
+    {
+      "start_s": 97.0,
+      "text": "Rover: never receives valid RTK heading.",
+      "seg_id": "rc1",
+      "end_s": 100.95
+    },
+    {
+      "start_s": 101.0,
+      "text": "Correction path broken before leaving the lot.",
+      "seg_id": "rc1",
+      "end_s": 104.95
+    },
+    {
+      "start_s": 105.0,
+      "text": "carr=NONE 100%. REL_POS_VALID never set.",
+      "seg_id": "rc2",
+      "end_s": 107.95
+    },
+    {
+      "start_s": 108.0,
+      "text": "Findings written to a forensic report.",
+      "seg_id": "rc3",
+      "end_s": 112.95
+    },
+    {
+      "start_s": 113.0,
+      "text": "Output isn't a report \u2014 it's a scoped patch.",
+      "seg_id": "px1",
+      "end_s": 117.45
+    },
+    {
+      "start_s": 117.5,
+      "text": "RTCM message IDs. UART link check.",
+      "seg_id": "px1",
+      "end_s": 121.95
+    },
+    {
+      "start_s": 122.0,
+      "text": "Plus a human-review gate.",
+      "seg_id": "px1",
+      "end_s": 125.95
+    },
+    {
+      "start_s": 126.0,
+      "text": "Black Box proposes. Engineer approves.",
+      "seg_id": "px2",
+      "end_s": 128.95
+    },
+    {
+      "start_s": 130.9,
+      "text": "Opus 4.7 vs 4.6, same benchmark slice.",
+      "seg_id": "o1",
+      "end_s": 133.85
+    },
+    {
+      "start_s": 133.9,
+      "text": "Same accuracy. Better judgment.",
+      "seg_id": "o1",
+      "end_s": 136.85
+    },
+    {
+      "start_s": 136.9,
+      "text": "4.7 sees fine visual details 4.6 loses.",
+      "seg_id": "o2",
+      "end_s": 142.85
+    },
+    {
+      "start_s": 142.9,
+      "text": "On under-specified cases, 4.7 abstains.",
+      "seg_id": "o3",
+      "end_s": 146.85
+    },
+    {
+      "start_s": 146.9,
+      "text": "Not a single-car demo.",
+      "seg_id": "b1",
+      "end_s": 152.85
+    },
+    {
+      "start_s": 152.9,
+      "text": "More cars. A robotic boat.",
+      "seg_id": "b2",
+      "end_s": 156.85
+    },
+    {
+      "start_s": 156.9,
+      "text": "Clean recordings and injected failures.",
+      "seg_id": "b3",
+      "end_s": 160.85
+    },
+    {
+      "start_s": 160.9,
+      "text": "When evidence is weak, it refuses to invent a bug.",
+      "seg_id": "g1",
+      "end_s": 165.35
+    },
+    {
+      "start_s": 165.4,
+      "text": "No evidence. No claim.",
+      "seg_id": "g1",
+      "end_s": 169.85
+    },
+    {
+      "start_s": 169.9,
+      "text": "Open benchmark. Reproducible runs.",
+      "seg_id": "out1",
+      "end_s": 172.85
+    },
+    {
+      "start_s": 172.9,
+      "text": "Robot forensics in minutes, for cents.",
+      "seg_id": "out2",
+      "end_s": 175.85
+    }
+  ],
+  "target_fps": 30,
+  "target_w": 1920,
+  "target_h": 1080,
+  "xfade_at_segment_ids": [
+    "p1",
+    "r1",
+    "o1",
+    "out1"
+  ],
+  "xfade_dur": 0.25
+}

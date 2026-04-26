@@ -1,0 +1,225 @@
+{
+  "panel": "breadth_montage",
+  "frame": [
+    1920,
+    1080
+  ],
+  "safe_area": {
+    "x_min": 96,
+    "x_max": 1824,
+    "y_min": 72,
+    "y_max": 1008
+  },
+  "cards": [
+    {
+      "id": "rtk_heading_break_01",
+      "x": 96,
+      "y": 280,
+      "w": 848,
+      "h": 348
+    },
+    {
+      "id": "boat_lidar_01",
+      "x": 976,
+      "y": 280,
+      "w": 848,
+      "h": 348
+    },
+    {
+      "id": "sensor_timeout_01",
+      "x": 96,
+      "y": 660,
+      "w": 848,
+      "h": 348
+    },
+    {
+      "id": "pid_saturation_01",
+      "x": 976,
+      "y": 660,
+      "w": 848,
+      "h": 348
+    }
+  ],
+  "texts": [
+    {
+      "x": 96,
+      "y": 96,
+      "w": 118,
+      "h": 21,
+      "text": "Breadth",
+      "font_size": 28,
+      "role": "label",
+      "card": null
+    },
+    {
+      "x": 96,
+      "y": 144,
+      "w": 962,
+      "h": 59,
+      "text": "One copilot \u00b7 four platforms.",
+      "font_size": 60,
+      "role": "heading",
+      "card": null
+    },
+    {
+      "x": 128,
+      "y": 312,
+      "w": 29,
+      "h": 18,
+      "text": "AV",
+      "font_size": 24,
+      "role": "label",
+      "card": "rtk_heading_break_01"
+    },
+    {
+      "x": 128,
+      "y": 360,
+      "w": 599,
+      "h": 55,
+      "text": "RTK heading break",
+      "font_size": 56,
+      "role": "heading",
+      "card": "rtk_heading_break_01"
+    },
+    {
+      "x": 128,
+      "y": 560,
+      "w": 421,
+      "h": 28,
+      "text": "rel_pos_heading_valid = 0",
+      "font_size": 28,
+      "role": "body",
+      "card": "rtk_heading_break_01"
+    },
+    {
+      "x": 128,
+      "y": 528,
+      "w": 119,
+      "h": 18,
+      "text": "evidence:",
+      "font_size": 22,
+      "role": "label",
+      "card": "rtk_heading_break_01"
+    },
+    {
+      "x": 1008,
+      "y": 312,
+      "w": 58,
+      "h": 18,
+      "text": "BOAT",
+      "font_size": 24,
+      "role": "label",
+      "card": "boat_lidar_01"
+    },
+    {
+      "x": 1008,
+      "y": 360,
+      "w": 511,
+      "h": 44,
+      "text": "Boat LiDAR drift",
+      "font_size": 56,
+      "role": "heading",
+      "card": "boat_lidar_01"
+    },
+    {
+      "x": 1008,
+      "y": 560,
+      "w": 472,
+      "h": 28,
+      "text": "echo timing > sensor_timeout",
+      "font_size": 28,
+      "role": "body",
+      "card": "boat_lidar_01"
+    },
+    {
+      "x": 1008,
+      "y": 528,
+      "w": 119,
+      "h": 18,
+      "text": "evidence:",
+      "font_size": 22,
+      "role": "label",
+      "card": "boat_lidar_01"
+    },
+    {
+      "x": 128,
+      "y": 692,
+      "w": 44,
+      "h": 18,
+      "text": "CAR",
+      "font_size": 24,
+      "role": "label",
+      "card": "sensor_timeout_01"
+    },
+    {
+      "x": 128,
+      "y": 740,
+      "w": 485,
+      "h": 44,
+      "text": "Sensor timeout",
+      "font_size": 56,
+      "role": "heading",
+      "card": "sensor_timeout_01"
+    },
+    {
+      "x": 128,
+      "y": 940,
+      "w": 303,
+      "h": 21,
+      "text": "imu stale > 200 ms",
+      "font_size": 28,
+      "role": "body",
+      "card": "sensor_timeout_01"
+    },
+    {
+      "x": 128,
+      "y": 908,
+      "w": 119,
+      "h": 18,
+      "text": "evidence:",
+      "font_size": 22,
+      "role": "label",
+      "card": "sensor_timeout_01"
+    },
+    {
+      "x": 1008,
+      "y": 692,
+      "w": 43,
+      "h": 18,
+      "text": "SIM",
+      "font_size": 24,
+      "role": "label",
+      "card": "pid_saturation_01"
+    },
+    {
+      "x": 1008,
+      "y": 740,
+      "w": 455,
+      "h": 44,
+      "text": "PID saturation",
+      "font_size": 56,
+      "role": "heading",
+      "card": "pid_saturation_01"
+    },
+    {
+      "x": 1008,
+      "y": 940,
+      "w": 421,
+      "h": 27,
+      "text": "integral windup, no clamp",
+      "font_size": 28,
+      "role": "body",
+      "card": "pid_saturation_01"
+    },
+    {
+      "x": 1008,
+      "y": 908,
+      "w": 119,
+      "h": 18,
+      "text": "evidence:",
+      "font_size": 22,
+      "role": "label",
+      "card": "pid_saturation_01"
+    }
+  ]
+}

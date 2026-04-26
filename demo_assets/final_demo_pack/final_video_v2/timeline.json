@@ -1,0 +1,145 @@
+{
+  "schema": "blackbox_demo_timeline/2.0",
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 30,
+  "video_codec": "libx264",
+  "pix_fmt": "yuv420p",
+  "audio_codec": "aac",
+  "xfade_seconds": 0.35,
+  "target_runtime_s": 179.767,
+  "segments": [
+    {
+      "i": 1,
+      "in_s": 0.0,
+      "out_s": 9.0,
+      "duration_s": 9.0,
+      "kind": "clip",
+      "asset": "demo_assets/final_demo_pack/trimmed_clips/block_01_hook.mp4",
+      "beat": "hook",
+      "intentional_static": false
+    },
+    {
+      "i": 2,
+      "in_s": 8.3,
+      "out_s": 19.083,
+      "duration_s": 10.433,
+      "kind": "clip",
+      "asset": "demo_assets/final_demo_pack/trimmed_clips/block_02_problem.mp4",
+      "beat": "problem",
+      "intentional_static": false
+    },
+    {
+      "i": 3,
+      "in_s": 18.383,
+      "out_s": 33.267,
+      "duration_s": 14.533,
+      "kind": "clip",
+      "asset": "demo_assets/final_demo_pack/trimmed_clips/block_03_setup.mp4",
+      "beat": "setup",
+      "intentional_static": false
+    },
+    {
+      "i": 4,
+      "in_s": 32.567,
+      "out_s": 53.917,
+      "duration_s": 21.0,
+      "kind": "clip",
+      "asset": "demo_assets/final_demo_pack/trimmed_clips/block_04_analysis_live_v2.mp4",
+      "beat": "live_managed_agent",
+      "intentional_static": false
+    },
+    {
+      "i": 5,
+      "in_s": 53.217,
+      "out_s": 71.1,
+      "duration_s": 17.533,
+      "kind": "clip",
+      "asset": "demo_assets/final_demo_pack/trimmed_clips/block_05_first_moment.mp4",
+      "beat": "first_moment",
+      "intentional_static": false
+    },
+    {
+      "i": 6,
+      "in_s": 70.4,
+      "out_s": 88.017,
+      "duration_s": 17.267,
+      "kind": "clip",
+      "asset": "demo_assets/final_demo_pack/trimmed_clips/block_06_second_moment.mp4",
+      "beat": "second_moment_evidence",
+      "intentional_static": false
+    },
+    {
+      "i": 7,
+      "in_s": 87.317,
+      "out_s": 104.667,
+      "duration_s": 17.0,
+      "kind": "still",
+      "asset": "demo_assets/final_demo_pack/panels/operator_vs_blackbox.png",
+      "beat": "refutation_climax",
+      "intentional_static": true
+    },
+    {
+      "i": 8,
+      "in_s": 103.967,
+      "out_s": 115.817,
+      "duration_s": 11.5,
+      "kind": "clip",
+      "asset": "demo_assets/final_demo_pack/trimmed_clips/block_08_money_shot.mp4",
+      "beat": "patch_diff_human_gate",
+      "intentional_static": false
+    },
+    {
+      "i": 9,
+      "in_s": 115.117,
+      "out_s": 132.467,
+      "duration_s": 17.0,
+      "kind": "still",
+      "asset": "demo_assets/final_demo_pack/panels/opus47_delta_panel.png",
+      "beat": "opus47_delta",
+      "intentional_static": true
+    },
+    {
+      "i": 10,
+      "in_s": 131.767,
+      "out_s": 149.117,
+      "duration_s": 17.0,
+      "kind": "still",
+      "asset": "demo_assets/final_demo_pack/panels/breadth_montage.png",
+      "beat": "generalization",
+      "intentional_static": true
+    },
+    {
+      "i": 11,
+      "in_s": 148.417,
+      "out_s": 160.9,
+      "duration_s": 12.133,
+      "kind": "clip",
+      "asset": "demo_assets/final_demo_pack/trimmed_clips/block_07_grounding.mp4",
+      "beat": "grounding_gate_abstention",
+      "intentional_static": false
+    },
+    {
+      "i": 12,
+      "in_s": 160.2,
+      "out_s": 170.617,
+      "duration_s": 10.067,
+      "kind": "clip",
+      "asset": "demo_assets/final_demo_pack/trimmed_clips/block_09_punchline.mp4",
+      "beat": "cost_and_repo",
+      "intentional_static": false
+    },
+    {
+      "i": 13,
+      "in_s": 169.917,
+      "out_s": 179.767,
+      "duration_s": 9.5,
+      "kind": "clip",
+      "asset": "demo_assets/final_demo_pack/trimmed_clips/block_10_outro.mp4",
+      "beat": "outro",
+      "intentional_static": true
+    }
+  ]
+}

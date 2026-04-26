@@ -1,0 +1,136 @@
+<!doctype html><html><head><meta charset='utf-8'><title>car_1 — report</title>
+<style>
+:root{color-scheme:dark;}
+body{background:#0b0d11;color:#dfe5ec;font-family:-apple-system,Inter,Segoe UI,Roboto,sans-serif;
+     max-width:1180px;margin:0 auto;padding:48px 56px;font-size:18px;line-height:1.6;}
+h1{font-size:38px;color:#fff;border-bottom:1px solid #2a3340;padding-bottom:12px;}
+h2{font-size:28px;color:#9bd1ff;margin-top:36px;}
+h3{font-size:22px;color:#cbd5e1;}
+code{background:#161b22;color:#ffd28a;padding:2px 6px;border-radius:4px;font-size:0.9em;}
+pre{background:#0f1419;border:1px solid #1f2937;padding:16px;border-radius:8px;overflow:auto;
+    font-size:14px;line-height:1.5;}
+blockquote{border-left:4px solid #ffb86b;padding:6px 16px;margin:18px 0;background:#1a1410;color:#ffd9aa;}
+table{border-collapse:collapse;width:100%;margin:16px 0;}
+th,td{border:1px solid #2a3340;padding:8px 12px;text-align:left;}
+th{background:#171c25;}
+strong{color:#fff;}
+a{color:#9bd1ff;}
+ul,ol{padding-left:28px;}
+</style>
+</head><body><h1>Black Box — Forensic Report</h1>
+<p><strong>Case:</strong> <code>car_1</code> &nbsp;·&nbsp; <strong>Mode:</strong> <code>scenario_mining</code><br />
+<strong>Duration:</strong> 970.20 s<br />
+<strong>Generated:</strong> 2026-04-23 16:32:05Z<br />
+<strong>Model:</strong> <code>claude-opus-4-7</code> (inference-only)</p>
+<blockquote>
+<p>Ego vehicle remains at the same parking-lot barrier/gate pose for ~130 s (frames 20 s–150 s are visually near-identical) before proceeding, suggesting a prolonged idle/stuck state at the gate.</p>
+</blockquote>
+<hr />
+<h2>Executive Summary</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>bug class</th>
+<th style="text-align: right;">confidence</th>
+<th>summary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>state_machine_deadlock</code> <strong>[ROOT CAUSE]</strong></td>
+<td style="text-align: right;"><code>██████░░░░</code> 0.60</td>
+<td>Ego vehicle remains at the same parking-lot barrier/gate pose for ~130 s (frames 20 s–150 s are visually near-identical) before proceeding, suggesting a prolonged idle/stuck state at the gate.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>other</code></td>
+<td style="text-align: right;"><code>██████░░░░</code> 0.55</td>
+<td>Initial ~5 s of camera stream is severely overexposed (near-pure-white), indicating auto-exposure convergence failure or recording started before ISP stabilized.</td>
+</tr>
+</tbody>
+</table>
+<h2>Timeline</h2>
+<table>
+<thead>
+<tr>
+<th>t</th>
+<th>label</th>
+<th>source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>15.30 s</code></td>
+<td>camera fully blown-out (saturated white)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>17.60 s</code></td>
+<td>exposure partially recovers, scene still washed</td>
+<td></td>
+</tr>
+<tr>
+<td><code>20.10 s</code></td>
+<td>first usable frame: ego stopped at parking-lot barrier/gate</td>
+<td></td>
+</tr>
+<tr>
+<td><code>02:30.00</code></td>
+<td>after ~130 s, ego still at identical barrier pose (stuck scene)</td>
+<td></td>
+</tr>
+<tr>
+<td><code>03:00.00</code></td>
+<td>ego has finally moved onto adjacent street</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>Hypotheses — Detail</h2>
+<h3>1. <code>state_machine_deadlock</code> — confidence 0.60</h3>
+<p>Ego vehicle remains at the same parking-lot barrier/gate pose for ~130 s (frames 20 s–150 s are visually near-identical) before proceeding, suggesting a prolonged idle/stuck state at the gate.</p>
+<p><strong>Evidence</strong></p>
+<ul>
+<li><strong>camera</strong> · <code>frame_00020.1s_dense.jpg</code> @ <code>20.10 s</code><blockquote>
+<p>Ego stopped facing boom barrier with parked cars on left and gate ticket booth ahead.</p>
+</blockquote>
+</li>
+<li><strong>camera</strong> · <code>frame_00050.1s_dense.jpg</code> @ <code>50.10 s</code><blockquote>
+<p>Identical viewpoint 30 s later — same cars, same barrier, same pedestrian position — no measurable ego motion.</p>
+</blockquote>
+</li>
+<li><strong>camera</strong> · <code>frame_00100.1s_dense.jpg</code> @ <code>01:40.10</code><blockquote>
+<p>Still identical parking-lot/barrier scene ~80 s after first usable frame.</p>
+</blockquote>
+</li>
+<li><strong>camera</strong> · <code>frame_00180.0s_dense.jpg</code> @ <code>03:00.00</code><blockquote>
+<p>Scene finally changes — ego has departed onto adjacent residential street.</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>Patch hint:</strong> Check planner/controller behavior at closed gates; add timeout + operator alert if ego is stationary &gt;N s with no lead obstacle within stop distance.</p>
+<h3>2. <code>other</code> — confidence 0.55</h3>
+<p>Initial ~5 s of camera stream is severely overexposed (near-pure-white), indicating auto-exposure convergence failure or recording started before ISP stabilized.</p>
+<p><strong>Evidence</strong></p>
+<ul>
+<li><strong>camera</strong> · <code>frame_00015.3s_dense.jpg</code> @ <code>15.30 s</code><blockquote>
+<p>Almost entirely saturated white image; only faint foliage edges visible.</p>
+</blockquote>
+</li>
+<li><strong>camera</strong> · <code>frame_00017.6s_dense.jpg</code> @ <code>17.60 s</code><blockquote>
+<p>Still heavily blown out; partial recovery, parked cars barely resolvable at edges.</p>
+</blockquote>
+</li>
+<li><strong>camera</strong> · <code>frame_00020.1s_dense.jpg</code> @ <code>20.10 s</code><blockquote>
+<p>Exposure has normalized — scene now correctly exposed.</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>Patch hint:</strong> Reject / mask perception outputs until AE has converged (e.g., gate on image mean-luma + histogram saturation ratio) and/or pre-warm the camera before autonomy-engage.</p>
+<h2>Proposed Patch</h2>
+<pre><code class="language-diff">Primary concern: ego remained stationary at the parking-lot barrier for ~130 s — validate whether the planner correctly detected a closed gate and whether human takeover was required; add a stuck-state detector with operator alert. Secondary: guard perception consumers against the ~5 s of saturated-white camera frames at session start (likely AE not yet converged).
+</code></pre>
+<hr />
+<p><em>Black Box · inference-only · Opus 4.7</em></p></body></html>
