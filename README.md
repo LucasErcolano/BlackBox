@@ -35,7 +35,7 @@ Feed it a robot recording — ROS1/ROS2 bag, telemetry, multi-camera video, LiDA
 
 ## Demo
 
-▶ **[Watch the 3-min demo](https://youtu.be/yME2EenNSF0?si=qxtqQMZbH8xN9aRe)** — full walkthrough of the hero case, the grounding gate refutation, and the scoped patch hand-off.
+▶ **[Watch the 3-min demo](https://youtu.be/xvMDm-1wKtI?si=AKeD3BcpLPKFglPL)** — full walkthrough of the hero case, the grounding gate refutation, and the scoped patch hand-off.
 
 Try it locally in 60 seconds:
 
