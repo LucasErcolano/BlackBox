@@ -11,6 +11,13 @@ venv/
 dist/
 build/
 
+# demo render intermediates (regenerable from scripts/)
+demo_assets/final_demo_pack/normalized_clips/
+demo_assets/final_demo_pack/trimmed_clips/
+demo_assets/final_demo_pack/final_video_v2/_segments/
+demo_assets/final_demo_pack/final_video_v2/_qa_frames/
+video_assets/
+
 data/bags/*
 !data/bags/.gitkeep
 data/synthetic/*

@@ -1,0 +1,1125 @@
+{
+  "final_video": "demo_assets/final_demo_pack/final_video_v2/blackbox_demo_final_v2.mp4",
+  "format": {
+    "width": 1920,
+    "height": 1080,
+    "r_frame_rate": "30/1",
+    "pix_fmt": "yuv420p",
+    "codec": "h264",
+    "duration_s": 179.767
+  },
+  "envelope_s": [
+    170.0,
+    180.0
+  ],
+  "xfade_s": 0.35,
+  "n_segments": 13,
+  "intentional_static_windows": [
+    {
+      "in_s": 87.317,
+      "out_s": 104.667
+    },
+    {
+      "in_s": 115.117,
+      "out_s": 132.467
+    },
+    {
+      "in_s": 131.767,
+      "out_s": 149.117
+    },
+    {
+      "in_s": 169.917,
+      "out_s": 179.767
+    }
+  ],
+  "freezedetect": {
+    "noise": "-50dB",
+    "min_freeze_s": 0.4,
+    "max_allowed_outside_static_s": 0.35,
+    "rule": "A freeze \u22650.35s fails QA only if its interval intersects an xfade window AND it does not lie entirely inside an intentionally static segment. Mid-clip held beats inside an animated PIL render are not flagged (they are part of the animation's pacing, not the freeze-then-jump defect).",
+    "transition_windows": [
+      {
+        "start_s": 8.65,
+        "end_s": 9.0
+      },
+      {
+        "start_s": 18.733,
+        "end_s": 19.083000000000002
+      },
+      {
+        "start_s": 32.916000000000004,
+        "end_s": 33.266000000000005
+      },
+      {
+        "start_s": 53.566,
+        "end_s": 53.916000000000004
+      },
+      {
+        "start_s": 70.749,
+        "end_s": 71.09899999999999
+      },
+      {
+        "start_s": 87.666,
+        "end_s": 88.01599999999999
+      },
+      {
+        "start_s": 104.31599999999999,
+        "end_s": 104.66599999999998
+      },
+      {
+        "start_s": 115.466,
+        "end_s": 115.81599999999999
+      },
+      {
+        "start_s": 132.11599999999999,
+        "end_s": 132.46599999999998
+      },
+      {
+        "start_s": 148.766,
+        "end_s": 149.11599999999999
+      },
+      {
+        "start_s": 160.549,
+        "end_s": 160.899
+      },
+      {
+        "start_s": 170.26600000000002,
+        "end_s": 170.616
+      }
+    ],
+    "all_freezes": [
+      {
+        "start": 0.4,
+        "end": 2.3,
+        "duration": 1.9
+      },
+      {
+        "start": 6.2,
+        "end": 7.466667,
+        "duration": 1.266667
+      },
+      {
+        "start": 8.166667,
+        "end": 8.7,
+        "duration": 0.533333
+      },
+      {
+        "start": 13.1,
+        "end": 14.4,
+        "duration": 1.3
+      },
+      {
+        "start": 16.0,
+        "end": 16.7,
+        "duration": 0.7
+      },
+      {
+        "start": 16.733333,
+        "end": 17.766667,
+        "duration": 1.033333
+      },
+      {
+        "start": 17.766667,
+        "end": 18.333333,
+        "duration": 0.566667
+      },
+      {
+        "start": 19.1,
+        "end": 21.4,
+        "duration": 2.3
+      },
+      {
+        "start": 22.633333,
+        "end": 24.8,
+        "duration": 2.166667
+      },
+      {
+        "start": 24.966667,
+        "end": 25.366667,
+        "duration": 0.4
+      },
+      {
+        "start": 26.3,
+        "end": 28.766667,
+        "duration": 2.466667
+      },
+      {
+        "start": 29.033333,
+        "end": 31.4,
+        "duration": 2.366667
+      },
+      {
+        "start": 31.566667,
+        "end": 33.0,
+        "duration": 1.433333
+      },
+      {
+        "start": 33.266667,
+        "end": 34.766667,
+        "duration": 1.5
+      },
+      {
+        "start": 34.766667,
+        "end": 36.7,
+        "duration": 1.933333
+      },
+      {
+        "start": 36.7,
+        "end": 37.566667,
+        "duration": 0.866667
+      },
+      {
+        "start": 38.1,
+        "end": 38.5,
+        "duration": 0.4
+      },
+      {
+        "start": 38.666667,
+        "end": 39.4,
+        "duration": 0.733333
+      },
+      {
+        "start": 39.566667,
+        "end": 40.366667,
+        "duration": 0.8
+      },
+      {
+        "start": 40.566667,
+        "end": 41.333333,
+        "duration": 0.766667
+      },
+      {
+        "start": 41.5,
+        "end": 42.3,
+        "duration": 0.8
+      },
+      {
+        "start": 42.4,
+        "end": 43.166667,
+        "duration": 0.766667
+      },
+      {
+        "start": 43.4,
+        "end": 43.866667,
+        "duration": 0.466667
+      },
+      {
+        "start": 44.366667,
+        "end": 45.1,
+        "duration": 0.733333
+      },
+      {
+        "start": 45.3,
+        "end": 45.8,
+        "duration": 0.5
+      },
+      {
+        "start": 46.2,
+        "end": 46.7,
+        "duration": 0.5
+      },
+      {
+        "start": 47.5,
+        "end": 47.966667,
+        "duration": 0.466667
+      },
+      {
+        "start": 49.1,
+        "end": 49.7,
+        "duration": 0.6
+      },
+      {
+        "start": 50.1,
+        "end": 50.566667,
+        "duration": 0.466667
+      },
+      {
+        "start": 54.0,
+        "end": 56.266667,
+        "duration": 2.266667
+      },
+      {
+        "start": 58.233333,
+        "end": 61.233333,
+        "duration": 3.0
+      },
+      {
+        "start": 61.733333,
+        "end": 63.0,
+        "duration": 1.266667
+      },
+      {
+        "start": 63.5,
+        "end": 65.266667,
+        "duration": 1.766667
+      },
+      {
+        "start": 66.2,
+        "end": 70.666667,
+        "duration": 4.466667
+      },
+      {
+        "start": 71.1,
+        "end": 73.433333,
+        "duration": 2.333333
+      },
+      {
+        "start": 74.0,
+        "end": 77.333333,
+        "duration": 3.333333
+      },
+      {
+        "start": 77.7,
+        "end": 78.1,
+        "duration": 0.4
+      },
+      {
+        "start": 79.766667,
+        "end": 80.8,
+        "duration": 1.033333
+      },
+      {
+        "start": 80.8,
+        "end": 81.5,
+        "duration": 0.7
+      },
+      {
+        "start": 81.5,
+        "end": 82.433333,
+        "duration": 0.933333
+      },
+      {
+        "start": 82.7,
+        "end": 83.1,
+        "duration": 0.4
+      },
+      {
+        "start": 83.433333,
+        "end": 85.3,
+        "duration": 1.866667
+      },
+      {
+        "start": 85.3,
+        "end": 85.9,
+        "duration": 0.6
+      },
+      {
+        "start": 86.4,
+        "end": 87.7,
+        "duration": 1.3
+      },
+      {
+        "start": 88.033333,
+        "end": 104.366667,
+        "duration": 16.333333
+      },
+      {
+        "start": 104.666667,
+        "end": 106.066667,
+        "duration": 1.4
+      },
+      {
+        "start": 106.233333,
+        "end": 106.666667,
+        "duration": 0.433333
+      },
+      {
+        "start": 107.033333,
+        "end": 107.433333,
+        "duration": 0.4
+      },
+      {
+        "start": 107.433333,
+        "end": 107.833333,
+        "duration": 0.4
+      },
+      {
+        "start": 107.833333,
+        "end": 108.233333,
+        "duration": 0.4
+      },
+      {
+        "start": 108.233333,
+        "end": 109.533333,
+        "duration": 1.3
+      },
+      {
+        "start": 110.066667,
+        "end": 115.0,
+        "duration": 4.933333
+      },
+      {
+        "start": 115.833333,
+        "end": 132.166667,
+        "duration": 16.333333
+      },
+      {
+        "start": 132.433333,
+        "end": 139.833333,
+        "duration": 7.4
+      },
+      {
+        "start": 139.833333,
+        "end": 148.8,
+        "duration": 8.966667
+      },
+      {
+        "start": 149.1,
+        "end": 152.433333,
+        "duration": 3.333333
+      },
+      {
+        "start": 152.433333,
+        "end": 154.2,
+        "duration": 1.766667
+      },
+      {
+        "start": 154.2,
+        "end": 155.133333,
+        "duration": 0.933333
+      },
+      {
+        "start": 155.7,
+        "end": 156.1,
+        "duration": 0.4
+      },
+      {
+        "start": 156.1,
+        "end": 160.0,
+        "duration": 3.9
+      },
+      {
+        "start": 160.833333,
+        "end": 161.666667,
+        "duration": 0.833333
+      },
+      {
+        "start": 161.666667,
+        "end": 162.933333,
+        "duration": 1.266667
+      },
+      {
+        "start": 162.933333,
+        "end": 163.433333,
+        "duration": 0.5
+      },
+      {
+        "start": 164.833333,
+        "end": 166.233333,
+        "duration": 1.4
+      },
+      {
+        "start": 167.0,
+        "end": 169.7,
+        "duration": 2.7
+      },
+      {
+        "start": 170.633333,
+        "end": 171.1,
+        "duration": 0.466667
+      },
+      {
+        "start": 171.1,
+        "end": 172.933333,
+        "duration": 1.833333
+      },
+      {
+        "start": 172.933333,
+        "end": 175.4,
+        "duration": 2.466667
+      },
+      {
+        "start": 175.4,
+        "end": null,
+        "duration": null
+      }
+    ],
+    "classified_freezes": [
+      {
+        "start": 0.4,
+        "end": 2.3,
+        "duration": 1.9,
+        "computed_duration": 1.9,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 6.2,
+        "end": 7.466667,
+        "duration": 1.266667,
+        "computed_duration": 1.266667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 8.166667,
+        "end": 8.7,
+        "duration": 0.533333,
+        "computed_duration": 0.533333,
+        "in_intentional_static": false,
+        "transition_window": [
+          8.65,
+          9.0
+        ],
+        "kind": "absorbed_by_xfade"
+      },
+      {
+        "start": 13.1,
+        "end": 14.4,
+        "duration": 1.3,
+        "computed_duration": 1.3,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 16.0,
+        "end": 16.7,
+        "duration": 0.7,
+        "computed_duration": 0.7,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 16.733333,
+        "end": 17.766667,
+        "duration": 1.033333,
+        "computed_duration": 1.033333,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 17.766667,
+        "end": 18.333333,
+        "duration": 0.566667,
+        "computed_duration": 0.566667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 19.1,
+        "end": 21.4,
+        "duration": 2.3,
+        "computed_duration": 2.3,
+        "in_intentional_static": false,
+        "transition_window": [
+          18.733,
+          19.083000000000002
+        ],
+        "kind": "absorbed_by_xfade"
+      },
+      {
+        "start": 22.633333,
+        "end": 24.8,
+        "duration": 2.166667,
+        "computed_duration": 2.166667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 24.966667,
+        "end": 25.366667,
+        "duration": 0.4,
+        "computed_duration": 0.4,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 26.3,
+        "end": 28.766667,
+        "duration": 2.466667,
+        "computed_duration": 2.466667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 29.033333,
+        "end": 31.4,
+        "duration": 2.366667,
+        "computed_duration": 2.366667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 31.566667,
+        "end": 33.0,
+        "duration": 1.433333,
+        "computed_duration": 1.433333,
+        "in_intentional_static": false,
+        "transition_window": [
+          32.916000000000004,
+          33.266000000000005
+        ],
+        "kind": "absorbed_by_xfade"
+      },
+      {
+        "start": 33.266667,
+        "end": 34.766667,
+        "duration": 1.5,
+        "computed_duration": 1.5,
+        "in_intentional_static": false,
+        "transition_window": [
+          32.916000000000004,
+          33.266000000000005
+        ],
+        "kind": "absorbed_by_xfade"
+      },
+      {
+        "start": 34.766667,
+        "end": 36.7,
+        "duration": 1.933333,
+        "computed_duration": 1.933333,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 36.7,
+        "end": 37.566667,
+        "duration": 0.866667,
+        "computed_duration": 0.866667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 38.1,
+        "end": 38.5,
+        "duration": 0.4,
+        "computed_duration": 0.4,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 38.666667,
+        "end": 39.4,
+        "duration": 0.733333,
+        "computed_duration": 0.733333,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 39.566667,
+        "end": 40.366667,
+        "duration": 0.8,
+        "computed_duration": 0.8,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 40.566667,
+        "end": 41.333333,
+        "duration": 0.766667,
+        "computed_duration": 0.766667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 41.5,
+        "end": 42.3,
+        "duration": 0.8,
+        "computed_duration": 0.8,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 42.4,
+        "end": 43.166667,
+        "duration": 0.766667,
+        "computed_duration": 0.766667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 43.4,
+        "end": 43.866667,
+        "duration": 0.466667,
+        "computed_duration": 0.466667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 44.366667,
+        "end": 45.1,
+        "duration": 0.733333,
+        "computed_duration": 0.733333,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 45.3,
+        "end": 45.8,
+        "duration": 0.5,
+        "computed_duration": 0.5,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 46.2,
+        "end": 46.7,
+        "duration": 0.5,
+        "computed_duration": 0.5,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 47.5,
+        "end": 47.966667,
+        "duration": 0.466667,
+        "computed_duration": 0.466667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 49.1,
+        "end": 49.7,
+        "duration": 0.6,
+        "computed_duration": 0.6,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 50.1,
+        "end": 50.566667,
+        "duration": 0.466667,
+        "computed_duration": 0.466667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 54.0,
+        "end": 56.266667,
+        "duration": 2.266667,
+        "computed_duration": 2.266667,
+        "in_intentional_static": false,
+        "transition_window": [
+          53.566,
+          53.916000000000004
+        ],
+        "kind": "absorbed_by_xfade"
+      },
+      {
+        "start": 58.233333,
+        "end": 61.233333,
+        "duration": 3.0,
+        "computed_duration": 3.0,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 61.733333,
+        "end": 63.0,
+        "duration": 1.266667,
+        "computed_duration": 1.266667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 63.5,
+        "end": 65.266667,
+        "duration": 1.766667,
+        "computed_duration": 1.766667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 66.2,
+        "end": 70.666667,
+        "duration": 4.466667,
+        "computed_duration": 4.466667,
+        "in_intentional_static": false,
+        "transition_window": [
+          70.749,
+          71.09899999999999
+        ],
+        "kind": "absorbed_by_xfade"
+      },
+      {
+        "start": 71.1,
+        "end": 73.433333,
+        "duration": 2.333333,
+        "computed_duration": 2.333333,
+        "in_intentional_static": false,
+        "transition_window": [
+          70.749,
+          71.09899999999999
+        ],
+        "kind": "absorbed_by_xfade"
+      },
+      {
+        "start": 74.0,
+        "end": 77.333333,
+        "duration": 3.333333,
+        "computed_duration": 3.333333,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 77.7,
+        "end": 78.1,
+        "duration": 0.4,
+        "computed_duration": 0.4,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 79.766667,
+        "end": 80.8,
+        "duration": 1.033333,
+        "computed_duration": 1.033333,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 80.8,
+        "end": 81.5,
+        "duration": 0.7,
+        "computed_duration": 0.7,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 81.5,
+        "end": 82.433333,
+        "duration": 0.933333,
+        "computed_duration": 0.933333,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 82.7,
+        "end": 83.1,
+        "duration": 0.4,
+        "computed_duration": 0.4,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 83.433333,
+        "end": 85.3,
+        "duration": 1.866667,
+        "computed_duration": 1.866667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 85.3,
+        "end": 85.9,
+        "duration": 0.6,
+        "computed_duration": 0.6,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 86.4,
+        "end": 87.7,
+        "duration": 1.3,
+        "computed_duration": 1.3,
+        "in_intentional_static": false,
+        "transition_window": [
+          87.666,
+          88.01599999999999
+        ],
+        "kind": "absorbed_by_xfade"
+      },
+      {
+        "start": 88.033333,
+        "end": 104.366667,
+        "duration": 16.333333,
+        "computed_duration": 16.333333,
+        "in_intentional_static": true,
+        "transition_window": [
+          87.666,
+          88.01599999999999
+        ],
+        "kind": "intentional_static"
+      },
+      {
+        "start": 104.666667,
+        "end": 106.066667,
+        "duration": 1.4,
+        "computed_duration": 1.4,
+        "in_intentional_static": false,
+        "transition_window": [
+          104.31599999999999,
+          104.66599999999998
+        ],
+        "kind": "absorbed_by_xfade"
+      },
+      {
+        "start": 106.233333,
+        "end": 106.666667,
+        "duration": 0.433333,
+        "computed_duration": 0.433333,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 107.033333,
+        "end": 107.433333,
+        "duration": 0.4,
+        "computed_duration": 0.4,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 107.433333,
+        "end": 107.833333,
+        "duration": 0.4,
+        "computed_duration": 0.4,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 107.833333,
+        "end": 108.233333,
+        "duration": 0.4,
+        "computed_duration": 0.4,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 108.233333,
+        "end": 109.533333,
+        "duration": 1.3,
+        "computed_duration": 1.3,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 110.066667,
+        "end": 115.0,
+        "duration": 4.933333,
+        "computed_duration": 4.933333,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 115.833333,
+        "end": 132.166667,
+        "duration": 16.333333,
+        "computed_duration": 16.333333,
+        "in_intentional_static": true,
+        "transition_window": [
+          115.466,
+          115.81599999999999
+        ],
+        "kind": "intentional_static"
+      },
+      {
+        "start": 132.433333,
+        "end": 139.833333,
+        "duration": 7.4,
+        "computed_duration": 7.4,
+        "in_intentional_static": true,
+        "transition_window": [
+          132.11599999999999,
+          132.46599999999998
+        ],
+        "kind": "intentional_static"
+      },
+      {
+        "start": 139.833333,
+        "end": 148.8,
+        "duration": 8.966667,
+        "computed_duration": 8.966667,
+        "in_intentional_static": true,
+        "transition_window": [
+          148.766,
+          149.11599999999999
+        ],
+        "kind": "intentional_static"
+      },
+      {
+        "start": 149.1,
+        "end": 152.433333,
+        "duration": 3.333333,
+        "computed_duration": 3.333333,
+        "in_intentional_static": false,
+        "transition_window": [
+          148.766,
+          149.11599999999999
+        ],
+        "kind": "absorbed_by_xfade"
+      },
+      {
+        "start": 152.433333,
+        "end": 154.2,
+        "duration": 1.766667,
+        "computed_duration": 1.766667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 154.2,
+        "end": 155.133333,
+        "duration": 0.933333,
+        "computed_duration": 0.933333,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 155.7,
+        "end": 156.1,
+        "duration": 0.4,
+        "computed_duration": 0.4,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 156.1,
+        "end": 160.0,
+        "duration": 3.9,
+        "computed_duration": 3.9,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 160.833333,
+        "end": 161.666667,
+        "duration": 0.833333,
+        "computed_duration": 0.833333,
+        "in_intentional_static": false,
+        "transition_window": [
+          160.549,
+          160.899
+        ],
+        "kind": "absorbed_by_xfade"
+      },
+      {
+        "start": 161.666667,
+        "end": 162.933333,
+        "duration": 1.266667,
+        "computed_duration": 1.266667,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 162.933333,
+        "end": 163.433333,
+        "duration": 0.5,
+        "computed_duration": 0.5,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 164.833333,
+        "end": 166.233333,
+        "duration": 1.4,
+        "computed_duration": 1.4,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 167.0,
+        "end": 169.7,
+        "duration": 2.7,
+        "computed_duration": 2.7,
+        "in_intentional_static": false,
+        "transition_window": null,
+        "kind": "mid_clip_designed_beat"
+      },
+      {
+        "start": 170.633333,
+        "end": 171.1,
+        "duration": 0.466667,
+        "computed_duration": 0.466667,
+        "in_intentional_static": true,
+        "transition_window": [
+          170.26600000000002,
+          170.616
+        ],
+        "kind": "intentional_static"
+      },
+      {
+        "start": 171.1,
+        "end": 172.933333,
+        "duration": 1.833333,
+        "computed_duration": 1.833333,
+        "in_intentional_static": true,
+        "transition_window": null,
+        "kind": "intentional_static"
+      },
+      {
+        "start": 172.933333,
+        "end": 175.4,
+        "duration": 2.466667,
+        "computed_duration": 2.466667,
+        "in_intentional_static": true,
+        "transition_window": null,
+        "kind": "intentional_static"
+      },
+      {
+        "start": 175.4,
+        "end": null,
+        "duration": null,
+        "computed_duration": 4.36699999999999,
+        "in_intentional_static": true,
+        "transition_window": null,
+        "kind": "intentional_static"
+      }
+    ],
+    "bad_freezes": []
+  },
+  "panel_layout_qa": {
+    "returncode": 0,
+    "stdout": "OK: 3 panel layouts pass safe-area + bbox + font-size checks",
+    "checked": [
+      "breadth_montage.layout.json",
+      "operator_vs_blackbox.layout.json",
+      "opus47_delta_panel.layout.json"
+    ]
+  },
+  "contact_sheets": {
+    "transitions": "demo_assets/final_demo_pack/final_video_v2/transition_contact_sheet.png",
+    "panel_layout": "demo_assets/final_demo_pack/final_video_v2/panel_layout_contact_sheet.png"
+  },
+  "passed": true,
+  "issues": []
+}

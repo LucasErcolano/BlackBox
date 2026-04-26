@@ -1,0 +1,161 @@
+{
+  "panel": "operator_vs_blackbox",
+  "frame": [
+    1920,
+    1080
+  ],
+  "safe_area": {
+    "x_min": 96,
+    "x_max": 1824,
+    "y_min": 72,
+    "y_max": 1008
+  },
+  "cards": [
+    {
+      "id": "operator",
+      "x": 96,
+      "y": 280,
+      "w": 844,
+      "h": 660
+    },
+    {
+      "id": "blackbox",
+      "x": 980,
+      "y": 280,
+      "w": 844,
+      "h": 660
+    }
+  ],
+  "texts": [
+    {
+      "x": 96,
+      "y": 96,
+      "w": 169,
+      "h": 23,
+      "text": "Refutation",
+      "font_size": 28,
+      "role": "label",
+      "card": null
+    },
+    {
+      "x": 96,
+      "y": 144,
+      "w": 1297,
+      "h": 59,
+      "text": "Operator theory rejected by evidence.",
+      "font_size": 60,
+      "role": "heading",
+      "card": null
+    },
+    {
+      "x": 132,
+      "y": 316,
+      "w": 200,
+      "h": 16,
+      "text": "OPERATOR THEORY",
+      "font_size": 22,
+      "role": "label",
+      "card": "operator"
+    },
+    {
+      "x": 132,
+      "y": 372,
+      "w": 475,
+      "h": 74,
+      "text": "\u201ctunnel\u201d",
+      "font_size": 96,
+      "role": "heading",
+      "card": "operator"
+    },
+    {
+      "x": 132,
+      "y": 506,
+      "w": 462,
+      "h": 31,
+      "text": "GPS anomaly at tunnel entry",
+      "font_size": 32,
+      "role": "body",
+      "card": "operator"
+    },
+    {
+      "x": 132,
+      "y": 550,
+      "w": 469,
+      "h": 31,
+      "text": "caused behavior degradation",
+      "font_size": 32,
+      "role": "body",
+      "card": "operator"
+    },
+    {
+      "x": 132,
+      "y": 874,
+      "w": 391,
+      "h": 25,
+      "text": "localized \u00b7 single moment",
+      "font_size": 26,
+      "role": "label",
+      "card": "operator"
+    },
+    {
+      "x": 1016,
+      "y": 316,
+      "w": 225,
+      "h": 16,
+      "text": "BLACK BOX FINDING",
+      "font_size": 22,
+      "role": "label",
+      "card": "blackbox"
+    },
+    {
+      "x": 1016,
+      "y": 372,
+      "w": 671,
+      "h": 74,
+      "text": "no RTK heading",
+      "font_size": 76,
+      "role": "heading",
+      "card": "blackbox"
+    },
+    {
+      "x": 1016,
+      "y": 506,
+      "w": 452,
+      "h": 31,
+      "text": "rel_pos_heading_valid = 0",
+      "font_size": 30,
+      "role": "body",
+      "card": "blackbox"
+    },
+    {
+      "x": 1016,
+      "y": 552,
+      "w": 523,
+      "h": 27,
+      "text": "for 18,133 / 18,133 RTK samples",
+      "font_size": 28,
+      "role": "body",
+      "card": "blackbox"
+    },
+    {
+      "x": 1016,
+      "y": 598,
+      "w": 410,
+      "h": 27,
+      "text": "session-wide \u00b7 not just tunnel",
+      "font_size": 28,
+      "role": "body",
+      "card": "blackbox"
+    },
+    {
+      "x": 1016,
+      "y": 874,
+      "w": 642,
+      "h": 26,
+      "text": "evidence \u2286 data/final_runs/sanfer_tunnel/",
+      "font_size": 26,
+      "role": "label",
+      "card": "blackbox"
+    }
+  ]
+}

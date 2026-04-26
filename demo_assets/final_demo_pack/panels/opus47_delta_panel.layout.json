@@ -1,0 +1,305 @@
+{
+  "panel": "opus47_delta_panel",
+  "frame": [
+    1920,
+    1080
+  ],
+  "safe_area": {
+    "x_min": 96,
+    "x_max": 1824,
+    "y_min": 72,
+    "y_max": 1008
+  },
+  "cards": [
+    {
+      "id": "tile_acc",
+      "x": 96,
+      "y": 280,
+      "w": 848,
+      "h": 348
+    },
+    {
+      "id": "tile_abs",
+      "x": 976,
+      "y": 280,
+      "w": 848,
+      "h": 348
+    },
+    {
+      "id": "tile_brier",
+      "x": 96,
+      "y": 660,
+      "w": 848,
+      "h": 348
+    },
+    {
+      "id": "tile_vis",
+      "x": 976,
+      "y": 660,
+      "w": 848,
+      "h": 348
+    }
+  ],
+  "texts": [
+    {
+      "x": 96,
+      "y": 96,
+      "w": 557,
+      "h": 61,
+      "text": "Opus 4.7 vs 4.6",
+      "font_size": 64,
+      "role": "heading",
+      "card": null
+    },
+    {
+      "x": 96,
+      "y": 176,
+      "w": 772,
+      "h": 31,
+      "text": "same accuracy \u00b7 better judgment \u00b7 sharper eyes",
+      "font_size": 32,
+      "role": "label",
+      "card": null
+    },
+    {
+      "x": 124,
+      "y": 308,
+      "w": 304,
+      "h": 34,
+      "text": "Same accuracy",
+      "font_size": 36,
+      "role": "heading",
+      "card": "tile_acc"
+    },
+    {
+      "x": 124,
+      "y": 368,
+      "w": 43,
+      "h": 18,
+      "text": "4.6",
+      "font_size": 24,
+      "role": "label",
+      "card": "tile_acc"
+    },
+    {
+      "x": 124,
+      "y": 408,
+      "w": 211,
+      "h": 66,
+      "text": "67%",
+      "font_size": 88,
+      "role": "heading",
+      "card": "tile_acc"
+    },
+    {
+      "x": 520,
+      "y": 368,
+      "w": 43,
+      "h": 18,
+      "text": "4.7",
+      "font_size": 24,
+      "role": "label",
+      "card": "tile_acc"
+    },
+    {
+      "x": 520,
+      "y": 408,
+      "w": 211,
+      "h": 66,
+      "text": "67%",
+      "font_size": 88,
+      "role": "heading",
+      "card": "tile_acc"
+    },
+    {
+      "x": 124,
+      "y": 570,
+      "w": 357,
+      "h": 20,
+      "text": "solvable bench \u00b7 n=12 runs",
+      "font_size": 26,
+      "role": "label",
+      "card": "tile_acc"
+    },
+    {
+      "x": 1004,
+      "y": 308,
+      "w": 360,
+      "h": 27,
+      "text": "Better abstention",
+      "font_size": 36,
+      "role": "heading",
+      "card": "tile_abs"
+    },
+    {
+      "x": 1004,
+      "y": 368,
+      "w": 43,
+      "h": 18,
+      "text": "4.6",
+      "font_size": 24,
+      "role": "label",
+      "card": "tile_abs"
+    },
+    {
+      "x": 1004,
+      "y": 408,
+      "w": 149,
+      "h": 66,
+      "text": "0%",
+      "font_size": 88,
+      "role": "heading",
+      "card": "tile_abs"
+    },
+    {
+      "x": 1400,
+      "y": 368,
+      "w": 43,
+      "h": 18,
+      "text": "4.7",
+      "font_size": 24,
+      "role": "label",
+      "card": "tile_abs"
+    },
+    {
+      "x": 1400,
+      "y": 408,
+      "w": 272,
+      "h": 66,
+      "text": "100%",
+      "font_size": 88,
+      "role": "heading",
+      "card": "tile_abs"
+    },
+    {
+      "x": 1004,
+      "y": 570,
+      "w": 419,
+      "h": 25,
+      "text": "under-specified case \u00b7 n=3 each",
+      "font_size": 26,
+      "role": "label",
+      "card": "tile_abs"
+    },
+    {
+      "x": 124,
+      "y": 688,
+      "w": 359,
+      "h": 27,
+      "text": "Better calibration",
+      "font_size": 36,
+      "role": "heading",
+      "card": "tile_brier"
+    },
+    {
+      "x": 124,
+      "y": 748,
+      "w": 43,
+      "h": 18,
+      "text": "4.6",
+      "font_size": 24,
+      "role": "label",
+      "card": "tile_brier"
+    },
+    {
+      "x": 124,
+      "y": 788,
+      "w": 278,
+      "h": 66,
+      "text": "0.239",
+      "font_size": 88,
+      "role": "heading",
+      "card": "tile_brier"
+    },
+    {
+      "x": 520,
+      "y": 748,
+      "w": 43,
+      "h": 18,
+      "text": "4.7",
+      "font_size": 24,
+      "role": "label",
+      "card": "tile_brier"
+    },
+    {
+      "x": 520,
+      "y": 788,
+      "w": 278,
+      "h": 66,
+      "text": "0.162",
+      "font_size": 88,
+      "role": "heading",
+      "card": "tile_brier"
+    },
+    {
+      "x": 124,
+      "y": 950,
+      "w": 497,
+      "h": 25,
+      "text": "Brier \u2193 under wrong-operator framing",
+      "font_size": 26,
+      "role": "label",
+      "card": "tile_brier"
+    },
+    {
+      "x": 1004,
+      "y": 688,
+      "w": 364,
+      "h": 27,
+      "text": "More visual detail",
+      "font_size": 36,
+      "role": "heading",
+      "card": "tile_vis"
+    },
+    {
+      "x": 1004,
+      "y": 748,
+      "w": 43,
+      "h": 18,
+      "text": "4.6",
+      "font_size": 24,
+      "role": "label",
+      "card": "tile_vis"
+    },
+    {
+      "x": 1004,
+      "y": 788,
+      "w": 155,
+      "h": 73,
+      "text": "0/3",
+      "font_size": 88,
+      "role": "heading",
+      "card": "tile_vis"
+    },
+    {
+      "x": 1400,
+      "y": 748,
+      "w": 43,
+      "h": 18,
+      "text": "4.7",
+      "font_size": 24,
+      "role": "label",
+      "card": "tile_vis"
+    },
+    {
+      "x": 1400,
+      "y": 788,
+      "w": 155,
+      "h": 73,
+      "text": "3/3",
+      "font_size": 88,
+      "role": "heading",
+      "card": "tile_vis"
+    },
+    {
+      "x": 1004,
+      "y": 950,
+      "w": 367,
+      "h": 25,
+      "text": "10pt token @ 3.84 MP \u00b7 n=3",
+      "font_size": 26,
+      "role": "label",
+      "card": "tile_vis"
+    }
+  ]
+}
