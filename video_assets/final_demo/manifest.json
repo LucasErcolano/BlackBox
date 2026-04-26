@@ -1,0 +1,42 @@
+{
+  "output": {
+    "video": "video_assets/final_demo/final_demo_3min_visual_only.mp4",
+    "preview": "video_assets/final_demo/final_demo_3min_visual_only_preview.png",
+    "shot_list": "video_assets/final_demo/shot_list.md",
+    "notes": "video_assets/final_demo/notes.md"
+  },
+  "spec": {
+    "duration_seconds": 180.0,
+    "resolution": "1920x1080",
+    "fps": 30,
+    "container": "mp4",
+    "video_codec": "libx264",
+    "pixel_format": "yuv420p",
+    "crf": 18,
+    "audio": "none (muted, -an)"
+  },
+  "sources": [
+    {"id": "01a", "path": "lavfi:color=black", "src_in": 0.0, "src_out": 6.0, "out_in": 0.0, "out_out": 6.0, "overlay": ["The operator blamed the tunnel."]},
+    {"id": "01b", "path": "lavfi:color=black", "src_in": 0.0, "src_out": 6.0, "out_in": 6.0, "out_out": 12.0, "overlay": ["Black Box checked the recording."]},
+    {"id": "02a", "path": "video_assets/final_ui_capture/intake_ui.mp4", "src_in": 0.0, "src_out": 10.0, "out_in": 12.0, "out_out": 22.0, "overlay": ["Robot failures leave evidence everywhere.", "Video · lidar · telemetry · controller logs"]},
+    {"id": "02b", "path": "video_assets/final_ui_capture/clip.mp4", "src_in": 0.0, "src_out": 3.0, "out_in": 22.0, "out_out": 25.0, "overlay": ["Robot failures leave evidence everywhere.", "Video · lidar · telemetry · controller logs"]},
+    {"id": "03",  "path": "video_assets/final_ui_capture/clip.mp4", "src_in": 3.0, "src_out": 16.0, "out_in": 25.0, "out_out": 38.0, "overlay": ["One real driving session", "Operator note — check the tunnel. No labels."]},
+    {"id": "04",  "path": "video_assets/final_ui_capture/managed_agent_stream_ui.mp4", "src_in": 0.0, "src_out": 17.0, "out_in": 38.0, "out_out": 55.0, "overlay": ["Opus 4.7 managed forensic agent", "Tools · events · memory · evidence"]},
+    {"id": "05",  "path": "video_assets/block_sanfer_evidence/clip.mp4", "src_in": 0.0, "src_out": 13.0, "out_in": 55.0, "out_out": 68.0, "overlay": ["Telemetry selects the windows", "Vision checks the evidence"]},
+    {"id": "06",  "path": "video_assets/block_sanfer_evidence/clip.mp4", "src_in": 13.0, "src_out": 40.0, "out_in": 68.0, "out_out": 95.0, "overlay": ["Operator hypothesis: tunnel caused GPS failure", "Finding — RTK heading failure started 43 minutes earlier"]},
+    {"id": "07",  "path": "video_assets/block_sanfer_evidence/clip.mp4", "src_in": 40.0, "src_out": 60.0, "out_in": 95.0, "out_out": 115.0, "overlay": ["Actual failure — RTK correction path", "Rover never gets valid heading"]},
+    {"id": "08a", "path": "video_assets/block_sanfer_evidence/clip.mp4", "src_in": 60.0, "src_out": 70.0, "out_in": 115.0, "out_out": 125.0, "overlay": ["Scoped patch, not redesign", "Proposed for human review"]},
+    {"id": "08b", "path": "video_assets/final_ui_capture/patch_human_review_ui.mp4", "src_in": 0.0, "src_out": 7.0, "out_in": 125.0, "out_out": 132.0, "overlay": ["Scoped patch, not redesign", "Proposed for human review"]},
+    {"id": "09",  "path": "video_assets/block_credibility_opus47/clip.mp4", "src_in": 0.0, "src_out": 20.0, "out_in": 132.0, "out_out": 152.0, "overlay": ["Same accuracy. Better judgment. More eyes.", "Simple post-mortems — 4.6 = 67%, 4.7 = 67%"]},
+    {"id": "10",  "path": "video_assets/block_credibility_opus47/clip.mp4", "src_in": 20.0, "src_out": 31.0, "out_in": 152.0, "out_out": 163.0, "overlay": ["4.7 preserves fine visual evidence", "4.7 runs faster on telemetry / text"]},
+    {"id": "11",  "path": "video_assets/block_credibility_opus47/clip.mp4", "src_in": 31.0, "src_out": 40.0, "out_in": 163.0, "out_out": 172.0, "overlay": ["Not a single-car demo", "Cars · robotic boat · clean cases · injected failures"]},
+    {"id": "12a", "path": "video_assets/block_credibility_opus47/clip.mp4", "src_in": 40.0, "src_out": 45.5, "out_in": 172.0, "out_out": 177.5, "overlay": ["No evidence → no claim", "Open benchmark · reproducible runs · cents per case"]},
+    {"id": "12b", "path": "video_assets/ui_feature_inserts/evidence_trace_insert.mp4", "src_in": 0.0, "src_out": 2.5, "out_in": 177.5, "out_out": 180.0, "overlay": ["No evidence → no claim", "Open benchmark · reproducible runs · cents per case"]}
+  ],
+  "build_commands": {
+    "per_segment": "ffmpeg -ss <SS> -i <IN> -t <T> -vf 'fps=30,scale=1920:1080,setsar=1,drawbox=x=0:y=ih-180:w=iw:h=180:color=black@0.55:t=fill,drawtext=fontfile=DejaVuSans-Bold.ttf:textfile=<L1>:expansion=none:fontcolor=white:fontsize=44:x=60:y=h-150,drawtext=fontfile=DejaVuSans-Bold.ttf:textfile=<L2>:expansion=none:fontcolor=white:fontsize=34:x=60:y=h-90' -c:v libx264 -pix_fmt yuv420p -an <OUT>",
+    "hook_card":   "ffmpeg -f lavfi -i color=c=black:s=1920x1080:r=30:d=6 -vf drawtext=...:fontsize=64:x=(w-text_w)/2:y=(h-text_h)/2 -c:v libx264 -pix_fmt yuv420p -an <OUT>",
+    "concat":      "ffmpeg -f concat -safe 0 -i concat.txt -c:v libx264 -pix_fmt yuv420p -crf 18 -an video_assets/final_demo/final_demo_3min_visual_only.mp4",
+    "preview":     "ffmpeg -ss 78 -i video_assets/final_demo/final_demo_3min_visual_only.mp4 -frames:v 1 video_assets/final_demo/final_demo_3min_visual_only_preview.png"
+  }
+}
