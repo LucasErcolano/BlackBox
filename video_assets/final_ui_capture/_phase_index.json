@@ -1,34 +1,34 @@
 {
-  "fps": 10,
+  "fps": 30,
   "width": 1920,
   "height": 1080,
-  "job_id": "8c42933db7d9",
+  "job_id": "fff43d637255",
   "phases": {
     "intake": {
       "start": 0,
-      "end": 100,
+      "end": 300,
       "secs": 10.0
     },
     "analysis_start": {
-      "start": 100,
-      "end": 160,
+      "start": 300,
+      "end": 480,
       "secs": 6.0
     },
     "agent_stream": {
-      "start": 160,
-      "end": 380,
+      "start": 480,
+      "end": 1140,
       "secs": 22.0
     },
     "report": {
-      "start": 380,
-      "end": 530,
+      "start": 1140,
+      "end": 1590,
       "secs": 15.0
     },
     "patch_review": {
-      "start": 530,
-      "end": 650,
+      "start": 1590,
+      "end": 1950,
       "secs": 12.0
     }
   },
-  "total_frames": 650
+  "total_frames": 1950
 }

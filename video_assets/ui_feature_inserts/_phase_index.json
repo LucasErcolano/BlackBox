@@ -1,33 +1,33 @@
 {
-  "fps": 10,
+  "fps": 30,
   "width": 1920,
   "height": 1080,
   "phases": {
     "memory": {
       "start": 0,
-      "end": 70,
+      "end": 210,
       "secs": 7.0
     },
     "steering": {
-      "start": 70,
-      "end": 180,
+      "start": 210,
+      "end": 540,
       "secs": 11.0
     },
     "hitl_patch": {
-      "start": 180,
-      "end": 280,
+      "start": 540,
+      "end": 840,
       "secs": 10.0
     },
     "rollback": {
-      "start": 280,
-      "end": 360,
+      "start": 840,
+      "end": 1080,
       "secs": 8.0
     },
     "evidence_trace": {
-      "start": 360,
-      "end": 440,
+      "start": 1080,
+      "end": 1320,
       "secs": 8.0
     }
   },
-  "total_frames": 440
+  "total_frames": 1320
 }

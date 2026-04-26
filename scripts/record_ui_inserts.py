@@ -22,7 +22,7 @@ from playwright.sync_api import sync_playwright
 OUT_DIR = Path("video_assets/ui_feature_inserts/_frames")
 INDEX_JSON = Path("video_assets/ui_feature_inserts/_phase_index.json")
 BASE = "http://127.0.0.1:8765"
-FPS = 10
+FPS = 30
 WIDTH, HEIGHT = 1920, 1080
 PATCH_JOB = "f748de9e40ca"
 

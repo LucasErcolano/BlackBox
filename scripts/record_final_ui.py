@@ -24,7 +24,7 @@ from playwright.sync_api import sync_playwright
 OUT_DIR = Path("video_assets/final_ui_capture/_frames")
 INDEX_JSON = Path("video_assets/final_ui_capture/_phase_index.json")
 BASE = "http://127.0.0.1:8765"
-FPS = 10
+FPS = 30
 WIDTH, HEIGHT = 1920, 1080
 
 DARK_CSS = """
