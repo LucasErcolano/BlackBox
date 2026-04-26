@@ -44,17 +44,17 @@ v46 = next(a for a in v["aggregates"] if a["model"] == "claude-opus-4-6")
 v47 = next(a for a in v["aggregates"] if a["model"] == "claude-opus-4-7")
 
 fig = plt.figure(figsize=(19.2, 10.8), dpi=100)
-fig.suptitle("Same accuracy. Better judgment. More eyes.",
-             fontsize=34, color=FG, y=0.955, weight="bold")
-fig.text(0.5, 0.905, "Opus 4.7 vs 4.6  ·  closed-taxonomy bench  ·  n=9–12 runs/model",
-         ha="center", color=MUTED, fontsize=14)
+fig.text(0.5, 0.945, "Same accuracy. Better judgment. More eyes.",
+         ha="center", va="center", color=FG, fontsize=32, weight="bold")
+fig.text(0.5, 0.890, "Opus 4.7 vs 4.6  ·  closed-taxonomy bench  ·  n=9–12 runs/model",
+         ha="center", va="center", color=MUTED, fontsize=14)
 
 def panel(ax, title, sub):
     ax.set_facecolor(BG)
     for s in ("top", "right"): ax.spines[s].set_visible(False)
     ax.spines["left"].set_color(MUTED); ax.spines["bottom"].set_color(MUTED)
-    ax.set_title(title, fontsize=15, color=FG, loc="left", pad=14, weight="bold")
-    ax.text(0, 1.04, sub, transform=ax.transAxes, color=MUTED, fontsize=10)
+    ax.text(0, 1.18, title, transform=ax.transAxes, color=FG, fontsize=15, weight="bold", ha="left", va="bottom")
+    ax.text(0, 1.04, sub, transform=ax.transAxes, color=MUTED, fontsize=10, ha="left", va="bottom")
 
 def bars(ax, vals, labels, fmts, colors, ymax=None):
     x = list(range(len(vals)))
@@ -68,7 +68,7 @@ def bars(ax, vals, labels, fmts, colors, ymax=None):
                 txt, ha="center", va="bottom", color=FG, fontsize=13, weight="bold")
 
 # Layout: 2x3 grid
-g = fig.add_gridspec(2, 3, left=0.05, right=0.97, top=0.86, bottom=0.07, hspace=0.45, wspace=0.28)
+g = fig.add_gridspec(2, 3, left=0.05, right=0.97, top=0.80, bottom=0.07, hspace=0.65, wspace=0.28)
 
 # 1 — Solvable accuracy (tied)
 ax = fig.add_subplot(g[0,0])

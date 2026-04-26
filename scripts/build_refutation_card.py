@@ -18,10 +18,10 @@ fig = plt.figure(figsize=(19.2, 10.8), dpi=100)
 ax = fig.add_axes([0,0,1,1]); ax.set_axis_off()
 ax.set_xlim(0,1920); ax.set_ylim(0,1080)
 
-ax.text(960, 1010, "sanfer_sanisidro · 1h cam-lidar bag · ROS1",
-        color=MUTED, fontsize=18, ha="center")
-ax.text(960, 960, "Operator says one thing. The data says another.",
-        color=FG, fontsize=34, weight="bold", ha="center")
+ax.text(960, 1040, "sanfer_sanisidro · 1h cam-lidar bag · ROS1",
+        color=MUTED, fontsize=18, ha="center", va="center")
+ax.text(960, 980, "Operator says one thing. The data says another.",
+        color=FG, fontsize=34, weight="bold", ha="center", va="center")
 
 def card(x, w, color, badge, badge_label, title, body, footer):
     box = FancyBboxPatch((x, 130), w, 760,

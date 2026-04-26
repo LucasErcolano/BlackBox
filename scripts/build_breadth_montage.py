@@ -19,7 +19,7 @@ rcParams.update({"font.family": "DejaVu Sans",
 cells = [
     ("sanfer_tunnel", "Lincoln MKZ · 1h drive",
      "RTK heading break — operator's tunnel theory refuted",
-     "data/final_runs/sanfer_tunnel/bundle/frames/frame_02606.5s_dense.jpg",
+     "demo_assets/bag_footage/sanfer_tunnel/frame_02634.1s_dense.jpg",
      TEAL, "Tier 1"),
     ("car_1", "Cam-lidar campus run",
      "Tier-2 mining: window flagged, low confidence — honest",
@@ -34,9 +34,9 @@ cells = [
 ]
 
 fig = plt.figure(figsize=(19.2, 10.8), dpi=100)
-fig.suptitle("Generalization across platforms", fontsize=30, color=FG, y=0.95, weight="bold")
-fig.text(0.5, 0.90, "Same pipeline. Different robots. Honest verdicts.",
-         ha="center", color=MUTED, fontsize=15)
+fig.text(0.5, 0.945, "Generalization across platforms", ha="center", va="center", color=FG, fontsize=30, weight="bold")
+fig.text(0.5, 0.890, "Same pipeline. Different robots. Honest verdicts.",
+         ha="center", va="center", color=MUTED, fontsize=15)
 
 g = fig.add_gridspec(2, 2, left=0.04, right=0.96, top=0.85, bottom=0.06,
                      hspace=0.18, wspace=0.06)
