@@ -315,7 +315,7 @@ def beat_bench() -> Image.Image:
         ("Brier (op pressure)",  "0.239 → 0.162", TEAL),
         ("fine vision (10 pt)",  "0/3  →  3/3", TEAL),
         ("wall-time latency",    "~30% faster", AMBER),
-        ("cost @ parity",        "≈ tied raw, lower under pressure", FG),
+        ("cost @ parity",        "≈ tied raw",  FG),
         ("seeds / case / model", "3 each, n=9–12", DIM),
         ("scoring",              "exact bug_class match + grounding", DIM),
     ]
@@ -350,7 +350,7 @@ def beat_outro() -> Image.Image:
                 continue
             try:
                 rec = json.loads(line)
-                total_usd += float(rec.get("usd", 0.0) or 0.0)
+                total_usd += float(rec.get("usd_cost", rec.get("usd", 0.0)) or 0.0)
                 n_calls += 1
             except Exception:
                 continue

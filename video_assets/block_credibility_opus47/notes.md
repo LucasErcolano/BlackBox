@@ -11,7 +11,7 @@
 | 3 | breadth         | 11s | `demo_assets/final_demo_pack/panels/breadth_montage.png` |
 | 4 | grounding       | 8s | `demo_assets/grounding_gate/clean_recording/` |
 | 5 | bench           | 8s | `black-box-bench/cases/` (9), `opus46_vs_opus47_20260425T182237Z.json`, `opus46_vs_opus47_20260425T183141Z.json` |
-| 6 | outro           | 6s | `data/costs.jsonl` (live: $0.00, 283 calls) |
+| 6 | outro           | 6s | `data/costs.jsonl` (live: $53.13, 283 calls) |
 
 Crossfade: 0.5s between beats.
 
