@@ -1,0 +1,93 @@
+{
+  "name": "block_credibility_opus47",
+  "title": "Same accuracy. Better judgment. More eyes.",
+  "duration_s": 45.5,
+  "fps": 30,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "beats": [
+    {
+      "i": 0,
+      "name": "title",
+      "dur_s": 7,
+      "headline": "Opus 4.7 vs 4.6 framing"
+    },
+    {
+      "i": 1,
+      "name": "delta_panel",
+      "dur_s": 8,
+      "headline": "6 axes: solvable acc tied, abstention 0\u2192100, Brier 0.239\u21920.162, vision 0/3\u21923/3, ~30% faster, $ tied"
+    },
+    {
+      "i": 2,
+      "name": "breadth",
+      "dur_s": 11,
+      "headline": "Lincoln MKZ + campus rover + USV lidar"
+    },
+    {
+      "i": 3,
+      "name": "grounding",
+      "dur_s": 8,
+      "headline": "clean bag \u2192 4 hypotheses dropped \u2192 empty report"
+    },
+    {
+      "i": 4,
+      "name": "bench",
+      "dur_s": 8,
+      "headline": "9 cases \u00d7 5 evaluation axes"
+    },
+    {
+      "i": 5,
+      "name": "outro",
+      "dur_s": 6,
+      "headline": "logged + reproducible + open"
+    }
+  ],
+  "sources": {
+    "delta_panel_png": "demo_assets/final_demo_pack/panels/opus47_delta_panel.png",
+    "breadth_panel_png": "demo_assets/final_demo_pack/panels/breadth_montage.png",
+    "bench_none_pass": "data/bench_runs/opus46_vs_opus47_20260425T182237Z.json",
+    "bench_false_pass": "data/bench_runs/opus46_vs_opus47_20260425T183141Z.json",
+    "bench_vision": "data/bench_runs/opus_vision_d1_20260425T185628Z.json",
+    "grounding_dir": "demo_assets/grounding_gate/clean_recording",
+    "cost_ledger": "data/costs.jsonl",
+    "doc": "docs/OPUS47_DELTA.md",
+    "pr_referenced": "PR #142",
+    "harness_scripts": [
+      "scripts/compare_opus_models.py",
+      "scripts/compare_opus_vision.py"
+    ]
+  },
+  "claims": {
+    "simple_post_mortem_acc": {
+      "4.6": "67%",
+      "4.7": "67%"
+    },
+    "under_specified_abstention": {
+      "4.6": "0%",
+      "4.7": "100%"
+    },
+    "operator_pressure_brier": {
+      "4.6": 0.239,
+      "4.7": 0.162
+    },
+    "fine_visual_detection_3.84MP": {
+      "4.6": "0/3",
+      "4.7": "3/3"
+    },
+    "telemetry_text_latency_speedup": "~30% faster on 4.7",
+    "explicit_non_claim": "We do NOT claim 4.7 is more accurate on simple cases \u2014 it is tied."
+  },
+  "cost_state_at_render": {
+    "total_usd": 0.0,
+    "calls_logged": 283
+  },
+  "outputs": {
+    "video": "video_assets/block_credibility_opus47/clip.mp4",
+    "preview": "video_assets/block_credibility_opus47/preview.png",
+    "manifest": "video_assets/block_credibility_opus47/manifest.json",
+    "notes": "video_assets/block_credibility_opus47/notes.md"
+  }
+}
