@@ -1,0 +1,107 @@
+1
+00:00:00,000 --> 00:00:05,500
+Operator told me the GPS failed when the car
+went under a tunnel.
+
+2
+00:00:05,500 --> 00:00:11,000
+I gave the bag to Black Box. It said he was wrong.
+
+3
+00:00:11,000 --> 00:00:18,000
+AV labs process hundreds of bags per week.
+Nobody reads them end-to-end.
+
+4
+00:00:18,000 --> 00:00:25,500
+Everybody has a theory. Most theories are wrong.
+
+5
+00:00:25,500 --> 00:00:33,500
+One hour of real driving. ROS1 bag. No labels.
+
+6
+00:00:33,500 --> 00:00:44,100
+Operator handed over one sentence: "check the tunnel."
+
+7
+00:00:44,100 --> 00:00:52,000
+Opus 4.7 reads the telemetry. Carrier-phase,
+fix quality, relative-position validity.
+
+8
+00:00:52,000 --> 00:01:05,100
+Long-horizon agent loop. Native memory.
+Streaming events. Source badge: REPLAY — real.
+
+9
+00:01:05,100 --> 00:01:13,500
+Moving-base antenna: clean RTK 94% of the bag.
+Rover antenna: never locks. Once. The whole hour.
+
+10
+00:01:13,500 --> 00:01:24,500
+REL_POS_VALID never sets. Dual-antenna heading
+pipeline broken before the car left the lot.
+
+11
+00:01:24,500 --> 00:01:32,000
+Operator blamed the tunnel.
+
+12
+00:01:32,000 --> 00:01:38,500
+Black Box: heading subsystem failed at t=0.24s,
+forty-three minutes before tunnel entry.
+Operator hypothesis REFUTED.
+
+13
+00:01:38,500 --> 00:01:46,000
+This is the fix. Specific RTCM3 message IDs:
+1077, 1087, 1097, 1127, 4072.0, 4072.1.
+
+14
+00:01:46,000 --> 00:01:53,000
+Config diff, not a redesign.
+Proposed for human review — not auto-applied.
+
+15
+00:01:53,000 --> 00:02:00,000
+Same single-shot accuracy as 4.6.
+Better judgment. More eyes.
+
+16
+00:02:00,000 --> 00:02:07,000
+Abstains 100% on under-specified cases (4.6: 0%).
+Better Brier under wrong operator framing.
+Reads small text 4.6 downsamples away.
+
+17
+00:02:07,000 --> 00:02:14,000
+Other car runs. A robotic boat.
+A clean synthetic bag.
+
+18
+00:02:14,000 --> 00:02:20,000
+Same pipeline. Different robots. Honest verdicts.
+
+19
+00:02:20,000 --> 00:02:28,000
+Same tool, clean bag. Returns nothing anomalous.
+
+20
+00:02:28,000 --> 00:02:37,500
+Will not fabricate a bug. Hypotheses dropped
+below evidence threshold. NO_ANOMALY_PATCH.
+
+21
+00:02:37,500 --> 00:02:45,000
+One hour of real driving. Forty-six cents.
+
+22
+00:02:45,000 --> 00:02:50,000
+Benchmark open on GitHub: black-box-bench.
+
+23
+00:02:50,000 --> 00:02:59,500
+Black Box · Forensic copilot for robots
+Built with Opus 4.7
